@@ -24,15 +24,18 @@ public class JavaScriptTemplateCollection extends CampaignSchema {
 
     public static String getQueryXml() {
         return """
-                    <queryDef schema="xtk:jst" operation="select">
-                        <select>
-                            <node expr="@name"/>
-                            <node expr="@label"/>
-                            <node expr="@namespace"/>
-                            <node expr="code"/>
-                        </select>
-                    </queryDef>
-                    """;
+                <queryDef schema="xtk:jst" operation="select">
+                    <select>
+                        <node expr="@name"/>
+                        <node expr="@label"/>
+                        <node expr="@namespace"/>
+                        <node expr="code"/>
+                    </select>
+                    <orderBy>
+                        <node expr="@name"/>
+                    </orderBy>
+                </queryDef>
+                """;
     }
 
     @Override

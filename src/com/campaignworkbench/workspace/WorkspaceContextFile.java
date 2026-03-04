@@ -1,5 +1,6 @@
 package com.campaignworkbench.workspace;
 
+import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -14,7 +15,7 @@ import java.nio.file.Path;
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         setterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
-public class WorkspaceContextFile extends WorkspaceFile {
+public abstract class WorkspaceContextFile extends WorkspaceFile {
     private final ObjectProperty<ContextXml> dataContextFileProperty = new SimpleObjectProperty<>();
     private ContextXml dataContextFile;
 

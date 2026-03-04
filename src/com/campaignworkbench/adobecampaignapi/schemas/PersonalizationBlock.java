@@ -2,7 +2,7 @@ package com.campaignworkbench.adobecampaignapi.schemas;
 
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public class IncludeView {
+public class PersonalizationBlock implements ISchemaKey {
     @JacksonXmlProperty(isAttribute = true)
     private long id;
 
@@ -59,8 +59,13 @@ public class IncludeView {
     public void print(boolean includeCode) {
         String output = "Id:" + id + " | " + "Name: " + name + " | " + "Label: " + label + " | " + "Folder: " + folder.getFullName();
         if(includeCode) {
-            output += " | " + "Code: " + source.getText();
+            output += " | " + "Code: " + getCode();
         }
         System.out.println(output);
+    }
+
+    @Override
+    public SchemaKey getKey() {
+        return new PersonalizationBlockKey(id);
     }
 }

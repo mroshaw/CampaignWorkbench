@@ -1,5 +1,7 @@
 package com.campaignworkbench.workspace;
 
+import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockKey;
+import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import java.nio.file.Path;
 
@@ -15,7 +17,7 @@ import java.nio.file.Path;
 
 public class PersoBlock extends WorkspaceFile {
 
-    private long campaignIncludeViewId;
+    private PersonalizationBlockKey schemaKey;
 
     public PersoBlock(String fileName, Workspace workspace) {
         super(fileName, WorkspaceFileType.BLOCK, workspace);
@@ -23,11 +25,13 @@ public class PersoBlock extends WorkspaceFile {
 
     public PersoBlock() {}
 
-    public long getCampaignIncludeViewId() {
-        return campaignIncludeViewId;
+    @Override
+    public void setKey(SchemaKey schemaKey) {
+        this.schemaKey = (PersonalizationBlockKey) schemaKey;
     }
 
-    public void setCampaignIncludeViewId(long campaignIncludeViewId) {
-        this.campaignIncludeViewId = campaignIncludeViewId;
+    @Override
+    public PersonalizationBlockKey getKey() {
+        return schemaKey;
     }
 }

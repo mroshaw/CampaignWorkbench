@@ -72,6 +72,17 @@
 }
 
 /*
+.picker-listview .list-cell:even {
+    -fx-background-color: -color-bg-subtle;
+}
+
+.picker-listview .list-cell:filled:selected:focused, .list-cell:filled:selected {
+        -fx-background-color: -color-bg-emphasis;
+}
+
+*/
+
+/*
 ***************************************************
 *** Error Log                                   ***
 ***************************************************

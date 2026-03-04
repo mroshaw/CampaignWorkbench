@@ -9,7 +9,7 @@ import javafx.stage.Window;
 
 import java.util.Optional;
 
-public class WorkspaceFilePicker {
+public class WorkspaceFilePickerDialog {
 
     public static <T extends WorkspaceFile> Optional<T> show(
             Window owner,
@@ -30,6 +30,8 @@ public class WorkspaceFilePicker {
                 .addAll(pickButtonType, ButtonType.CANCEL);
 
         ListView<T> listView = new ListView<>(workspaceFiles);
+        listView.setFixedCellSize(24);
+        listView.getStyleClass().add("picker-listview");
 
         listView.setCellFactory(lv -> new ListCell<>() {
             @Override

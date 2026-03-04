@@ -7,7 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Window;
 
-public class ConfigBox {
+public class SettingsDialog {
 
     private static final String TITLE = "Campaign Configuration";
 

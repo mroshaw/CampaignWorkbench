@@ -1,9 +1,12 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
-import com.campaignworkbench.ide.IJavaFxNode;
-import com.campaignworkbench.ide.IdeException;
-import com.campaignworkbench.ide.TextInputBox;
-import com.campaignworkbench.ide.YesNoPopupDialog;
+import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
+import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateKey;
+import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlock;
+import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplate;
+import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockKey;
+import com.campaignworkbench.ide.*;
+import com.campaignworkbench.ide.TextInputDialog;
 import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.*;
@@ -12,6 +15,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -27,6 +31,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -72,6 +77,11 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private Button clearDataContextButton;
     private Button setMessageContextButton;
     private Button clearMessageContextButton;
+    private Button connectToCampaignButton;
+    private Button disconnectFromCampaignButton;
+    private Button createNewFromCampaignButton;
+    private Button refreshFromCampaignButton;
+    private Button pushToCampaignButton;
 
     // Main panel
     private VBox workspaceExplorerPanel;
@@ -79,6 +89,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private WorkspaceFileType selectedFileType;
     private WorkspaceFile selectedFile;
     private WorkspaceFile selectedContextFile;
+
+    private boolean isConnectedToCampaign;
 
     /**
      * @param labelText           Label to use for the control in the UI
@@ -102,6 +114,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     public void setWorkspace(Workspace workspace) {
         this.workspace.setValue(workspace);
+        setToolbarButtonStates();
     }
 
     public boolean isWorkspaceOpen() {
@@ -138,19 +151,30 @@ public class WorkspaceExplorer implements IJavaFxNode {
             } else {
                 workspaceName.bind(newWorkspace.getNameProperty());
 
+                // Sort children
+                System.out.println("Sorting templates");
+                FXCollections.sort(newWorkspace.getTemplates(), Comparator.comparing(Template::getBaseFileName));
                 // Bind children to workspace.templates
                 templatesListener = bindListToTree(newWorkspace.getTemplates(), templateRoot, template ->
-                        WorkspaceExplorerItem.createTemplateTreeItem(template, this::deleteExistingFile)
+                        WorkspaceExplorerItem.createTemplateTreeItem(template, this::deleteExistingFile), Comparator.comparing(Template::getBaseFileName)
                 );
 
+                System.out.println("Sorting blocks");
+                FXCollections.sort(newWorkspace.getBlocks(), Comparator.comparing(PersoBlock::getBaseFileName));
                 modulesListener = bindListToTree(newWorkspace.getModules(), moduleRoot, module ->
-                        WorkspaceExplorerItem.createModuleTreeItem(module, this::insertIntoCode, this::deleteExistingFile)
+                        WorkspaceExplorerItem.createModuleTreeItem(module, this::insertIntoCode, this::deleteExistingFile), Comparator.comparing(EtmModule::getBaseFileName)
                 );
+
+                System.out.println("Sorting modules");
+                FXCollections.sort(newWorkspace.getModules(), Comparator.comparing(EtmModule::getBaseFileName));
                 blocksListener = bindListToTree(newWorkspace.getBlocks(), blockRoot, block ->
-                        WorkspaceExplorerItem.createBlockTreeItem(block, this::insertIntoCode, this::deleteExistingFile)
+                        WorkspaceExplorerItem.createBlockTreeItem(block, this::insertIntoCode, this::deleteExistingFile), Comparator.comparing(PersoBlock::getBaseFileName)
                 );
+
+                System.out.println("Sorting contexts");
+                FXCollections.sort(newWorkspace.getContexts(), Comparator.comparing(ContextXml::getBaseFileName));
                 contextsListener = bindListToTree(newWorkspace.getContexts(), contextRoot, context ->
-                        WorkspaceExplorerItem.createContextTreeItem(context, this::deleteExistingFile)
+                        WorkspaceExplorerItem.createContextTreeItem(context, this::deleteExistingFile), Comparator.comparing(ContextXml::getBaseFileName)
                 );
             }
         });
@@ -159,13 +183,17 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private <T> ListChangeListener<T> bindListToTree(
             ObservableList<T> list,
             TreeItem<Object> parentRoot,
-            Function<T, TreeItem<Object>> mapper) {
+            Function<T, TreeItem<Object>> mapper,
+            Comparator<T> sorter) {
 
         // Initial population
         parentRoot.getChildren().clear();
         for (T item : list) {
             parentRoot.getChildren().add(mapper.apply(item));
         }
+
+        // Sort initial children
+        sortTreeItems(parentRoot, sorter);
 
         ListChangeListener<T> listener = change -> {
             while (change.next()) {
@@ -205,7 +233,16 @@ public class WorkspaceExplorer implements IJavaFxNode {
         clearDataContextButton = UiUtil.createButton("", "Clear Data Context", FontAwesome.Glyph.FILE_CODE_ALT, "negative-icon", 1, true, _ -> clearDataContextHandler());
         setMessageContextButton = UiUtil.createButton("", "Set Message Context", FontAwesome.Glyph.ENVELOPE, "positive-icon", 1, true, _ -> setMessageContextHandler());
         clearMessageContextButton = UiUtil.createButton("", "Clear Message Context", FontAwesome.Glyph.ENVELOPE, "negative-icon", 1, true, _ -> clearMessageContextHandler());
-        ToolBar toolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
+
+        // Campaign connection toolbar buttons
+        connectToCampaignButton = UiUtil.createButton("", "Connect to Campaign", FontAwesome.Glyph.CIRCLE, "positive-icon", 1, true, _ -> connectToCampaignHandler());
+        disconnectFromCampaignButton = UiUtil.createButton("", "Disconnect from Campaign", FontAwesome.Glyph.CIRCLE_ALT, "negative-icon", 1, false, _ -> disconnectFromCampaignHandler());
+        createNewFromCampaignButton = UiUtil.createButton("", "Create new from Campaign", FontAwesome.Glyph.FILE, "positive-icon", 1, false, _ -> createNewFromCampaignHandler());
+        refreshFromCampaignButton = UiUtil.createButton("", "Refresh from Campaign", FontAwesome.Glyph.ARROW_CIRCLE_LEFT, "neutral-icon", 1, false, _ -> refreshFromCampaignHandler());
+        pushToCampaignButton = UiUtil.createButton("", "Push to Campaign", FontAwesome.Glyph.ARROW_CIRCLE_RIGHT, "neutral-icon", 1, false, _ -> pushToCampaignHandler());
+
+        ToolBar workspaceToolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
+        ToolBar campaignToolbar = new ToolBar(connectToCampaignButton, disconnectFromCampaignButton, createNewFromCampaignButton, refreshFromCampaignButton, pushToCampaignButton);
 
         // TreeView for all items
         treeView = new TreeView<>();
@@ -238,7 +275,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         WorkspaceExplorerItem.applyCellFactory(treeView);
 
         // Create the main explorer container
-        workspaceExplorerPanel = new VBox(explorerLabel, toolbar, treeView);
+        workspaceExplorerPanel = new VBox(explorerLabel, campaignToolbar, workspaceToolbar, treeView);
         workspaceExplorerPanel.setMinHeight(0);
         VBox.setVgrow(treeView, Priority.ALWAYS);
 
@@ -250,9 +287,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         // Set style classes
         workspaceExplorerPanel.getStyleClass().add("workspace-explorer");
-        toolbar.getStyleClass().add("small-toolbar");
+        workspaceToolbar.getStyleClass().add("small-toolbar");
+        campaignToolbar.getStyleClass().add("small-toolbar");
 
-        setToolbarContext();
+        setToolbarButtonStates();
     }
 
     private void selectionChangedHandler(ObservableValue obs, TreeItem oldItem, TreeItem newItem) {
@@ -278,11 +316,30 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 selectedFile = null;
                 selectedContextFile = null;
             }
-            setToolbarContext();
+            setToolbarButtonStates();
         }
     }
 
-    private void setToolbarContext() {
+    private void setToolbarButtonStates() {
+
+        if(workspace.getValue() == null) {
+            setDataContextButton.setDisable(true);
+            clearDataContextButton.setDisable(true);
+            setMessageContextButton.setDisable(true);
+            clearMessageContextButton.setDisable(true);
+            addExistingButton.setDisable(true);
+            createNewButton.setDisable(true);
+            removeButton.setDisable(true);
+            pushToCampaignButton.setDisable(true);
+            refreshFromCampaignButton.setDisable(true);
+            createNewFromCampaignButton.setDisable(true);
+            connectToCampaignButton.setDisable(true);
+            disconnectFromCampaignButton.setDisable(true);
+            return;
+        }
+
+        connectToCampaignButton.setDisable(isConnectedToCampaign);
+        disconnectFromCampaignButton.setDisable(!isConnectedToCampaign);
 
         if (selectedFile == null) {
             setDataContextButton.setDisable(true);
@@ -313,21 +370,37 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         switch (selectedFileType) {
             case TEMPLATE:
+                pushToCampaignButton.setDisable(!(isTemplateSelected && isConnectedToCampaign));
+
                 setDataContextButton.setDisable(!isTemplateSelected);
                 clearDataContextButton.setDisable(!isTemplateSelected);
                 setMessageContextButton.setDisable(!isTemplateSelected);
                 clearMessageContextButton.setDisable(!isTemplateSelected);
-
+                pushToCampaignButton.setDisable(!isConnectedToCampaign);
                 break;
             case MODULE:
+                createNewFromCampaignButton.setDisable(!isConnectedToCampaign);
+                pushToCampaignButton.setDisable(!(isWorkspaceFileSelected && isConnectedToCampaign && selectedFile.hasCampaignKey()));
+                refreshFromCampaignButton.setDisable(!(isWorkspaceFileSelected && isConnectedToCampaign && selectedFile.hasCampaignKey()));
                 setDataContextButton.setDisable(!isModuleSelected);
                 clearDataContextButton.setDisable(!isModuleSelected);
                 setMessageContextButton.setDisable(true);
                 clearMessageContextButton.setDisable(true);
                 break;
             case BLOCK:
+                createNewFromCampaignButton.setDisable(!isConnectedToCampaign);
+                pushToCampaignButton.setDisable(!(isWorkspaceFileSelected && isConnectedToCampaign && selectedFile.hasCampaignKey()));
+                refreshFromCampaignButton.setDisable(!(isWorkspaceFileSelected && isConnectedToCampaign && selectedFile.hasCampaignKey()));
+                setDataContextButton.setDisable(true);
+                clearDataContextButton.setDisable(true);
+                setMessageContextButton.setDisable(true);
+                clearMessageContextButton.setDisable(true);
+                break;
             case CONTEXT:
             default:
+                pushToCampaignButton.setDisable(true);
+                refreshFromCampaignButton.setDisable(true);
+                createNewFromCampaignButton.setDisable(true);
                 setDataContextButton.setDisable(true);
                 clearDataContextButton.setDisable(true);
                 setMessageContextButton.setDisable(true);
@@ -338,7 +411,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     public void createNewWorkspace() {
 
-        Optional<String> result = TextInputBox.show(getWindow(), "Create workspace", "Please enter a unique name for the new workspace", "Workspace name:");
+        Optional<String> result = TextInputDialog.show(getWindow(), "Create workspace", "Please enter a unique name for the new workspace", "Workspace name:");
 
         result.ifPresent(workspaceName -> {
             // Only executed if OK was clicked and text was not empty
@@ -371,6 +444,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
             // Not a valid workspace
             throw new IdeException("Selected folder is not a valid workspace!", null);
         }
+
+        setToolbarButtonStates();
     }
 
     public void saveWorkspace() {
@@ -394,7 +469,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
             return;
         }
 
-        getWorkspace().createNewWorkspaceFile(selectedFile.getName(), workspaceFileType);
+        WorkspaceFile newFile = getWorkspace().createNewWorkspaceFile(selectedFile.getName(), workspaceFileType);
+        fileOpenHandler.accept(newFile);
     }
 
     public void addExistingFile(WorkspaceFileType workspaceFileType) {
@@ -448,7 +524,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         if (selectedFile instanceof WorkspaceContextFile workspaceContextFile) {
 
-            Optional<ContextXml> contextFile = WorkspaceFilePicker.show(getWindow(), "Pick Context", "Choose an XML context for the message", "Context XML: ", getWorkspace().getContexts());
+            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show(getWindow(), "Pick Context", "Choose an XML context for the message", "Context XML: ", getWorkspace().getContexts());
             contextFile.ifPresent(workspaceContextFile::setDataContextFile);
         }
     }
@@ -456,7 +532,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private void setMessageContextHandler() {
         if (selectedFile instanceof Template template) {
 
-            Optional<ContextXml> contextFile = WorkspaceFilePicker.show(getWindow(), "Pick Context", "Choose an XML context for the message", "Context XML: ", getWorkspace().getContexts());
+            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show(getWindow(), "Pick Context", "Choose an XML context for the message", "Context XML: ", getWorkspace().getContexts());
             contextFile.ifPresent(template::setMessageContextFile);
         }
     }
@@ -471,6 +547,80 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (selectedFile instanceof Template workspaceFile) {
             workspaceFile.clearMessageContext();
         }
+    }
+
+    private void connectToCampaignHandler() {
+        try {
+            CampaignServerManager.connect();
+        } catch (IdeException ideException) {
+            LogPanel.appendLog("An error occurred connecting to Adobe Campaign. Please check File > Settings!");
+            return;
+        }
+        LogPanel.appendLog("Connected to Campaign server at: " + CampaignServerManager.getEndpointUrl());
+        isConnectedToCampaign = true;
+        setToolbarButtonStates();
+    }
+
+    private void disconnectFromCampaignHandler() {
+        CampaignServerManager.disconnect();
+        LogPanel.appendLog("Disconnected from Campaign at: " + CampaignServerManager.getEndpointUrl());
+        isConnectedToCampaign = false;
+        setToolbarButtonStates();
+    }
+
+    private void createNewFromCampaignHandler() {
+        if(selectedFileType == WorkspaceFileType.BLOCK) {
+            Optional<PersonalizationBlock> newBlock = CampaignBlockPickerDialog.show(getWindow(),"Pick Personalized Block", "Pick a personalisation block from the Campaign Server", "");
+            if(newBlock.isEmpty()) {
+                return;
+            }
+            PersonalizationBlockKey key = (PersonalizationBlockKey)newBlock.get().getKey();
+            System.out.println("Create new " + selectedFileType + " from " + newBlock.get().getLabel() + " with key " + key.getId());
+
+            WorkspaceFile newFile = workspace.get().createNewWorkspaceFile(newBlock.get().getName(), WorkspaceFileType.BLOCK, newBlock.get().getCode(), key);
+            newFile.setKey(key);
+            fileOpenHandler.accept(newFile);
+        }
+
+        if(selectedFileType == WorkspaceFileType.MODULE) {
+            Optional<JavaScriptTemplate> newModule = CampaignModulePickerDialog.show(getWindow(),"Pick JavaScript Template", "Pick a module JavaScript Template from the Campaign Server", "");
+            if(newModule.isEmpty()) {
+                return;
+            }
+            JavaScriptTemplateKey key = (JavaScriptTemplateKey)newModule.get().getKey();
+            System.out.println("Create new " + selectedFileType + " from " + newModule.get().getLabel() + " with key (" + key.getNamespace() + ":" + key.getName() + ")");
+
+            WorkspaceFile newFile = workspace.get().createNewWorkspaceFile(newModule.get().getName(), WorkspaceFileType.MODULE, newModule.get().getCode(), key);
+
+            fileOpenHandler.accept(newFile);
+        }
+    }
+
+    private void refreshFromCampaignHandler() {
+
+        if(selectedFileType == WorkspaceFileType.BLOCK) {
+            CampaignServerManager.refreshBlocks();
+            PersonalizationBlockKey key = (PersonalizationBlockKey) selectedFile.getKey();
+            Optional<PersonalizationBlock> block = CampaignServerManager.getPersonalizationBlock(key.getId());
+            if(block.isPresent()) {
+                selectedFile.saveWorkspaceFileContent(block.get().getCode());
+                fileOpenHandler.accept(selectedFile);
+            }
+        }
+
+        if(selectedFileType == WorkspaceFileType.MODULE) {
+            CampaignServerManager.refreshJavaScriptTemplates();
+            JavaScriptTemplateKey key = (JavaScriptTemplateKey) selectedFile.getKey();
+            Optional<JavaScriptTemplate> javascriptTemplate = CampaignServerManager.getJavaScriptTemplate(key.getNamespace(), key.getName());
+            if(javascriptTemplate.isPresent()) {
+                selectedFile.saveWorkspaceFileContent(javascriptTemplate.get().getCode());
+                fileOpenHandler.accept(selectedFile);
+            }
+        }
+    }
+
+    private void pushToCampaignHandler() {
+
     }
 
     private void setupDoubleClickHandler() {
@@ -517,6 +667,14 @@ public class WorkspaceExplorer implements IJavaFxNode {
                     evt.consume();
                 }
             }
+        });
+    }
+
+    private <T> void sortTreeItems(TreeItem<Object> parentRoot, Comparator<T> sorter) {
+        FXCollections.sort(parentRoot.getChildren(), (a, b) -> {
+            T valA = (T) ((WorkspaceExplorerItem.WorkspaceFileTreeItem) a.getValue()).workspaceFile;
+            T valB = (T) ((WorkspaceExplorerItem.WorkspaceFileTreeItem) b.getValue()).workspaceFile;
+            return sorter.compare(valA, valB);
         });
     }
 

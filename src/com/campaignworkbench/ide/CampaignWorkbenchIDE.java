@@ -29,7 +29,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     /**
      * The current active workspace
      */
-        private WorkspaceExplorer workspaceExplorer;
+    private WorkspaceExplorer workspaceExplorer;
     private MainToolBar toolBar;
     private EditorTabPanel editorTabPanel;
     private LogPanel logPanel;
@@ -330,7 +330,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      * Runs the template in the currently selected editor tab
      */
     private void runTemplate() {
-        if(!workspaceExplorer.isWorkspaceOpen()) {
+        if (!workspaceExplorer.isWorkspaceOpen()) {
             reportError("No workspace is open. Please open a workspace before running a template.", true);
             return;
         }
@@ -397,10 +397,10 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     }
 
     private void showAbout() {
-        AboutBox.show(scene.getWindow());
+        AboutDialog.show(scene.getWindow());
     }
 
     private void showSettings() {
-        ConfigBox.show(scene.getWindow());
+        SettingsDialog.show(scene.getWindow());
     }
 }

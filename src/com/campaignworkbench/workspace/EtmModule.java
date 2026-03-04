@@ -1,9 +1,9 @@
 package com.campaignworkbench.workspace;
 
-import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateIdentifier;
+import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateKey;
+import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockKey;
+import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
-import java.nio.file.Path;
 
 /**
  * Class representing an ETM module workspace file.
@@ -16,7 +16,7 @@ import java.nio.file.Path;
 )
 public class EtmModule extends WorkspaceContextFile {
 
-    private JavaScriptTemplateIdentifier campaignJavaScriptTemplateId;
+    private JavaScriptTemplateKey schemaKey;
 
     public EtmModule(String fileName, Workspace workspace) {
         super(fileName, WorkspaceFileType.MODULE, workspace);
@@ -24,11 +24,14 @@ public class EtmModule extends WorkspaceContextFile {
 
     public EtmModule() {}
 
-    public void setCampaignIdentifier(JavaScriptTemplateIdentifier javaScriptTemplateId) {
-        campaignJavaScriptTemplateId = javaScriptTemplateId;
+    @Override
+    public void setKey(SchemaKey schemaKey) {
+        this.schemaKey = (JavaScriptTemplateKey) schemaKey;
     }
 
-    public JavaScriptTemplateIdentifier getCampaignIdentifier() {
-        return campaignJavaScriptTemplateId;
+    @Override
+    public JavaScriptTemplateKey getKey() {
+        return schemaKey;
     }
+
 }

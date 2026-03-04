@@ -50,6 +50,9 @@ public final class FileUtil {
 
     public static void write(Path path, String contentText) {
         try {
+            if(contentText == null) {
+                return;
+            }
             byte[] strToBytes = contentText.getBytes();
             Files.write(path, strToBytes);
         } catch (IOException e) {

@@ -86,6 +86,10 @@ public final class EditorTab extends Tab {
         updateTabText();
     }
 
+    public void refreshText() {
+        editor.setText(workspaceFile.getWorkspaceFileContent());
+    }
+
     public void setDataContextFile(ContextXml contextFile) {
         if (workspaceFile instanceof WorkspaceContextFile workspaceContextFile) {
 

@@ -244,6 +244,9 @@ public class WorkspaceExplorerItem {
                     return;
                 }
 
+                // Reset class
+                getStyleClass().removeAll("workspace-file", "workspace-file-linked");
+
                 switch (item) {
                     // Item header has an icon graphic and a context menu
                     case HeaderTreeItem iconText -> {
@@ -261,6 +264,12 @@ public class WorkspaceExplorerItem {
                     // Workspace file has name of the file and a context menu
                     case WorkspaceFileTreeItem workspaceFileTreeItem -> {
                         setText(workspaceFileTreeItem.workspaceFile.getBaseFileName());
+
+                        if(workspaceFileTreeItem.workspaceFile.hasCampaignKey()) {
+                            getStyleClass().add("workspace-file-linked");
+                        } else {
+                            getStyleClass().add("workspace-file");
+                        }
 
                         WorkspaceFileType fileType = workspaceFileTreeItem.workspaceFile.getFileType();
                         ContextMenu menu = new ContextMenu();

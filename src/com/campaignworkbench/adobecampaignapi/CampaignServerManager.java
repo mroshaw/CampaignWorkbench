@@ -1,7 +1,7 @@
 package com.campaignworkbench.adobecampaignapi;
 
-import com.campaignworkbench.adobecampaignapi.schemas.IncludeView;
-import com.campaignworkbench.adobecampaignapi.schemas.IncludeViewCollection;
+import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlock;
+import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockCollection;
 import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplate;
 import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateCollection;
 import com.campaignworkbench.ide.IdeException;
@@ -29,7 +29,7 @@ public class CampaignServerManager {
     private static final XmlMapper mapper = new XmlMapper();
 
     // Maintain a single list of static blocks and JavaScript templates
-    private static IncludeViewCollection allPersonalizationBlocks = new IncludeViewCollection();
+    private static PersonalizationBlockCollection allPersonalizationBlocks = new PersonalizationBlockCollection();
     private static JavaScriptTemplateCollection allJavaScriptTemplates = new JavaScriptTemplateCollection();
 
     public static boolean connect() throws IdeException {
@@ -53,6 +53,11 @@ public class CampaignServerManager {
         return true;
     }
 
+    public static boolean disconnect() {
+        soapClient.client.close();
+        return true;
+    }
+
     public static String getEndpointUrl() {
         Optional<String> endPointUrl = credentials.getEndpointUrl();
         return endPointUrl.orElse("");
@@ -66,7 +71,7 @@ public class CampaignServerManager {
         }
     }
 
-    public static IncludeViewCollection getAllPersoBlocks(boolean refresh) throws IdeException {
+    public static PersonalizationBlockCollection getAllPersoBlocks(boolean refresh) throws IdeException {
         if (!allPersonalizationBlocks.isInitialized() || refresh) {
             refreshBlocks();
 
@@ -76,37 +81,37 @@ public class CampaignServerManager {
 
     public static JavaScriptTemplateCollection getAllJavaScriptTemplates(boolean refresh) throws IdeException {
         if(!allJavaScriptTemplates.isInitialized() || refresh) {
-            refreshTemplates();
+            refreshJavaScriptTemplates();
         }
         return allJavaScriptTemplates;
     }
 
     public static void refreshBlocks() throws IdeException {
-        String innerResultXml = querySchema(IncludeViewCollection.getQueryXml());
-        allPersonalizationBlocks = mapper.readValue(innerResultXml, IncludeViewCollection.class);
+        String innerResultXml = querySchema(PersonalizationBlockCollection.getQueryXml());
+        allPersonalizationBlocks = mapper.readValue(innerResultXml, PersonalizationBlockCollection.class);
     }
 
-    public static void refreshTemplates() throws IdeException {
+    public static void refreshJavaScriptTemplates() throws IdeException {
         String innerResultXml = querySchema(JavaScriptTemplateCollection.getQueryXml());
         allJavaScriptTemplates = mapper.readValue(innerResultXml, JavaScriptTemplateCollection.class);
     }
 
     public static void refreshAll() throws IdeException {
         refreshBlocks();
-        refreshTemplates();
+        refreshJavaScriptTemplates();
     }
 
-    public static Optional<IncludeView> getPersonalizationBlock(long id) {
-        if (allPersonalizationBlocks == null || allPersonalizationBlocks.getIncludeViews() == null) {
+    public static Optional<PersonalizationBlock> getPersonalizationBlock(long id) {
+        if (allPersonalizationBlocks == null || allPersonalizationBlocks.getPersonalisationBlocks() == null) {
             return Optional.empty();
         }
 
-        return allPersonalizationBlocks.getIncludeViews().stream()
+        return allPersonalizationBlocks.getPersonalisationBlocks().stream()
                 .filter(iv -> iv.getId() == id)
                 .findFirst();
     }
 
-    public static Optional<JavaScriptTemplate> getScriptTemplate(String namespace, String name) {
+    public static Optional<JavaScriptTemplate> getJavaScriptTemplate(String namespace, String name) {
         if (allJavaScriptTemplates == null) {
             return Optional.empty();
         }

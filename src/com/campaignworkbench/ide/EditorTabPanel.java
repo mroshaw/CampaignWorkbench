@@ -107,7 +107,8 @@ public class EditorTabPanel implements IJavaFxNode {
     public void addEditorTab(WorkspaceFile workspaceFile) {
         EditorTab existingTab = getExistingTab(workspaceFile);
         if(existingTab != null) {
-            // Set focus on the tab
+            // Refresh and set focus on the tab
+            getSelected().refreshText();
             tabPane.getSelectionModel().select(existingTab);
             return;
         }

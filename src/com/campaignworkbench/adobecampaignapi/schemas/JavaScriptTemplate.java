@@ -2,7 +2,7 @@ package com.campaignworkbench.adobecampaignapi.schemas;
 
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public class JavaScriptTemplate {
+public class JavaScriptTemplate implements ISchemaKey {
 
     @JacksonXmlProperty(isAttribute = true)
     private String name;
@@ -36,8 +36,8 @@ public class JavaScriptTemplate {
         return name;
     }
 
-    public JavaScriptTemplateIdentifier getIdentifier() {
-        return new JavaScriptTemplateIdentifier(namespace, name);
+    public JavaScriptTemplateKey getIdentifier() {
+        return new JavaScriptTemplateKey(namespace, name);
     }
 
     public String getNamespace() {
@@ -58,5 +58,10 @@ public class JavaScriptTemplate {
             output += " | " + "Code: " + code;
         }
         System.out.println(output);
+    }
+
+    @Override
+    public SchemaKey getKey() {
+        return new JavaScriptTemplateKey(name, namespace);
     }
 }

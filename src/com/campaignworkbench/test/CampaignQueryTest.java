@@ -1,8 +1,8 @@
 package com.campaignworkbench.test;
 
 import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
-import com.campaignworkbench.adobecampaignapi.schemas.IncludeView;
-import com.campaignworkbench.adobecampaignapi.schemas.IncludeViewCollection;
+import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlock;
+import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockCollection;
 import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplate;
 import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateCollection;
 
@@ -22,11 +22,11 @@ public class CampaignQueryTest {
 
             CampaignServerManager.refreshAll();
 
-            Optional<JavaScriptTemplate> template = CampaignServerManager.getScriptTemplate("ssg", "ETM_M00_END.js");
+            Optional<JavaScriptTemplate> template = CampaignServerManager.getJavaScriptTemplate("ssg", "ETM_M00_END.js");
             template.ifPresent(javaScriptTemplate -> javaScriptTemplate.print(false));
 
-            Optional<IncludeView> block = CampaignServerManager.getPersonalizationBlock(680205044);
-            block.ifPresent(includeView -> includeView.print(false));
+            Optional<PersonalizationBlock> block = CampaignServerManager.getPersonalizationBlock(680205044);
+            block.ifPresent(includeView -> includeView.print(true));
 
             // IncludeViewCollection blockCollection = CampaignServerManager.getAllPersoBlocks(true);
             // JavaScriptTemplateCollection javascriptCollection = CampaignServerManager.getAllJavaScriptTemplates(true);
@@ -40,8 +40,8 @@ public class CampaignQueryTest {
 
     }
 
-    private static void printPersonBlocks(IncludeViewCollection blockCollection) {
-        for (IncludeView view : blockCollection.getIncludeViews()) {
+    private static void printPersonBlocks(PersonalizationBlockCollection blockCollection) {
+        for (PersonalizationBlock view : blockCollection.getPersonalisationBlocks()) {
             view.print(false);
         }
     }

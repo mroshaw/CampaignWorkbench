@@ -1,5 +1,6 @@
 package com.campaignworkbench.workspace;
 
+import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -24,6 +25,15 @@ public class Template extends WorkspaceContextFile {
     }
 
     public Template() {}
+
+    @Override
+    public void setKey(SchemaKey schemaKey) {
+    }
+
+    @Override
+    public SchemaKey getKey() {
+        return null;
+    }
 
     public void setMessageContextFile(ContextXml messageContextFile) {
 

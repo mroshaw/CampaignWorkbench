@@ -76,3 +76,16 @@
     -fx-text-fill: #00ff00;
     -fx-font-size: 12pt;
 }
+
+/*
+***************************************************
+*** Workspace Explorer                          ***
+***************************************************
+*/
+.workspace-explorer .workspace-file-linked {
+    -fx-font-weight: bold;
+}
+
+.workspace-explorer .workspace-file {
+
+}

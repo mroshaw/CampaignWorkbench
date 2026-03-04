@@ -1,5 +1,6 @@
 package com.campaignworkbench.workspace;
 
+import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.campaignworkbench.ide.IdeException;
 import com.campaignworkbench.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -16,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -147,6 +149,29 @@ public class Workspace {
         return userDir.toPath().resolve(workspacesRootName);
     }
 
+    public void sortAllLists() {
+        sortTemplates();
+        sortBlocks();
+        sortModules();
+        sortContexts();
+    }
+
+    public void sortTemplates() {
+        FXCollections.sort(templates, Comparator.comparing(Template::getBaseFileName));
+    }
+
+    public void sortBlocks() {
+        FXCollections.sort(blocks, Comparator.comparing(PersoBlock::getBaseFileName));
+    }
+
+    public void sortModules() {
+        FXCollections.sort(modules, Comparator.comparing(EtmModule::getBaseFileName));
+    }
+
+    public void sortContexts() {
+        FXCollections.sort(contexts, Comparator.comparing(ContextXml::getBaseFileName));
+    }
+
     public void createNewWorkspace() {
         Path workspaceFolder = getRootFolderPath();
         Path templateFolder = getRootFolderPath().resolve(WorkspaceFileType.TEMPLATE.getFolderName());
@@ -201,7 +226,16 @@ public class Workspace {
                 .orElse(null);
     }
 
-    public void createNewWorkspaceFile(String fileName, WorkspaceFileType fileType) throws IdeException {
+    public WorkspaceFile createNewWorkspaceFile(String fileName, WorkspaceFileType fileType, String content, SchemaKey schemaKey) throws IdeException {
+        WorkspaceFile newFile = createNewWorkspaceFile(fileName, fileType);
+
+        newFile.saveWorkspaceFileContent(content);
+        newFile.setKey(schemaKey);
+        save();
+        return newFile;
+    }
+
+    public WorkspaceFile createNewWorkspaceFile(String fileName, WorkspaceFileType fileType) throws IdeException {
 
         if (fileExistsInFileSystem(fileName, fileType)) {
             throw new IdeException("An error occurred creating the new workspace file. File '" + fileName + "' of type '" + fileType + "' already exists!", null);
@@ -212,22 +246,41 @@ public class Workspace {
         } catch (IOException ioe) {
             throw new IdeException("An error occurred creating the new workspace file: " + filePath, ioe.getCause());
         }
-        addWorkspaceFile(fileName, fileType);
+        WorkspaceFile newFile = addWorkspaceFile(fileName, fileType);
         save();
+        return newFile;
     }
 
-    public void addWorkspaceFile(String fileName, WorkspaceFileType fileType) {
+    public WorkspaceFile addWorkspaceFile(String fileName, WorkspaceFileType fileType) {
 
         if(fileExistsInWorkspace(fileName, fileType)) {
-            return;
+            throw new IdeException("File with name " + fileName + " of type " + fileType + " already exists in the workspace!", null);
         }
+
         switch (fileType) {
-            case TEMPLATE -> templates.add(new Template(fileName, this));
-            case MODULE -> modules.add(new EtmModule(fileName, this));
-            case BLOCK -> blocks.add(new PersoBlock(fileName, this));
-            case CONTEXT -> contexts.add(new ContextXml(fileName, this));
+            case TEMPLATE:
+                Template newTemplate = new Template(fileName, this);
+                templates.add(newTemplate);
+                save();
+                return newTemplate;
+            case MODULE:
+                EtmModule newModule = new EtmModule(fileName, this);
+                modules.add(newModule);
+                save();
+                return newModule;
+            case BLOCK:
+                PersoBlock newBlock = new PersoBlock(fileName, this);
+                blocks.add(newBlock);
+                save();
+                return newBlock;
+              case CONTEXT:
+                ContextXml newContext = new ContextXml(fileName, this);
+                contexts.add(newContext);
+                save();
+                return newContext;
+             default:
+                throw new IdeException("Unrecognised file type!", null);
         }
-        save();
     }
 
     public void removeWorkspaceFile(WorkspaceFile fileToRemove, boolean deleteFromFileSystem) {
@@ -328,6 +381,8 @@ public class Workspace {
             this.contexts.forEach(context -> context.setWorkspace(this));
 
             nameProperty.setValue(jsonFilePath.getParent().getFileName().toString());
+
+            sortAllLists();
 
         } catch (IOException ioe) {
             throw new IdeException("An error occurred loading the workspace JSON file: " + getConfigFileAbsolutePath(), ioe.getCause());

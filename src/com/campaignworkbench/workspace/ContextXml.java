@@ -1,5 +1,6 @@
 package com.campaignworkbench.workspace;
 
+import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import java.nio.file.Path;
 
@@ -19,4 +20,14 @@ public class ContextXml extends WorkspaceFile {
     }
 
     public ContextXml() {}
+
+    @Override
+    public void setKey(SchemaKey schemaKey) {
+    }
+
+    @Override
+    public SchemaKey getKey() {
+        return null;
+    }
+
 }

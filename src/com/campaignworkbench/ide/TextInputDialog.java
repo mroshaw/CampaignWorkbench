@@ -1,13 +1,12 @@
 package com.campaignworkbench.ide;
-import javafx.scene.control.TextInputDialog;
 import javafx.stage.Window;
 
 import java.util.Optional;
 
-public class TextInputBox {
+public class TextInputDialog {
     public static Optional<String> show(Window owner, String title, String headerText, String contentText) {
 
-        TextInputDialog dialog = new TextInputDialog();
+        javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog();
 
         dialog.initOwner(owner);
         dialog.setTitle(title);

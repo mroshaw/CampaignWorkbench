@@ -55,7 +55,7 @@ public final class TemplateRenderer {
 
             cx = Context.enter();
             cx.setOptimizationLevel(-1);
-            cx.setLanguageVersion(Context.VERSION_1_8);
+            cx.setLanguageVersion(Context.VERSION_1_7);
             scope = cx.initStandardObjects();
 
             // Add the Data Context

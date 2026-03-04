@@ -13,7 +13,7 @@ import javafx.stage.Window;
 
 import java.time.Year;
 
-public class AboutBox {
+public class AboutDialog {
 
     private static final String appName = "Campaign Workbench";
     private static final String description = "Powerful IDE to build and test Campaign Classic template code";

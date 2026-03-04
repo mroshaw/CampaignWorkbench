@@ -1,4 +1,5 @@
 package com.campaignworkbench.workspace;
+import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.campaignworkbench.ide.IdeException;
 import com.campaignworkbench.util.FileUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -18,7 +19,7 @@ import java.nio.file.Paths;
         setterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE
 )
-public class WorkspaceFile {
+public abstract class WorkspaceFile {
 
     private String fileName;
     private WorkspaceFileType fileType;
@@ -70,6 +71,10 @@ public class WorkspaceFile {
         return fileType == WorkspaceFileType.TEMPLATE;
     }
 
+    public boolean hasCampaignKey() {
+        return getKey() != null;
+    }
+
     public boolean isDataContextApplicable() {
         return fileType == WorkspaceFileType.TEMPLATE ||
                 fileType == WorkspaceFileType.MODULE;
@@ -115,4 +120,7 @@ public class WorkspaceFile {
             throw new IdeException("An error occurred deleting the file from the file system: " + deleteFileAbsolutePath, ioe.getCause());
         }
     }
+    public abstract void setKey(SchemaKey schemaKey);
+
+    public abstract SchemaKey getKey();
 }
