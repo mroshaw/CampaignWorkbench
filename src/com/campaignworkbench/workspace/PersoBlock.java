@@ -14,9 +14,20 @@ import java.nio.file.Path;
 )
 
 public class PersoBlock extends WorkspaceFile {
+
+    private long campaignIncludeViewId;
+
     public PersoBlock(String fileName, Workspace workspace) {
         super(fileName, WorkspaceFileType.BLOCK, workspace);
     }
 
     public PersoBlock() {}
+
+    public long getCampaignIncludeViewId() {
+        return campaignIncludeViewId;
+    }
+
+    public void setCampaignIncludeViewId(long campaignIncludeViewId) {
+        this.campaignIncludeViewId = campaignIncludeViewId;
+    }
 }

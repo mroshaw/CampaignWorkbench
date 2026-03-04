@@ -51,6 +51,8 @@ public class MainMenuBar implements IJavaFxNode {
             EventHandler<ActionEvent> saveCurrentFileHandler,
             EventHandler<ActionEvent> saveCurrentAsFileHandler,
 
+            EventHandler<ActionEvent> settingsHandler,
+
             EventHandler<ActionEvent> findHandler,
 
             EventHandler<ActionEvent> applyLightThemeHandler,
@@ -68,6 +70,8 @@ public class MainMenuBar implements IJavaFxNode {
         Menu openMenu = new Menu("Open");
         Menu newMenu = new Menu("New");
         Menu addMenu = new Menu("Add Existing");
+        MenuItem settingsItem = new MenuItem("Settings");
+        settingsItem.setOnAction(settingsHandler);
 
         MenuItem openWorkspaceMenu = new MenuItem("Workspace");
 
@@ -122,7 +126,7 @@ public class MainMenuBar implements IJavaFxNode {
         saveCurrentAs.setOnAction(saveCurrentAsFileHandler);
         exitItem.setOnAction(exitHandler);
 
-        fileMenu.getItems().addAll(newMenu, openMenu, addMenu, new SeparatorMenuItem(), saveCurrent, saveCurrentAs, saveWorkspaceMenu, new SeparatorMenuItem(), exitItem);
+        fileMenu.getItems().addAll(newMenu, openMenu, addMenu, new SeparatorMenuItem(), saveCurrent, saveCurrentAs, saveWorkspaceMenu, new SeparatorMenuItem(), settingsItem, new SeparatorMenuItem(), exitItem);
 
         // Edit menu
         Menu editMenu = new Menu("Edit");

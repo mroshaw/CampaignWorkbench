@@ -1,5 +1,6 @@
 package com.campaignworkbench.workspace;
 
+import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateIdentifier;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.nio.file.Path;
@@ -14,9 +15,20 @@ import java.nio.file.Path;
         isGetterVisibility = JsonAutoDetect.Visibility.NONE
 )
 public class EtmModule extends WorkspaceContextFile {
+
+    private JavaScriptTemplateIdentifier campaignJavaScriptTemplateId;
+
     public EtmModule(String fileName, Workspace workspace) {
         super(fileName, WorkspaceFileType.MODULE, workspace);
     }
 
     public EtmModule() {}
+
+    public void setCampaignIdentifier(JavaScriptTemplateIdentifier javaScriptTemplateId) {
+        campaignJavaScriptTemplateId = javaScriptTemplateId;
+    }
+
+    public JavaScriptTemplateIdentifier getCampaignIdentifier() {
+        return campaignJavaScriptTemplateId;
+    }
 }

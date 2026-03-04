@@ -53,9 +53,13 @@ public class CampaignServerManager {
         return true;
     }
 
+    public static String getEndpointUrl() {
+        Optional<String> endPointUrl = credentials.getEndpointUrl();
+        return endPointUrl.orElse("");
+    }
+
     public static void updateCredentials(String clientId, String clientSecret, String endpointUrl) throws IdeException {
         try {
-            CredentialStore credentials = new CredentialStore();
             credentials.save(clientId, clientSecret, endpointUrl);
         } catch (RuntimeException e) {
             throw new IdeException("Could not save credentials!", e);

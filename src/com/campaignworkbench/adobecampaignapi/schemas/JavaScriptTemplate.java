@@ -32,9 +32,12 @@ public class JavaScriptTemplate {
         this.label = label;
     }
 
-
     public String getName() {
         return name;
+    }
+
+    public JavaScriptTemplateIdentifier getIdentifier() {
+        return new JavaScriptTemplateIdentifier(namespace, name);
     }
 
     public String getNamespace() {

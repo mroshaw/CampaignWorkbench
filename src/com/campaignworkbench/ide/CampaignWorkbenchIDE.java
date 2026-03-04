@@ -76,6 +76,9 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
                 _ -> saveCurrentFileHandler(),
                 _ -> saveCurrentFileAsHandler(),
+
+                _ -> showSettings(),
+
                 _ -> toggleFindHandler(),
 
                 _ -> setThemeHandler(IDETheme.LIGHT),
@@ -395,5 +398,9 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
     private void showAbout() {
         AboutBox.show(scene.getWindow());
+    }
+
+    private void showSettings() {
+        ConfigBox.show(scene.getWindow());
     }
 }
