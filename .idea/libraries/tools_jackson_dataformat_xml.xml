@@ -1,0 +1,22 @@
+<component name="libraryTable">
+  <library name="tools.jackson.dataformat.xml" type="repository">
+    <properties maven-id="tools.jackson.dataformat:jackson-dataformat-xml:3.1.0" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/tools/jackson/dataformat/jackson-dataformat-xml/3.1.0/jackson-dataformat-xml-3.1.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/tools/jackson/core/jackson-core/3.1.0/jackson-core-3.1.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/tools/jackson/core/jackson-databind/3.1.0/jackson-databind-3.1.0.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/woodstox/stax2-api/4.2.2/stax2-api-4.2.2.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/woodstox/woodstox-core/7.1.1/woodstox-core-7.1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/tools/jackson/dataformat/jackson-dataformat-xml/3.1.0/jackson-dataformat-xml-3.1.0-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/tools/jackson/core/jackson-core/3.1.0/jackson-core-3.1.0-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/jackson/core/jackson-annotations/2.21/jackson-annotations-2.21-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/tools/jackson/core/jackson-databind/3.1.0/jackson-databind-3.1.0-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/woodstox/stax2-api/4.2.2/stax2-api-4.2.2-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/woodstox/woodstox-core/7.1.1/woodstox-core-7.1.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>

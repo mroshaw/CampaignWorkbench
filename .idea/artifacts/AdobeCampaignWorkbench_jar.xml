@@ -11,7 +11,6 @@
       <element id="library" level="project" name="fifesoft.rstaui" />
       <element id="library" level="project" name="io.github.mkpaz.atlantafx.base" />
       <element id="library" level="project" name="controlsfx" />
-      <element id="library" level="project" name="tools.jackson.core.databind" />
       <element id="library" level="project" name="fifesoft.rsyntaxtextarea" />
       <element id="library" level="project" name="fifesoft.languagesupport" />
     </root>
