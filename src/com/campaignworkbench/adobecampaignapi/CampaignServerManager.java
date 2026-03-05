@@ -37,6 +37,12 @@ public class CampaignServerManager {
         Optional<String> clientId = credentials.getClientId();
         Optional<String> clientSecret = credentials.getClientSecret();
 
+        /*
+        System.out.println("URL: " + endPointUrl.orElse(""));
+        System.out.println("client_id: " + clientId.orElse(""));
+        System.out.println("client_secret: " + clientSecret.orElse(""));
+        */
+
         // Get authentication token
         String accessToken;
         try {

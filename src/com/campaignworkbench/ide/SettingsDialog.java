@@ -71,7 +71,6 @@ public class SettingsDialog {
                         : "";
 
                 CampaignServerManager.updateCredentials(clientId, clientSecret, endpointUrl);
-                LogPanel.appendLog("Configuration saved.");
             }
             return null;
         });

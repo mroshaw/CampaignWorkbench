@@ -39,6 +39,8 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
 
         tabPane.getSelectionModel().selectedItemProperty().addListener((_, _, selectedTab) -> refreshTab(selectedTab));
 
+        tabPane.getStyleClass().add("output-tab-panel");
+
         ThemeManager.register(this);
     }
 
@@ -66,7 +68,6 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
     private void setSourceCodeContent(String content) {
         sourceCodeTab.setContentText(content);
     }
-
 
     private void setPreSourceCodeContent(String content) {
         preSourceCodeTab.setContentText(content);

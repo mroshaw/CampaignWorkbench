@@ -90,6 +90,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private WorkspaceFile selectedFile;
     private WorkspaceFile selectedContextFile;
 
+    private final ErrorReporter errorReporter;
+
     private boolean isConnectedToCampaign;
 
     /**
@@ -99,12 +101,12 @@ public class WorkspaceExplorer implements IJavaFxNode {
     public WorkspaceExplorer(String labelText,
                              Consumer<WorkspaceFile> fileOpenHandler,
                              Consumer<Workspace> workspaceChangedHandler,
-                             Consumer<String> insertIntoCodeHandler) {
+                             Consumer<String> insertIntoCodeHandler, ErrorReporter errorReporter) {
 
         this.fileOpenHandler = fileOpenHandler;
         this.workspaceChangedHandler = workspaceChangedHandler;
         this.insertIntoCodeHandler = insertIntoCodeHandler;
-
+        this.errorReporter = errorReporter;
         createUi(labelText);
     }
 
@@ -152,26 +154,26 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 workspaceName.bind(newWorkspace.getNameProperty());
 
                 // Sort children
-                System.out.println("Sorting templates");
+                // System.out.println("Sorting templates");
                 FXCollections.sort(newWorkspace.getTemplates(), Comparator.comparing(Template::getBaseFileName));
                 // Bind children to workspace.templates
                 templatesListener = bindListToTree(newWorkspace.getTemplates(), templateRoot, template ->
                         WorkspaceExplorerItem.createTemplateTreeItem(template, this::deleteExistingFile), Comparator.comparing(Template::getBaseFileName)
                 );
 
-                System.out.println("Sorting blocks");
+                // System.out.println("Sorting blocks");
                 FXCollections.sort(newWorkspace.getBlocks(), Comparator.comparing(PersoBlock::getBaseFileName));
                 modulesListener = bindListToTree(newWorkspace.getModules(), moduleRoot, module ->
                         WorkspaceExplorerItem.createModuleTreeItem(module, this::insertIntoCode, this::deleteExistingFile), Comparator.comparing(EtmModule::getBaseFileName)
                 );
 
-                System.out.println("Sorting modules");
+                // System.out.println("Sorting modules");
                 FXCollections.sort(newWorkspace.getModules(), Comparator.comparing(EtmModule::getBaseFileName));
                 blocksListener = bindListToTree(newWorkspace.getBlocks(), blockRoot, block ->
                         WorkspaceExplorerItem.createBlockTreeItem(block, this::insertIntoCode, this::deleteExistingFile), Comparator.comparing(PersoBlock::getBaseFileName)
                 );
 
-                System.out.println("Sorting contexts");
+                // System.out.println("Sorting contexts");
                 FXCollections.sort(newWorkspace.getContexts(), Comparator.comparing(ContextXml::getBaseFileName));
                 contextsListener = bindListToTree(newWorkspace.getContexts(), contextRoot, context ->
                         WorkspaceExplorerItem.createContextTreeItem(context, this::deleteExistingFile), Comparator.comparing(ContextXml::getBaseFileName)
@@ -442,7 +444,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
             getWorkspace().load();
         } else {
             // Not a valid workspace
-            throw new IdeException("Selected folder is not a valid workspace!", null);
+            errorReporter.reportError("The selected folder is not a valid workspace folder!", true);
         }
 
         setToolbarButtonStates();
@@ -524,7 +526,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         if (selectedFile instanceof WorkspaceContextFile workspaceContextFile) {
 
-            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show(getWindow(), "Pick Context", "Choose an XML context for the message", "Context XML: ", getWorkspace().getContexts());
+            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show(getWindow(), getWorkspace().getContexts());
             contextFile.ifPresent(workspaceContextFile::setDataContextFile);
         }
     }
@@ -532,7 +534,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private void setMessageContextHandler() {
         if (selectedFile instanceof Template template) {
 
-            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show(getWindow(), "Pick Context", "Choose an XML context for the message", "Context XML: ", getWorkspace().getContexts());
+            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show(getWindow(), getWorkspace().getContexts());
             contextFile.ifPresent(template::setMessageContextFile);
         }
     }
@@ -553,24 +555,24 @@ public class WorkspaceExplorer implements IJavaFxNode {
         try {
             CampaignServerManager.connect();
         } catch (IdeException ideException) {
-            LogPanel.appendLog("An error occurred connecting to Adobe Campaign. Please check File > Settings!");
+            errorReporter.reportError("An error occurred connecting to Adobe Campaign. Please check File > Settings!", true);
             return;
         }
-        LogPanel.appendLog("Connected to Campaign server at: " + CampaignServerManager.getEndpointUrl());
+        errorReporter.logMessage("Connected to Campaign server at: " + CampaignServerManager.getEndpointUrl());
         isConnectedToCampaign = true;
         setToolbarButtonStates();
     }
 
     private void disconnectFromCampaignHandler() {
         CampaignServerManager.disconnect();
-        LogPanel.appendLog("Disconnected from Campaign at: " + CampaignServerManager.getEndpointUrl());
+        errorReporter.logMessage("Disconnected from Campaign at: " + CampaignServerManager.getEndpointUrl());
         isConnectedToCampaign = false;
         setToolbarButtonStates();
     }
 
     private void createNewFromCampaignHandler() {
         if(selectedFileType == WorkspaceFileType.BLOCK) {
-            Optional<PersonalizationBlock> newBlock = CampaignBlockPickerDialog.show(getWindow(),"Pick Personalized Block", "Pick a personalisation block from the Campaign Server", "");
+            Optional<PersonalizationBlock> newBlock = CampaignBlockPickerDialog.show(getWindow());
             if(newBlock.isEmpty()) {
                 return;
             }
@@ -583,7 +585,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
 
         if(selectedFileType == WorkspaceFileType.MODULE) {
-            Optional<JavaScriptTemplate> newModule = CampaignModulePickerDialog.show(getWindow(),"Pick JavaScript Template", "Pick a module JavaScript Template from the Campaign Server", "");
+            Optional<JavaScriptTemplate> newModule = CampaignModulePickerDialog.show(getWindow());
             if(newModule.isEmpty()) {
                 return;
             }

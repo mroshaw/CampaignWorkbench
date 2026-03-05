@@ -32,6 +32,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private WorkspaceExplorer workspaceExplorer;
     private MainToolBar toolBar;
     private EditorTabPanel editorTabPanel;
+    private UiErrorReporter errorReporter;
     private LogPanel logPanel;
     private ErrorLogPanel errorLogPanel;
     private OutputTabPanel outputPanel;
@@ -57,6 +58,13 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         iconImage = new Image(
                 Objects.requireNonNull(getClass().getResourceAsStream("/app.png")));
         primaryStage.getIcons().add(iconImage);
+
+        // Log panel and Error Reporter
+        logPanel = new LogPanel("Logs");
+        errorLogPanel = new ErrorLogPanel("Errors");
+        errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> outputPanel.highlightJsLine(line));
+
+        errorReporter = new UiErrorReporter(logPanel, errorLogPanel);
 
         // Menu and toolbar
         MainMenuBar menuBar = new MainMenuBar(
@@ -95,7 +103,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 _ -> runTemplate());
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace, this::workspaceChanged, this::insertIntoCodeHandler);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace, this::workspaceChanged, this::insertIntoCodeHandler, errorReporter);
 
         // Editor tabs
         editorTabPanel = new EditorTabPanel((_, _, newTab) -> tabPanelChanged(newTab));
@@ -103,11 +111,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         // Output panes
         outputPanel = new OutputTabPanel();
 
-        // Log pane
-        logPanel = new LogPanel("Logs");
-        errorLogPanel = new ErrorLogPanel("Errors");
 
-        errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> outputPanel.highlightJsLine(line));
 
         SplitPane logSplitPane = new SplitPane();
         logSplitPane.setOrientation(Orientation.HORIZONTAL);
@@ -150,7 +154,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         primaryStage.show();
         ThemeManager.register(this);
         Workspace.createWorkspaceRootFolder();
-        appendLog("Welcome to Campaign workbench!");
+        errorReporter.reportError("Welcome to Campaign workbench!", false);
     }
 
     /**
@@ -166,15 +170,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         editorTabPanel.closeAllTabs();
         Platform.exit();
         System.exit(0);
-    }
-
-    /**
-     * Appends a message to the log panel
-     *
-     * @param logMessage the message to append
-     */
-    private void appendLog(String logMessage) {
-        logPanel.appendLog(logMessage);
     }
 
     private void setThemeHandler(IDETheme ideTheme) {
@@ -214,7 +209,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         try {
             workspaceExplorer.openWorkspace();
         } catch (IdeException ideEx) {
-            reportError("An error occurred while opening the workspace: " + ideEx.getMessage(), ideEx, true);
+            errorReporter.reportError("An error occurred while opening the workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
 
@@ -222,7 +217,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         try {
             workspaceExplorer.createNewWorkspace();
         } catch (IdeException ideEx) {
-            reportError("An error occurred while creating a new workspace: " + ideEx.getMessage(), ideEx, true);
+            errorReporter.reportError("An error occurred while creating a new workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
 
@@ -230,7 +225,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         try {
             workspaceExplorer.saveWorkspace();
         } catch (IdeException ideEx) {
-            reportError("An error occurred while saving the workspace: " + ideEx.getMessage(), ideEx, true);
+            errorReporter.reportError("An error occurred while saving the workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
 
@@ -239,7 +234,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
             editorTabPanel.closeAllTabs();
             workspaceExplorer.closeWorkspace();
         } catch (IdeException ideEx) {
-            reportError("An error occurred while closing the workspace: " + ideEx.getMessage(), ideEx, true);
+            errorReporter.reportError("An error occurred while closing the workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
 
@@ -251,7 +246,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         try {
             workspaceExplorer.saveWorkspace();
         } catch (IdeException ideEx) {
-            reportError("An error occurred while saving the workspace: " + ideEx.getMessage(), ideEx, true);
+            errorReporter.reportError("An error occurred while saving the workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
 
@@ -281,7 +276,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         try {
             workspaceExplorer.addExistingFile(fileType);
         } catch (IdeException ideEx) {
-            reportError("An error occurred while adding an existing file of type: " + fileType, ideEx, true);
+            errorReporter.reportError("An error occurred while adding an existing file of type: " + fileType, ideEx, true);
         }
     }
 
@@ -290,7 +285,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
             workspaceExplorer.createNewFile(fileType);
             saveWorkspaceHandler();
         } catch (IdeException ideEx) {
-            reportError("An error occurred while creating an new file of type: " + fileType, ideEx, true);
+            errorReporter.reportError("An error occurred while creating an new file of type: " + fileType, ideEx, true);
         }
     }
 
@@ -309,8 +304,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private void saveCurrentFileHandler() {
 
         if (!editorTabPanel.isSelected()) {
-            appendLog("No editor tab selected to save.");
-            showAlert("No editor tab selected.");
+            errorReporter.reportError("No editor tab selected to save.", true);
             return;
         }
         editorTabPanel.saveSelectedTab();
@@ -331,7 +325,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      */
     private void runTemplate() {
         if (!workspaceExplorer.isWorkspaceOpen()) {
-            reportError("No workspace is open. Please open a workspace before running a template.", true);
+            errorReporter.reportError("No workspace is open. Please open a workspace before running a template.", true);
             return;
         }
 
@@ -352,18 +346,16 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
                 Platform.runLater(() -> {
                     outputPanel.setContent(resultHtml, resultJs);
-                    appendLog("Template ran successfully: " + editorTabPanel.getSelectedFileName());
+                    errorReporter.logMessage("Template ran successfully: " + editorTabPanel.getSelectedFileName());
                 });
             }
         } catch (IdeException ideEx) {
-            appendLog("An IDE error occurred: " + ideEx.getMessage());
-            reportError(ideEx.getMessage(), ideEx, true);
+            errorReporter.reportError("An IDE error occurred!", ideEx, true);
         } catch (RendererException renderEx) {
-            appendLog("A Renderer error occurred: " + renderEx.getMessage());
-            errorLogPanel.addError(renderEx);
+            errorReporter.reportError("A Renderer error occurred!", renderEx, true);
             outputPanel.setContent("", renderEx.getSourceCode());
         } catch (Exception ex) {
-            appendLog("An unexpected error occurred: " + ex.getMessage());
+            errorReporter.reportError("An unexpected error occurred!", ex, true);
         }
     }
 
@@ -372,7 +364,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      *
      * @param msg the message to show
      */
-    private void showAlert(String msg) {
+    private static void showAlert(String msg) {
         Platform.runLater(() -> {
             Alert alert = new Alert(
                     Alert.AlertType.WARNING,
@@ -381,19 +373,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
             );
             alert.showAndWait();
         });
-    }
-
-    private void reportError(String message, boolean displayAlert) {
-        logPanel.appendLog(message);
-        if (displayAlert) {
-            showAlert(message);
-        }
-    }
-
-    private void reportError(String message, Exception exception, boolean showAlert) {
-        reportError(message, showAlert);
-        errorLogPanel.addError(exception);
-
     }
 
     private void showAbout() {

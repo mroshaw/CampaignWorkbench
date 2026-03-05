@@ -19,7 +19,7 @@ public class AboutDialog {
     private static final String description = "Powerful IDE to build and test Campaign Classic template code";
     private static final String version = Version.VERSION;
     private static final String copyright = "©" + Year.now().getValue() + " Specsavers";
-    private static final Image icon = new Image(CampaignWorkbenchIDE.class.getResourceAsStream("/images/icon.png"));
+    private static final Image icon = new Image(CampaignWorkbenchIDE.class.getResourceAsStream("/app.png"));
 
     public static void show(Window owner) {
 

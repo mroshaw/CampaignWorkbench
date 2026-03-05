@@ -113,17 +113,27 @@ public class Workspace {
     public ObservableList<Template> getTemplates() {
         return templates;
     }
+
     public ObservableList<EtmModule> getModules() {
         return modules;
     }
+
     public ObservableList<PersoBlock> getBlocks() {
         return blocks;
     }
+
     public ObservableList<ContextXml> getContexts() {
         return contexts;
     }
-    public StringProperty getNameProperty() { return nameProperty; }
-    public String getName() { return nameProperty.getValue(); }
+
+    public StringProperty getNameProperty() {
+        return nameProperty;
+    }
+
+    public String getName() {
+        return nameProperty.getValue();
+    }
+
     public Path getRootFolderPath() {
         return workspacesRootPath.resolve(nameProperty.getValue());
     }
@@ -139,8 +149,6 @@ public class Workspace {
             } catch (IOException ioe) {
                 throw new IdeException("An error occurred creating Workspaces root: " + workspacesRootPath, ioe.getCause());
             }
-        } else {
-            System.out.println("Workspaces root already exists: " + workspacesRootPath);
         }
     }
 
@@ -213,7 +221,7 @@ public class Workspace {
             return null;
         }
 
-        ObservableList<? extends WorkspaceFile> fileList = switch(fileType) {
+        ObservableList<? extends WorkspaceFile> fileList = switch (fileType) {
             case TEMPLATE -> templates;
             case MODULE -> modules;
             case BLOCK -> blocks;
@@ -253,7 +261,7 @@ public class Workspace {
 
     public WorkspaceFile addWorkspaceFile(String fileName, WorkspaceFileType fileType) {
 
-        if(fileExistsInWorkspace(fileName, fileType)) {
+        if (fileExistsInWorkspace(fileName, fileType)) {
             throw new IdeException("File with name " + fileName + " of type " + fileType + " already exists in the workspace!", null);
         }
 
@@ -273,12 +281,12 @@ public class Workspace {
                 blocks.add(newBlock);
                 save();
                 return newBlock;
-              case CONTEXT:
+            case CONTEXT:
                 ContextXml newContext = new ContextXml(fileName, this);
                 contexts.add(newContext);
                 save();
                 return newContext;
-             default:
+            default:
                 throw new IdeException("Unrecognised file type!", null);
         }
     }
@@ -339,7 +347,7 @@ public class Workspace {
     public void writeToJson(Path jsonFilePath) {
         try {
             JsonUtil.writeToJson(jsonFilePath, this);
-            System.out.println("Saved workspace JSON file: " + jsonFilePath);
+            // System.out.println("Saved workspace JSON file: " + jsonFilePath);
         } catch (IOException ioe) {
             throw new IdeException("An error occurred saving the workspace JSON file: " + jsonFilePath, ioe.getCause());
         } catch (Exception e) {
@@ -364,16 +372,16 @@ public class Workspace {
             // Restore back-references
             this.templates.forEach(template -> {
                 template.setWorkspace(this);
-                if(template.getMessageContextFile() != null) {
+                if (template.getMessageContextFile() != null) {
                     template.getMessageContextFile().setWorkspace(this);
                 }
-                if(template.getDataContextFile() != null) {
+                if (template.getDataContextFile() != null) {
                     template.getDataContextFile().setWorkspace(this);
                 }
             });
             this.modules.forEach(module -> {
                 module.setWorkspace(this);
-                if(module.getDataContextFile() != null) {
+                if (module.getDataContextFile() != null) {
                     module.getDataContextFile().setWorkspace(this);
                 }
             });

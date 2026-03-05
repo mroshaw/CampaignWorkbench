@@ -82,6 +82,30 @@
 
 */
 
+
+/*
+***************************************************
+*** Log Panel                                   ***
+***************************************************
+*/
+.log-area .log-timestamp {
+    -fx-fill: -color-bg-subtle;
+    -fx-font-weight: bold;
+    -fx-font-size: 11pt;
+}
+
+.log-area .selection-highlight {
+    -fx-fill: #4a90e2;   /* selection background colour */
+}
+
+.log-area .log-message {
+    -fx-font-size: 11pt;
+}
+
+.log-area .caret {
+    -fx-stroke: -color-fg-default !important;
+}
+
 /*
 ***************************************************
 *** Error Log                                   ***

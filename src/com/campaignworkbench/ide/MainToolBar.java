@@ -46,7 +46,7 @@ public class MainToolBar implements IJavaFxNode {
                 runButton
         );
 
-        toolBar.getStyleClass().add(".large-toolbar");
+        toolBar.getStyleClass().add("large-toolbar");
     }
 
     /**

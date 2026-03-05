@@ -13,6 +13,9 @@
       <element id="library" level="project" name="controlsfx" />
       <element id="library" level="project" name="fifesoft.rsyntaxtextarea" />
       <element id="library" level="project" name="fifesoft.languagesupport" />
+      <element id="library" level="project" name="github.javakeyring.java.keyring" />
+      <element id="library" level="project" name="tools.jackson.dataformat.xml" />
+      <element id="library" level="project" name="tools.jackson.jaxrs.json.provider" />
     </root>
   </artifact>
 </component>
