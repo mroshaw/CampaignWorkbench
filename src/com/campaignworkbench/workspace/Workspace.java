@@ -1,7 +1,6 @@
 package com.campaignworkbench.workspace;
 
 import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
-import com.campaignworkbench.ide.IdeException;
 import com.campaignworkbench.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -147,7 +146,7 @@ public class Workspace {
                 Files.createDirectory(workspacesRootPath);
                 System.out.println("Created Workspaces root: " + workspacesRootPath);
             } catch (IOException ioe) {
-                throw new IdeException("An error occurred creating Workspaces root: " + workspacesRootPath, ioe.getCause());
+                throw new WorkspaceException("An error occurred creating Workspaces root: " + workspacesRootPath, ioe.getCause());
             }
         }
     }
@@ -191,7 +190,7 @@ public class Workspace {
                 || Files.exists(moduleFolder)
                 || Files.exists(blocksFolder)
                 || Files.exists(contextFolder)) {
-            throw new IdeException("Invalid location selected for new workspace. Workspace files already exists!", null);
+            throw new WorkspaceException("Invalid location selected for new workspace. Workspace files already exists!", null);
         }
 
         try {
@@ -201,7 +200,7 @@ public class Workspace {
             Files.createDirectory(blocksFolder);
             Files.createDirectory(contextFolder);
         } catch (IOException ioe) {
-            throw new IdeException("An error occurred creating the new workspace: " + getConfigFileAbsolutePath(), ioe.getCause());
+            throw new WorkspaceException("An error occurred creating the new workspace: " + getConfigFileAbsolutePath(), ioe);
         }
 
         save();
@@ -234,7 +233,7 @@ public class Workspace {
                 .orElse(null);
     }
 
-    public WorkspaceFile createNewWorkspaceFile(String fileName, WorkspaceFileType fileType, String content, SchemaKey schemaKey) throws IdeException {
+    public WorkspaceFile createNewWorkspaceFile(String fileName, WorkspaceFileType fileType, String content, SchemaKey schemaKey) {
         WorkspaceFile newFile = createNewWorkspaceFile(fileName, fileType);
 
         newFile.saveWorkspaceFileContent(content);
@@ -243,16 +242,16 @@ public class Workspace {
         return newFile;
     }
 
-    public WorkspaceFile createNewWorkspaceFile(String fileName, WorkspaceFileType fileType) throws IdeException {
+    public WorkspaceFile createNewWorkspaceFile(String fileName, WorkspaceFileType fileType) {
 
         if (fileExistsInFileSystem(fileName, fileType)) {
-            throw new IdeException("An error occurred creating the new workspace file. File '" + fileName + "' of type '" + fileType + "' already exists!", null);
+            throw new WorkspaceException("An error occurred creating the new workspace file. File '" + fileName + "' of type '" + fileType + "' already exists!", null);
         }
         Path filePath = getFilePath(fileName, fileType);
         try {
             Path newFilePath = Files.createFile(filePath);
         } catch (IOException ioe) {
-            throw new IdeException("An error occurred creating the new workspace file: " + filePath, ioe.getCause());
+            throw new WorkspaceException("An error occurred creating the new workspace file: " + filePath, ioe.getCause());
         }
         WorkspaceFile newFile = addWorkspaceFile(fileName, fileType);
         save();
@@ -262,7 +261,7 @@ public class Workspace {
     public WorkspaceFile addWorkspaceFile(String fileName, WorkspaceFileType fileType) {
 
         if (fileExistsInWorkspace(fileName, fileType)) {
-            throw new IdeException("File with name " + fileName + " of type " + fileType + " already exists in the workspace!", null);
+            throw new WorkspaceException("File with name " + fileName + " of type " + fileType + " already exists in the workspace!", null);
         }
 
         switch (fileType) {
@@ -287,7 +286,7 @@ public class Workspace {
                 save();
                 return newContext;
             default:
-                throw new IdeException("Unrecognised file type!", null);
+                throw new WorkspaceException("Unrecognised file type!", null);
         }
     }
 
@@ -349,9 +348,9 @@ public class Workspace {
             JsonUtil.writeToJson(jsonFilePath, this);
             // System.out.println("Saved workspace JSON file: " + jsonFilePath);
         } catch (IOException ioe) {
-            throw new IdeException("An error occurred saving the workspace JSON file: " + jsonFilePath, ioe.getCause());
+            throw new WorkspaceException("An error occurred saving the workspace JSON file: " + jsonFilePath, ioe.getCause());
         } catch (Exception e) {
-            throw new IdeException("An unknown occurred saving the workspace JSON file: " + jsonFilePath, e);
+            throw new WorkspaceException("An unknown occurred saving the workspace JSON file: " + jsonFilePath, e);
         }
     }
 
@@ -359,7 +358,7 @@ public class Workspace {
         writeToJson(getConfigFileAbsolutePath());
     }
 
-    private void readFromJson() {
+    private void readFromJson() throws WorkspaceException{
         try {
             Path jsonFilePath = getConfigFileAbsolutePath();
             Workspace newWorkspace = JsonUtil.readFromJson(jsonFilePath, Workspace.class);
@@ -393,9 +392,9 @@ public class Workspace {
             sortAllLists();
 
         } catch (IOException ioe) {
-            throw new IdeException("An error occurred loading the workspace JSON file: " + getConfigFileAbsolutePath(), ioe.getCause());
+            throw new WorkspaceException("An error occurred loading the workspace JSON file: " + getConfigFileAbsolutePath(), ioe.getCause());
         } catch (Exception e) {
-            throw new IdeException("An unknown occurred loading the workspace JSON file: " + getConfigFileAbsolutePath(), e);
+            throw new WorkspaceException("An unknown occurred loading the workspace JSON file: " + getConfigFileAbsolutePath(), e);
         }
     }
 }

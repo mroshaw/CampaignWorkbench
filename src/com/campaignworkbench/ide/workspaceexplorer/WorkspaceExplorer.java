@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
+import com.campaignworkbench.adobecampaignapi.ApiException;
 import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
 import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateKey;
 import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlock;
@@ -7,6 +8,8 @@ import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplate;
 import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockKey;
 import com.campaignworkbench.ide.*;
 import com.campaignworkbench.ide.TextInputDialog;
+import com.campaignworkbench.ide.dialogs.YesNoCancelPopupDialog;
+import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
 import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.*;
@@ -58,7 +61,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     // Root structures of the tree view
     private TreeView<Object> treeView;
-    private TreeItem<Object> workspaceRoot;
     private TreeItem<Object> templateRoot;
     private TreeItem<Object> moduleRoot;
     private TreeItem<Object> blockRoot;
@@ -66,7 +68,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     // Event handlers
     private final Consumer<WorkspaceFile> fileOpenHandler;
-    private final Consumer<Workspace> workspaceChangedHandler;
     private final Consumer<String> insertIntoCodeHandler;
 
     // Toolbar buttons
@@ -88,10 +89,9 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     private WorkspaceFileType selectedFileType;
     private WorkspaceFile selectedFile;
-    private WorkspaceFile selectedContextFile;
 
     private final ErrorReporter errorReporter;
-
+    private final CampaignServerManager campaignServerManager;
     private boolean isConnectedToCampaign;
 
     /**
@@ -104,9 +104,9 @@ public class WorkspaceExplorer implements IJavaFxNode {
                              Consumer<String> insertIntoCodeHandler, ErrorReporter errorReporter) {
 
         this.fileOpenHandler = fileOpenHandler;
-        this.workspaceChangedHandler = workspaceChangedHandler;
         this.insertIntoCodeHandler = insertIntoCodeHandler;
         this.errorReporter = errorReporter;
+        campaignServerManager = new CampaignServerManager();
         createUi(labelText);
     }
 
@@ -124,7 +124,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     }
 
     private void bindWorkspace() {
-        workspace.addListener((obs, oldWorkspace, newWorkspace) -> {
+        workspace.addListener((ObservableValue<? extends Workspace> _, Workspace oldWorkspace, Workspace newWorkspace) -> {
 
             // Remove old listeners
             if (oldWorkspace != null) {
@@ -253,7 +253,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         bindWorkspace();
 
         // Create roots
-        workspaceRoot = WorkspaceExplorerItem.createHeaderTreeItemObservableText(FontAwesome.Glyph.FOLDER, workspaceName,
+        TreeItem<Object> workspaceRoot = WorkspaceExplorerItem.createHeaderTreeItemObservableText(FontAwesome.Glyph.FOLDER, workspaceName,
                 "workspace-icon", null, this::createNewFile, this::addExistingFile);
 
         templateRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(FontAwesome.Glyph.ENVELOPE, "Templates",
@@ -298,9 +298,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private void selectionChangedHandler(ObservableValue obs, TreeItem oldItem, TreeItem newItem) {
         if (newItem != null) {
 
-            if (newItem.getValue() instanceof WorkspaceExplorerItem.ContextTreeItem contextTreeItem) {
-                selectedContextFile = contextTreeItem.workspaceFile;
-
+            if (newItem.getValue() instanceof WorkspaceExplorerItem.ContextTreeItem) {
                 TreeItem parentItem = newItem.getParent();
 
                 if (parentItem != null && parentItem.getValue() instanceof WorkspaceExplorerItem.WorkspaceFileTreeItem parentWorkspaceItem) {
@@ -316,7 +314,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
             } else if (newItem.getValue() instanceof WorkspaceExplorerItem.HeaderTreeItem parentFolder) {
                 selectedFileType = parentFolder.fileType;
                 selectedFile = null;
-                selectedContextFile = null;
             }
             setToolbarButtonStates();
         }
@@ -364,7 +361,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         boolean isWorkspaceFileSelected = selectedFile != null;
         boolean isTemplateSelected = selectedFileType == WorkspaceFileType.TEMPLATE && isWorkspaceFileSelected;
         boolean isModuleSelected = selectedFileType == WorkspaceFileType.MODULE && isWorkspaceFileSelected;
-        boolean isBlockSelected = selectedFileType == WorkspaceFileType.BLOCK && isWorkspaceFileSelected;
 
         addExistingButton.setDisable(false);
         createNewButton.setDisable(false);
@@ -439,9 +435,13 @@ public class WorkspaceExplorer implements IJavaFxNode {
         Path expectedJsonFile = folder.toPath().resolve(folderName + ".json");
 
         if (Files.exists(expectedJsonFile) && Files.isRegularFile(expectedJsonFile)) {
-            System.out.println("File exists: " + expectedJsonFile);
-            setWorkspace(new Workspace(folderName, false));
-            getWorkspace().load();
+            // System.out.println("File exists: " + expectedJsonFile);
+            try {
+                setWorkspace(new Workspace(folderName, false));
+                getWorkspace().load();
+            } catch (WorkspaceException workspaceException) {
+                errorReporter.reportError("Could not load workspace!", workspaceException, true);
+            }
         } else {
             // Not a valid workspace
             errorReporter.reportError("The selected folder is not a valid workspace folder!", true);
@@ -454,8 +454,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (getWorkspace() != null) {
             try {
                 getWorkspace().save();
-            } catch (IdeException ideException) {
-                throw new IdeException("Could not save workspace!", ideException.getCause());
+            } catch (WorkspaceException workspaceException) {
+                errorReporter.reportError("Could not save workspace!", workspaceException, true);
             }
         }
     }
@@ -470,9 +470,12 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (selectedFile == null) {
             return;
         }
-
-        WorkspaceFile newFile = getWorkspace().createNewWorkspaceFile(selectedFile.getName(), workspaceFileType);
-        fileOpenHandler.accept(newFile);
+        try {
+            WorkspaceFile newFile = getWorkspace().createNewWorkspaceFile(selectedFile.getName(), workspaceFileType);
+            fileOpenHandler.accept(newFile);
+        } catch (WorkspaceException workspaceException) {
+            errorReporter.reportError("Could not create new file!", workspaceException, true);
+        }
     }
 
     public void addExistingFile(WorkspaceFileType workspaceFileType) {
@@ -481,17 +484,25 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (selectedFile == null) {
             return;
         }
-
-        getWorkspace().addWorkspaceFile(selectedFile.getName(), workspaceFileType);
+        try {
+            getWorkspace().addWorkspaceFile(selectedFile.getName(), workspaceFileType);
+        }
+        catch (WorkspaceException workspaceException) {
+            errorReporter.reportError("Could not add existing file!", workspaceException, true);
+        }
     }
 
     private void deleteExistingFile(WorkspaceFile workspaceFile) {
-        YesNoPopupDialog.YesNoCancel result = YesNoPopupDialog.show("Confirm delete?", "Do you also want to delete the selected file (" + selectedFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
+        YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Confirm delete?", "Do you also want to delete the selected file (" + selectedFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
 
-        if (result == YesNoPopupDialog.YesNoCancel.CANCEL) {
+        if (result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
             return;
         }
-        getWorkspace().removeWorkspaceFile(selectedFile, result == YesNoPopupDialog.YesNoCancel.YES);
+        try {
+            getWorkspace().removeWorkspaceFile(selectedFile, result == YesNoCancelPopupDialog.YesNoCancel.YES);
+        } catch (WorkspaceException workspaceException) {
+            errorReporter.reportError("An error occurred deleting " + selectedFile.getBaseFileName(), workspaceException, true);
+        }
     }
 
     private void insertIntoCode(String textToInsert) {
@@ -503,7 +514,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (selectedFileType == null) {
             return;
         }
-
         createNewFile(selectedFileType);
     }
 
@@ -511,7 +521,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (selectedFileType == null) {
             return;
         }
-
         addExistingFile(selectedFileType);
     }
 
@@ -553,39 +562,45 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     private void connectToCampaignHandler() {
         try {
-            CampaignServerManager.connect();
-        } catch (IdeException ideException) {
+            campaignServerManager.connect();
+        } catch (ApiException apiException) {
             errorReporter.reportError("An error occurred connecting to Adobe Campaign. Please check File > Settings!", true);
             return;
         }
-        errorReporter.logMessage("Connected to Campaign server at: " + CampaignServerManager.getEndpointUrl());
+        errorReporter.logMessage("Connected to Campaign server at: " + campaignServerManager.getEndpointUrl());
         isConnectedToCampaign = true;
         setToolbarButtonStates();
     }
 
     private void disconnectFromCampaignHandler() {
-        CampaignServerManager.disconnect();
-        errorReporter.logMessage("Disconnected from Campaign at: " + CampaignServerManager.getEndpointUrl());
-        isConnectedToCampaign = false;
-        setToolbarButtonStates();
+        try {
+            campaignServerManager.disconnect();
+            errorReporter.logMessage("Disconnected from Campaign at: " + campaignServerManager.getEndpointUrl());
+            isConnectedToCampaign = false;
+            setToolbarButtonStates();
+        } catch (ApiException apiException) {
+            errorReporter.reportError("An error occurred disconnecting from Adobe Campaign", apiException, true);
+        }
     }
 
     private void createNewFromCampaignHandler() {
         if(selectedFileType == WorkspaceFileType.BLOCK) {
-            Optional<PersonalizationBlock> newBlock = CampaignBlockPickerDialog.show(getWindow());
+            Optional<PersonalizationBlock> newBlock = CampaignBlockPickerDialog.show(getWindow(), campaignServerManager);
             if(newBlock.isEmpty()) {
                 return;
             }
-            PersonalizationBlockKey key = (PersonalizationBlockKey)newBlock.get().getKey();
-            System.out.println("Create new " + selectedFileType + " from " + newBlock.get().getLabel() + " with key " + key.getId());
 
+            PersonalizationBlockKey key = (PersonalizationBlockKey)newBlock.get().getKey();
+            // System.out.println("Create new " + selectedFileType + " from " + newBlock.get().getLabel() + " with key " + key.getId());
+
+            errorReporter.logMessage("Creating " + selectedFileType + " from Adobe Campaign using " + newBlock.get().getLabel() + " with key " + key.getId() + ". Please wait...");
             WorkspaceFile newFile = workspace.get().createNewWorkspaceFile(newBlock.get().getName(), WorkspaceFileType.BLOCK, newBlock.get().getCode(), key);
             newFile.setKey(key);
             fileOpenHandler.accept(newFile);
         }
 
         if(selectedFileType == WorkspaceFileType.MODULE) {
-            Optional<JavaScriptTemplate> newModule = CampaignModulePickerDialog.show(getWindow());
+            Optional<JavaScriptTemplate> newModule = CampaignModulePickerDialog.show(getWindow(), campaignServerManager);
             if(newModule.isEmpty()) {
                 return;
             }
@@ -596,33 +611,75 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
             fileOpenHandler.accept(newFile);
         }
+        errorReporter.logMessage("Created new " + selectedFileType + " from Adobe Campaign");
     }
 
     private void refreshFromCampaignHandler() {
-
-        if(selectedFileType == WorkspaceFileType.BLOCK) {
-            CampaignServerManager.refreshBlocks();
-            PersonalizationBlockKey key = (PersonalizationBlockKey) selectedFile.getKey();
-            Optional<PersonalizationBlock> block = CampaignServerManager.getPersonalizationBlock(key.getId());
-            if(block.isPresent()) {
-                selectedFile.saveWorkspaceFileContent(block.get().getCode());
-                fileOpenHandler.accept(selectedFile);
-            }
+        if(!selectedFile.hasCampaignKey())
+        {
+            errorReporter.reportError("The selected file does not have a Campaign key!", true);
+            return;
         }
 
-        if(selectedFileType == WorkspaceFileType.MODULE) {
-            CampaignServerManager.refreshJavaScriptTemplates();
-            JavaScriptTemplateKey key = (JavaScriptTemplateKey) selectedFile.getKey();
-            Optional<JavaScriptTemplate> javascriptTemplate = CampaignServerManager.getJavaScriptTemplate(key.getNamespace(), key.getName());
-            if(javascriptTemplate.isPresent()) {
-                selectedFile.saveWorkspaceFileContent(javascriptTemplate.get().getCode());
-                fileOpenHandler.accept(selectedFile);
+        if(YesNoPopupDialog.show("Are you sure?", "Are you sure you want to refresh " + selectedFileType + " " + selectedFile.getFileName() + " from Adobe Campaign?", (Stage) getNode().getScene().getWindow()) == YesNoPopupDialog.YesNo.NO) {
+            return;
+        }
+
+
+        errorReporter.logMessage("Refreshing " + selectedFile.getBaseFileName() + " from Adobe Campaign. Please wait...");
+        try {
+            if (selectedFileType == WorkspaceFileType.BLOCK) {
+                campaignServerManager.refreshBlocks();
+                PersonalizationBlockKey key = (PersonalizationBlockKey) selectedFile.getKey();
+                Optional<PersonalizationBlock> block = campaignServerManager.getPersonalizationBlock(key.getId());
+                if (block.isPresent()) {
+                    selectedFile.saveWorkspaceFileContent(block.get().getCode());
+                    fileOpenHandler.accept(selectedFile);
+                }
             }
+
+            if (selectedFileType == WorkspaceFileType.MODULE) {
+                campaignServerManager.refreshJavaScriptTemplates();
+                JavaScriptTemplateKey key = (JavaScriptTemplateKey) selectedFile.getKey();
+                Optional<JavaScriptTemplate> javascriptTemplate = campaignServerManager.getJavaScriptTemplate(key.getNamespace(), key.getName());
+                if (javascriptTemplate.isPresent()) {
+                    selectedFile.saveWorkspaceFileContent(javascriptTemplate.get().getCode());
+                    fileOpenHandler.accept(selectedFile);
+                }
+            }
+            errorReporter.logMessage("Refreshed " + selectedFileType + " " + selectedFile.getBaseFileName() + " from Adobe Campaign");
+        } catch (ApiException apiException) {
+            errorReporter.reportError("An error occurred refreshing " + selectedFile.getBaseFileName() + " from Adobe Campaign", apiException, true);
         }
     }
 
     private void pushToCampaignHandler() {
+        if(!selectedFile.hasCampaignKey())
+        {
+            errorReporter.reportError("The selected file does not have a Campaign key!", true);
+            return;
+        }
 
+        if(YesNoPopupDialog.show("Are you sure?", "Are you sure you want to push " + selectedFileType + " " + selectedFile.getFileName() + " to Adobe Campaign?", (Stage) getNode().getScene().getWindow()) == YesNoPopupDialog.YesNo.NO) {
+            return;
+        }
+
+        try {
+            switch(selectedFileType) {
+                case BLOCK:
+                    campaignServerManager.updatePersonalizationBlock((PersonalizationBlockKey) selectedFile.getKey(), selectedFile.getWorkspaceFileContent());
+                    break;
+                case MODULE:
+                    campaignServerManager.updateJavascriptTemplate((JavaScriptTemplateKey) selectedFile.getKey(), selectedFile.getWorkspaceFileContent());
+                    break;
+                default:
+                    errorReporter.reportError("The file type " + selectedFileType + " is not supported for updating on Campaign!", true);
+                    return;
+            }
+            errorReporter.logMessage("Updated " + selectedFileType + " " + selectedFile.getBaseFileName() + " on Adobe Campaign");
+        } catch (ApiException apiException) {
+            errorReporter.reportError("An error occurred updating " + selectedFile.getBaseFileName() + " on Adobe Campaign", apiException, true);
+        }
     }
 
     private void setupDoubleClickHandler() {
@@ -653,10 +710,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
                         }
                         return;
                     }
-
-                    // Call open file on the selected context file
-                    WorkspaceFile fileToOpen= contextTreeItem.workspaceFile;
-                    // fileToOpen.setWorkspace(workspace);
 
                     fileOpenHandler.accept(contextTreeItem.workspaceFile);
                     evt.consume();

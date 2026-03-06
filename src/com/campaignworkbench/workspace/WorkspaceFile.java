@@ -1,6 +1,5 @@
 package com.campaignworkbench.workspace;
 import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
-import com.campaignworkbench.ide.IdeException;
 import com.campaignworkbench.util.FileUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -84,22 +83,22 @@ public abstract class WorkspaceFile {
         return fileType == WorkspaceFileType.TEMPLATE;
     }
 
-    public String getWorkspaceFileContent() throws IdeException {
+    public String getWorkspaceFileContent() throws WorkspaceException {
         return getFileContent(getAbsoluteFilePath());
     }
 
     /**
      * @return string content of the given file. To be used by this and derived classes.
      */
-    protected String getFileContent(Path absoluteFilePath) throws IdeException {
+    protected String getFileContent(Path absoluteFilePath) throws WorkspaceException {
         try {
             return FileUtil.read(absoluteFilePath);
         } catch (RuntimeException rte) {
-            throw new IdeException("An error occurred loading the file: " + absoluteFilePath, rte);
+            throw new WorkspaceException("An error occurred loading the file: " + absoluteFilePath, rte);
         }
     }
 
-    public void saveWorkspaceFileContent(String contentText) throws IdeException {
+    public void saveWorkspaceFileContent(String contentText) throws WorkspaceException {
         saveFileContent(getAbsoluteFilePath(), contentText);
     }
 
@@ -107,17 +106,17 @@ public abstract class WorkspaceFile {
         try {
             FileUtil.write(absoluteFilePath, contentText);
         } catch (RuntimeException rte) {
-            throw new IdeException("An error occurred saving the file: " + absoluteFilePath, rte);
+            throw new WorkspaceException("An error occurred saving the file: " + absoluteFilePath, rte);
         }
     }
 
-    public void deleteFromFileSystem() throws IdeException{
+    public void deleteFromFileSystem() throws WorkspaceException{
         Path deleteFileAbsolutePath = getAbsoluteFilePath();
         System.out.println("Deleting: " + deleteFileAbsolutePath);
         try {
             Files.delete(deleteFileAbsolutePath);
         } catch (IOException ioe) {
-            throw new IdeException("An error occurred deleting the file from the file system: " + deleteFileAbsolutePath, ioe.getCause());
+            throw new WorkspaceException("An error occurred deleting the file from the file system: " + deleteFileAbsolutePath, ioe.getCause());
         }
     }
     public abstract void setKey(SchemaKey schemaKey);

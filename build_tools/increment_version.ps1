@@ -1,35 +1,44 @@
-$versionFile = "$PSScriptRoot\..\version.properties"
+# Create UTF-8 encoding
+$utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 
 # ------------------------------------------------------------
-# Update or Insert version in Version.java
+# Paths
 # ------------------------------------------------------------
+$versionFile = Resolve-Path "$PSScriptRoot\..\version.properties"
+$javaOut = Resolve-Path "$PSScriptRoot\..\src\com\campaignworkbench\ide\Version.java"
+$manifestPath = Resolve-Path "$PSScriptRoot\..\resources\META-INF\MANIFEST.MF"
 
-
+# ------------------------------------------------------------
 # Read properties
+# ------------------------------------------------------------
+$propsRaw = Get-Content $versionFile -Raw
 $props = @{}
-Get-Content $versionFile | ForEach-Object {
-    if ($_ -match "(.+)=(.+)") {
+
+foreach ($line in $propsRaw -split "`r?`n") {
+    if ($line -match "(.+)=(.+)") {
         $props[$matches[1]] = $matches[2]
     }
 }
 
-# Increment build
+# ------------------------------------------------------------
+# Increment build number
+# ------------------------------------------------------------
 $props["build"] = [int]$props["build"] + 1
 
-# Write back
-$props.GetEnumerator() | ForEach-Object {
-    "$($_.Key)=$($_.Value)"
-} | Set-Content $versionFile
+# Write back properties atomically
+$propsContent = ($props.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join "`r`n"
+[System.IO.File]::WriteAllText($versionFile, $propsContent, $utf8NoBom)
 
+# ------------------------------------------------------------
 # Construct version string
+# ------------------------------------------------------------
 $version = "$($props.major).$($props.minor).$($props.patch).$($props.build)"
-
 Write-Host "New Version: $version"
 
+# ------------------------------------------------------------
 # Generate Version.java
-$javaOut = "$PSScriptRoot\..\src\com\campaignworkbench\ide\Version.java"
-
-@"
+# ------------------------------------------------------------
+$javaContent = @"
 package com.campaignworkbench.ide;
 
 public final class Version {
@@ -41,19 +50,19 @@ public final class Version {
     public static final String VERSION =
             MAJOR + "." + MINOR + "." + PATCH + "." + BUILD;
 }
-"@ | Set-Content $javaOut
+"@
+
+[System.IO.File]::WriteAllText($javaOut, $javaContent, $utf8NoBom)
 
 # ------------------------------------------------------------
 # Update or Insert Implementation-Version in MANIFEST.MF
 # ------------------------------------------------------------
-$manifestPath = "$PSScriptRoot\..\resources\META-INF\MANIFEST.MF"
-
 if (Test-Path $manifestPath) {
 
     $content = Get-Content $manifestPath -Raw
 
     if ($content -match "(?m)^Implementation-Version:\s*.+$") {
-        # Replace existing
+        # Replace existing line
         $content = [regex]::Replace(
                 $content,
                 "(?m)^Implementation-Version:\s*.+$",
@@ -61,20 +70,15 @@ if (Test-Path $manifestPath) {
         )
     }
     else {
-        # Remove trailing whitespace/newlines
-        $content = $content.TrimEnd()
-
-        # Append directly (NO blank line)
-        $content += "`r`nImplementation-Version: $version"
+        # Remove trailing whitespace/newlines and append
+        $content = $content.TrimEnd() + "`r`nImplementation-Version: $version"
     }
 
-    # Ensure file ends with CRLF
+    # Ensure CRLF ending
     if (-not $content.EndsWith("`r`n")) {
         $content += "`r`n"
     }
 
-    $encoding = New-Object System.Text.ASCIIEncoding
-    [System.IO.File]::WriteAllText($manifestPath, $content, $encoding)
-
+    [System.IO.File]::WriteAllText($manifestPath, $content, $utf8NoBom)
     Write-Host "MANIFEST.MF updated."
 }

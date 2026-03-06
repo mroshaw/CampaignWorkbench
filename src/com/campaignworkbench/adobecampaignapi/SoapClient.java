@@ -17,8 +17,26 @@ public class SoapClient {
         this.endPoint = endPoint;
     }
 
-    public String sendQueryRequest(String queryXml) throws IOException, InterruptedException {
-        String soapBody = """
+    public String sendUpdateRequest(String updateXml) {
+        String soapBodyXml = """
+                <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                                  xmlns:urn="urn:xtk:session">
+                   <soapenv:Header/>
+                   <soapenv:Body>
+                      <urn:Write>
+                        <sessiontoken></sessiontoken>
+                        <urn:domDoc>
+                            %s
+                        </urn:domDoc>
+                        </urn:Write>
+                   </soapenv:Body>
+                </soapenv:Envelope>
+                """.formatted(updateXml);
+        return sendRequest(soapBodyXml, "xtk:persist#Write");
+    }
+
+    public String sendQueryRequest(String queryXml) {
+        String soapBodyXml = """
                 <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
                                   xmlns:urn="urn:xtk:queryDef">
                    <soapenv:Header/>
@@ -33,21 +51,28 @@ public class SoapClient {
                 </soapenv:Envelope>
                 """.formatted(queryXml);
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(endPoint))
-                .header("Content-Type", "text/xml;charset=UTF-8")
-                .header("Authorization", "Bearer " + authToken)
-                .header("SOAPAction", "xtk:queryDef#ExecuteQuery")
-                .POST(HttpRequest.BodyPublishers.ofString(soapBody))
-                .build();
+        return sendRequest(soapBodyXml, "xtk:queryDef#ExecuteQuery");
+    }
 
-        HttpClient client = HttpClient.newHttpClient();
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+    private String sendRequest(String soapBodyXml, String soapAction) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(endPoint))
+                    .header("Content-Type", "text/xml;charset=UTF-8")
+                    .header("Authorization", "Bearer " + authToken)
+                    .header("SOAPAction", soapAction)
+                    .POST(HttpRequest.BodyPublishers.ofString(soapBodyXml))
+                    .build();
 
-        // System.out.println("Status code: " + response.statusCode());
-        // System.out.println("Response body:");
-        // System.out.println(response.body());
+            HttpClient client = HttpClient.newHttpClient();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        return response.body();
+            if(response.statusCode() != 200) {
+                throw new ApiException("An error occurred while sending the SOAP request. StatusCode: " + response.statusCode() + ". Response: " + response.body(), null);
+            }
+            return response.body();
+        } catch (InterruptedException | IOException sendException) {
+            throw new ApiException("An error occurred while sending the SOAP request!", sendException);
+        }
     }
 }

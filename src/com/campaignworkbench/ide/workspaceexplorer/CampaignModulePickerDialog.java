@@ -10,14 +10,14 @@ import java.util.Optional;
 
 public class CampaignModulePickerDialog extends PickerDialog<JavaScriptTemplate> {
 
-    public static Optional<JavaScriptTemplate> show(Window owner) {
-        return new CampaignModulePickerDialog().showInternal(owner);
+    public static Optional<JavaScriptTemplate> show(Window owner, CampaignServerManager campaignServerManager) {
+        return new CampaignModulePickerDialog().showInternal(owner, campaignServerManager);
     }
 
-    public Optional<JavaScriptTemplate> showInternal(Window owner) {
+    public Optional<JavaScriptTemplate> showInternal(Window owner, CampaignServerManager campaignServerManager) {
 
         var modules = FXCollections.observableArrayList(
-                CampaignServerManager.getAllJavaScriptTemplates(true)
+                campaignServerManager.getAllJavaScriptTemplates(true)
                         .getJavaScriptTemplates()
         );
 

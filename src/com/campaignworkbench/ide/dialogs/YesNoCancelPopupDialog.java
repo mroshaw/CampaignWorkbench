@@ -1,4 +1,4 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.dialogs;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
@@ -7,29 +7,20 @@ import javafx.stage.Stage;
 
 import java.util.Optional;
 
-/**
- * Simple Yes No Cancel dialog box implementation.
- */
-public final class YesNoPopupDialog {
+public final class YesNoCancelPopupDialog extends BasePopupDialog {
 
     public enum YesNoCancel {
         YES, NO, CANCEL
     }
 
-    private YesNoPopupDialog() {
-        // utility class
-    }
+    private YesNoCancelPopupDialog() {}
 
     public static YesNoCancel show(
             String title,
             String message,
             Stage owner
     ) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.initOwner(owner);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
+        Alert alert = createAlert(Alert.AlertType.CONFIRMATION, title, message, owner);
 
         ButtonType yes = new ButtonType("Yes");
         ButtonType no = new ButtonType("No");

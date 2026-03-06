@@ -1,11 +1,13 @@
 package com.campaignworkbench.ide;
 
-import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
+import com.campaignworkbench.adobecampaignapi.CredentialStore;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Window;
+
+import java.util.Optional;
 
 public class SettingsDialog {
 
@@ -33,9 +35,11 @@ public class SettingsDialog {
         endpointField.setPromptText("https://your-server.example.com");
         endpointField.setPrefColumnCount(30);
 
-        // Pre-populate URL only
-        endpointField.setText(CampaignServerManager.getEndpointUrl());
+        CredentialStore credentialStore = new CredentialStore();
 
+        // Pre-populate URL only
+        Optional<String> endpointUrl = credentialStore.getEndpointUrl();
+        endpointUrl.ifPresent(endpointField::setText);
         PasswordField clientIdField = new PasswordField();
         clientIdField.setPromptText("Client ID");
 
@@ -58,19 +62,19 @@ public class SettingsDialog {
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == saveButtonType) {
 
-                String endpointUrl = endpointField.getText() != null
+                String newEndpointUrl = endpointField.getText() != null
                         ? endpointField.getText().trim()
                         : "";
 
-                String clientId = clientIdField.getText() != null
+                String newClientId = clientIdField.getText() != null
                         ? clientIdField.getText().trim()
                         : "";
 
-                String clientSecret = clientSecretField.getText() != null
+                String newClientSecret = clientSecretField.getText() != null
                         ? clientSecretField.getText().trim()
                         : "";
 
-                CampaignServerManager.updateCredentials(clientId, clientSecret, endpointUrl);
+                credentialStore.save(newClientId, newClientSecret, newEndpointUrl);
             }
             return null;
         });

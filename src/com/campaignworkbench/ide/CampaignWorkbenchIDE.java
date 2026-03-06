@@ -1,6 +1,7 @@
 package com.campaignworkbench.ide;
 
 import com.campaignworkbench.campaignrenderer.*;
+import com.campaignworkbench.ide.dialogs.AboutDialog;
 import com.campaignworkbench.ide.workspaceexplorer.WorkspaceExplorer;
 import com.campaignworkbench.workspace.Template;
 import com.campaignworkbench.workspace.Workspace;

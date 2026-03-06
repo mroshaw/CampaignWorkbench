@@ -7,7 +7,8 @@ public class AuthTest {
     static void main(String[] args) {
 
         try {
-            boolean connected =  CampaignServerManager.connect();
+            CampaignServerManager campaignServerManager = new CampaignServerManager();
+            boolean connected =  campaignServerManager.connect();
 
             if(connected) {
                 System.out.println("Connected!");

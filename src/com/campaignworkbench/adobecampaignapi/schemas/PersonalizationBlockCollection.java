@@ -42,4 +42,12 @@ public class PersonalizationBlockCollection extends CampaignSchema {
                 </queryDef>
                 """;
     }
+
+    public static String getUpdateXml(PersonalizationBlockKey key, String code) {
+        return """
+                <includeView xtkschema="nms:includeView" id="%s" _key="@id" >
+                <source><text><![CDATA[%s]]></text></source>
+                </includeView>
+                """.formatted(key.getId(),code);
+    }
 }

@@ -38,6 +38,14 @@ public class JavaScriptTemplateCollection extends CampaignSchema {
                 """;
     }
 
+    public static String getUpdateXml(JavaScriptTemplateKey key, String code) {
+        return """
+                <jst xtkschema="xtk:jst" name="%s" namespace="%s" _key="@name,@namespace" >
+                <code><![CDATA[%s]]></code>
+                </jst>
+                """.formatted(key.getName(), key.getNamespace(), code);
+    }
+
     @Override
     public boolean isInitialized() {
         return javaScriptTemplates != null;

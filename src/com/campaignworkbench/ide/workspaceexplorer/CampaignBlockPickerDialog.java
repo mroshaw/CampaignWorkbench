@@ -10,14 +10,14 @@ import java.util.Optional;
 
 public class CampaignBlockPickerDialog extends PickerDialog<PersonalizationBlock> {
 
-    public static Optional<PersonalizationBlock> show(Window owner) {
-        return new CampaignBlockPickerDialog().showInternal(owner);
+    public static Optional<PersonalizationBlock> show(Window owner, CampaignServerManager campaignServerManager) {
+        return new CampaignBlockPickerDialog().showInternal(owner, campaignServerManager);
     }
 
-    public Optional<PersonalizationBlock> showInternal(Window owner) {
+    public Optional<PersonalizationBlock> showInternal(Window owner, CampaignServerManager campaignServerManager) {
 
         var blocks = FXCollections.observableArrayList(
-                CampaignServerManager.getAllPersoBlocks(true)
+                campaignServerManager.getAllPersoBlocks(true)
                         .getPersonalisationBlocks()
         );
 

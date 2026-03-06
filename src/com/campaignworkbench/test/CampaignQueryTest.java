@@ -14,18 +14,19 @@ public class CampaignQueryTest {
 
         try {
 
-            boolean connected =  CampaignServerManager.connect();
+            CampaignServerManager campaignServerManager = new CampaignServerManager();
+            boolean connected =  campaignServerManager.connect();
 
             if(connected) {
                 System.out.println("Connected!");
             }
 
-            CampaignServerManager.refreshAll();
+            campaignServerManager.refreshAll();
 
-            Optional<JavaScriptTemplate> template = CampaignServerManager.getJavaScriptTemplate("ssg", "ETM_M00_END.js");
+            Optional<JavaScriptTemplate> template = campaignServerManager.getJavaScriptTemplate("ssg", "ETM_M00_END.js");
             template.ifPresent(javaScriptTemplate -> javaScriptTemplate.print(false));
 
-            Optional<PersonalizationBlock> block = CampaignServerManager.getPersonalizationBlock(680205044);
+            Optional<PersonalizationBlock> block = campaignServerManager.getPersonalizationBlock(680205044);
             block.ifPresent(includeView -> includeView.print(true));
 
             // IncludeViewCollection blockCollection = CampaignServerManager.getAllPersoBlocks(true);

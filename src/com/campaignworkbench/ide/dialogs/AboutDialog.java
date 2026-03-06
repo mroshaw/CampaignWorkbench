@@ -1,5 +1,7 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.dialogs;
 
+import com.campaignworkbench.ide.CampaignWorkbenchIDE;
+import com.campaignworkbench.ide.Version;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ButtonType;

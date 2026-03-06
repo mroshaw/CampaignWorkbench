@@ -1,10 +1,6 @@
 package com.campaignworkbench.adobecampaignapi;
 
-import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlock;
-import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockCollection;
-import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplate;
-import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateCollection;
-import com.campaignworkbench.ide.IdeException;
+import com.campaignworkbench.adobecampaignapi.schemas.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -22,36 +18,30 @@ import java.io.StringWriter;
 import java.util.Optional;
 
 public class CampaignServerManager {
-    private static final AuthClient authClient = new AuthClient();
-    private static SoapClient soapClient;
-    private static final CredentialStore credentials = new CredentialStore();
-    private static final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-    private static final XmlMapper mapper = new XmlMapper();
+    private final AuthClient authClient = new AuthClient();
+    private SoapClient soapClient;
+    private final CredentialStore credentials = new CredentialStore();
+    private final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    private final XmlMapper mapper = new XmlMapper();
 
     // Maintain a single list of static blocks and JavaScript templates
-    private static PersonalizationBlockCollection allPersonalizationBlocks = new PersonalizationBlockCollection();
-    private static JavaScriptTemplateCollection allJavaScriptTemplates = new JavaScriptTemplateCollection();
+    private PersonalizationBlockCollection allPersonalizationBlocks = new PersonalizationBlockCollection();
+    private JavaScriptTemplateCollection allJavaScriptTemplates = new JavaScriptTemplateCollection();
 
-    public static boolean connect() throws IdeException {
+    public boolean connect() throws ApiException {
         Optional<String> endPointUrl = credentials.getEndpointUrl();
         Optional<String> clientId = credentials.getClientId();
         Optional<String> clientSecret = credentials.getClientSecret();
-
-        /*
-        System.out.println("URL: " + endPointUrl.orElse(""));
-        System.out.println("client_id: " + clientId.orElse(""));
-        System.out.println("client_secret: " + clientSecret.orElse(""));
-        */
 
         // Get authentication token
         String accessToken;
         try {
             if (clientId.isEmpty() || clientSecret.isEmpty() || endPointUrl.isEmpty()) {
-                throw new IdeException("Could not authenticate with the provided credentials! Endpoint URL, client_id or client_secret are empty!", null);
+                throw new ApiException("Could not authenticate with the provided credentials! Endpoint URL, client_id or client_secret are empty!", null);
             }
             accessToken = authClient.getAccessToken(clientId.get(), clientSecret.get());
         } catch (IOException | InterruptedException e) {
-            throw new IdeException("Could not authenticate with the provided credentials!", e);
+            throw new ApiException("Could not authenticate with the provided credentials!", e);
         }
 
         // Connect to the Campaign SOAP instance
@@ -59,25 +49,20 @@ public class CampaignServerManager {
         return true;
     }
 
-    public static boolean disconnect() {
-        soapClient.client.close();
-        return true;
+    public void disconnect() throws ApiException {
+        try {
+            soapClient.client.close();
+          } catch (Exception exception) {
+            throw new ApiException("Could not disconnect from the Campaign SOAP instance!", exception);
+        }
     }
 
-    public static String getEndpointUrl() {
+    public String getEndpointUrl() {
         Optional<String> endPointUrl = credentials.getEndpointUrl();
         return endPointUrl.orElse("");
     }
 
-    public static void updateCredentials(String clientId, String clientSecret, String endpointUrl) throws IdeException {
-        try {
-            credentials.save(clientId, clientSecret, endpointUrl);
-        } catch (RuntimeException e) {
-            throw new IdeException("Could not save credentials!", e);
-        }
-    }
-
-    public static PersonalizationBlockCollection getAllPersoBlocks(boolean refresh) throws IdeException {
+    public PersonalizationBlockCollection getAllPersoBlocks(boolean refresh) throws ApiException {
         if (!allPersonalizationBlocks.isInitialized() || refresh) {
             refreshBlocks();
 
@@ -85,29 +70,29 @@ public class CampaignServerManager {
         return allPersonalizationBlocks;
     }
 
-    public static JavaScriptTemplateCollection getAllJavaScriptTemplates(boolean refresh) throws IdeException {
+    public JavaScriptTemplateCollection getAllJavaScriptTemplates(boolean refresh) throws ApiException {
         if(!allJavaScriptTemplates.isInitialized() || refresh) {
             refreshJavaScriptTemplates();
         }
         return allJavaScriptTemplates;
     }
 
-    public static void refreshBlocks() throws IdeException {
+    public void refreshBlocks() throws ApiException {
         String innerResultXml = querySchema(PersonalizationBlockCollection.getQueryXml());
         allPersonalizationBlocks = mapper.readValue(innerResultXml, PersonalizationBlockCollection.class);
     }
 
-    public static void refreshJavaScriptTemplates() throws IdeException {
+    public void refreshJavaScriptTemplates() throws ApiException {
         String innerResultXml = querySchema(JavaScriptTemplateCollection.getQueryXml());
         allJavaScriptTemplates = mapper.readValue(innerResultXml, JavaScriptTemplateCollection.class);
     }
 
-    public static void refreshAll() throws IdeException {
+    public void refreshAll() throws ApiException {
         refreshBlocks();
         refreshJavaScriptTemplates();
     }
 
-    public static Optional<PersonalizationBlock> getPersonalizationBlock(long id) {
+    public Optional<PersonalizationBlock> getPersonalizationBlock(long id) {
         if (allPersonalizationBlocks == null || allPersonalizationBlocks.getPersonalisationBlocks() == null) {
             return Optional.empty();
         }
@@ -117,7 +102,7 @@ public class CampaignServerManager {
                 .findFirst();
     }
 
-    public static Optional<JavaScriptTemplate> getJavaScriptTemplate(String namespace, String name) {
+    public Optional<JavaScriptTemplate> getJavaScriptTemplate(String namespace, String name) {
         if (allJavaScriptTemplates == null) {
             return Optional.empty();
         }
@@ -127,15 +112,13 @@ public class CampaignServerManager {
                 .findFirst();
     }
 
-
-
-    private static String querySchema(String queryXml) throws IdeException {
+    private String querySchema(String queryXml) {
         // Run a queryDef against the Campaign server
         String queryResultXml;
         try {
             queryResultXml = soapClient.sendQueryRequest(queryXml);
-        } catch (IOException | InterruptedException exception) {
-            throw new IdeException("An error occurred while querying Personalisation Blocks!", exception);
+        } catch (ApiException apiException) {
+            throw new ApiException("An error occurred while querying Personalisation Blocks!", apiException);
         }
 
         // Deserialize the result to object instances
@@ -154,15 +137,34 @@ public class CampaignServerManager {
             return nodeToString(collectionNode);
 
         } catch (Exception exception) {
-            throw new IdeException("An error occurred while processing the results of the query: " + queryResultXml, exception);
+            throw new ApiException("An error occurred while processing the results of the query: " + queryResultXml, exception);
         }
     }
 
-    private static String nodeToString(Node node) throws Exception {
+    private String nodeToString(Node node) throws Exception {
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         StringWriter writer = new StringWriter();
         transformer.transform(new DOMSource(node), new StreamResult(writer));
         return writer.toString();
     }
 
+    public void updatePersonalizationBlock(PersonalizationBlockKey key, String code) throws ApiException {
+        String updateXml = PersonalizationBlockCollection.getUpdateXml(key, code);
+        String updateResultXml;
+        try {
+            updateResultXml = soapClient.sendUpdateRequest(updateXml);
+        } catch (ApiException apiException) {
+            throw new ApiException("An error occurred while updating Personalisation Block with key: " + key.getId(), apiException);
+        }
+    }
+
+    public void updateJavascriptTemplate(JavaScriptTemplateKey key, String code) throws ApiException {
+        String updateXml = JavaScriptTemplateCollection.getUpdateXml(key, code);
+        String updateResultXml;
+        try {
+            updateResultXml = soapClient.sendUpdateRequest(updateXml);
+        } catch (ApiException apiException) {
+            throw new ApiException("An error occurred while updating JavaScriptTemplate with key: " + key.getNamespace() + key.getName(), apiException);
+        }
+    }
 }
