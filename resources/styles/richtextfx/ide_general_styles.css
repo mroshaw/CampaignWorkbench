@@ -13,11 +13,30 @@
 */
 .large-toolbar {
     -fx-spacing: 8px;
-    -fx-padding: 4px 8px 4px 8px;
+    -fx-padding: 4px 4px 4px 4px;
 }
 
+.large-toolbar .separator {
+    -fx-padding: 0px;
+  }
+
 .large-toolbar .button {
-    -fx-padding: 8px;
+    -fx-padding: 4px;
+}
+
+.small-toolbar {
+    -fx-spacing: 6px;
+    -fx-padding: 4px 4px 4px 4px;
+    -fx-max-height: 50px;
+}
+
+.small-toolbar .separator {
+    -fx-padding: 4px;
+
+}
+
+.small-toolbar .button {
+    -fx-padding: 4px;
 }
 
 /*
@@ -70,18 +89,6 @@
 .workspace-explorer .workspace-explorer-treeview .tree-item-container {
     -fx-spacing: 8;
 }
-
-/*
-.picker-listview .list-cell:even {
-    -fx-background-color: -color-bg-subtle;
-}
-
-.picker-listview .list-cell:filled:selected:focused, .list-cell:filled:selected {
-        -fx-background-color: -color-bg-emphasis;
-}
-
-*/
-
 
 /*
 ***************************************************

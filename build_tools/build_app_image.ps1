@@ -1,0 +1,10 @@
+$versionFile = "$PSScriptRoot\..\version.properties"
+
+$props = @{}
+Get-Content $versionFile | ForEach-Object {
+    if ($_ -match "(.+)=(.+)") {
+        $props[$matches[1]] = $matches[2]
+    }
+}
+$version = "$($props.major).$($props.minor).$($props.build)"
+jpackage --name "Campaign Workbench" --app-version $version --vendor "Specsavers" --description "Develop, execute, and test Adobe Campaign email templates, ETM modules, and personalisation blocks" --input "$PSScriptRoot\..\out\artifacts\AdobeCampaignWorkbench_jar" --main-jar AdobeCampaignWorkbench.jar --main-class com.campaignworkbench.ide.CampaignWorkbenchIDE --icon "$PSScriptRoot\..\resources\app.ico" --type app-image --java-options "--module-path E:\Dev\Java\javafx-sdk-25.0.2\lib --add-modules javafx.controls,javafx.fxml,javafx.graphics --enable-native-access=ALL-UNNAMED --enable-native-access=javafx.graphics --enable-native-access=javafx.web" --dest "$PSScriptRoot\..\installer"

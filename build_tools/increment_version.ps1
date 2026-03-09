@@ -32,7 +32,7 @@ $propsContent = ($props.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value
 # ------------------------------------------------------------
 # Construct version string
 # ------------------------------------------------------------
-$version = "$($props.major).$($props.minor).$($props.patch).$($props.build)"
+$version = "$($props.major).$($props.minor).$($props.build)"
 Write-Host "New Version: $version"
 
 # ------------------------------------------------------------
@@ -44,11 +44,10 @@ package com.campaignworkbench.ide;
 public final class Version {
     public static final int MAJOR = $($props.major);
     public static final int MINOR = $($props.minor);
-    public static final int PATCH = $($props.patch);
     public static final int BUILD = $($props.build);
 
     public static final String VERSION =
-            MAJOR + "." + MINOR + "." + PATCH + "." + BUILD;
+            MAJOR + "." + MINOR + "." + BUILD;
 }
 "@
 

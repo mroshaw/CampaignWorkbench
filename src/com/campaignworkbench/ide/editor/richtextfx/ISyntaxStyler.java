@@ -1,6 +1,6 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
-import com.campaignworkbench.ide.IDETheme;
+import com.campaignworkbench.ide.IdeTheme;
 import org.fxmisc.richtext.model.StyleSpans;
 import java.util.Collection;
 
@@ -10,5 +10,5 @@ import java.util.Collection;
 public interface ISyntaxStyler {
     StyleSpans<Collection<String>> style(String text);
 
-    String getStyleSheet(IDETheme theme);
+    String getStyleSheet(IdeTheme theme);
 }

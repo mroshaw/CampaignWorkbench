@@ -1,17 +1,19 @@
 package com.campaignworkbench.util;
 
+import com.campaignworkbench.ide.icons.IdeIcon;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
 
 public class UiUtil {
 
-    public static Button createButton(String buttonText, String toolTipText, FontAwesome.Glyph icon, String styleClass, Integer sizeFactor, boolean defaultState, EventHandler eventHandler) {
-        Glyph glyph = new Glyph("FontAwesome", icon).sizeFactor(sizeFactor);
-        glyph.getStyleClass().add(styleClass);
-        Button newButton = new Button(buttonText, glyph);
+    public static Button createButton(String buttonText, String toolTipText, IdeIcon icon, boolean filled, String styleClass, Integer resolution, Integer size, boolean defaultState, EventHandler eventHandler) {
+        Node iconNode = icon.getIcon(resolution, styleClass, filled);
+        float scale = size.floatValue() / resolution.floatValue();
+        iconNode.setScaleX(scale);
+        iconNode.setScaleY(scale);
+        Button newButton = new Button(buttonText, iconNode);
         newButton.setTooltip(new Tooltip(toolTipText));
         newButton.setOnAction(eventHandler);
         newButton.setDisable(!defaultState);

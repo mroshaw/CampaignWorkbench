@@ -79,7 +79,7 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
     }
 
     @Override
-    public void applyTheme(IDETheme ideTheme) {
+    public void applyTheme(IdeTheme ideTheme) {
         switch(ideTheme) {
             case LIGHT:
                 setBackgroundColor("#ffffff");

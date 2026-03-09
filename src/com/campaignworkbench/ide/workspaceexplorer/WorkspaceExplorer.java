@@ -10,6 +10,7 @@ import com.campaignworkbench.ide.*;
 import com.campaignworkbench.ide.TextInputDialog;
 import com.campaignworkbench.ide.dialogs.YesNoCancelPopupDialog;
 import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
+import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.*;
@@ -29,7 +30,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
-import org.controlsfx.glyphfont.FontAwesome;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -228,20 +228,20 @@ public class WorkspaceExplorer implements IJavaFxNode {
         explorerLabel.getStyleClass().add("ide-label");
 
         // Mini toolbar
-        createNewButton = UiUtil.createButton("", "Create new", FontAwesome.Glyph.FILE, "neutral-icon", 1, true, _ -> createNewHandler());
-        addExistingButton = UiUtil.createButton("", "Add existing", FontAwesome.Glyph.PLUS_CIRCLE, "positive-icon", 1, true, _ -> addExistingHandler());
-        removeButton = UiUtil.createButton("", "Remove", FontAwesome.Glyph.MINUS_CIRCLE, "negative-icon", 1, true, _ -> deleteHandler());
-        setDataContextButton = UiUtil.createButton("", "Set Data Context", FontAwesome.Glyph.FILE_CODE_ALT, "positive-icon", 1, true, _ -> setDataContextHandler());
-        clearDataContextButton = UiUtil.createButton("", "Clear Data Context", FontAwesome.Glyph.FILE_CODE_ALT, "negative-icon", 1, true, _ -> clearDataContextHandler());
-        setMessageContextButton = UiUtil.createButton("", "Set Message Context", FontAwesome.Glyph.ENVELOPE, "positive-icon", 1, true, _ -> setMessageContextHandler());
-        clearMessageContextButton = UiUtil.createButton("", "Clear Message Context", FontAwesome.Glyph.ENVELOPE, "negative-icon", 1, true, _ -> clearMessageContextHandler());
+        createNewButton = UiUtil.createButton("", "Create new", IdeIcon.NEW_FILE, true, "neutral-icon", 20, 16,true, _ -> createNewHandler());
+        addExistingButton = UiUtil.createButton("", "Add existing",IdeIcon.ADD_FILE, true, "positive-icon", 20, 16, true, _ -> addExistingHandler());
+        removeButton = UiUtil.createButton("", "Remove", IdeIcon.DELETE_FILE, true,"negative-icon", 20, 16, true, _ -> deleteHandler());
+        setDataContextButton = UiUtil.createButton("", "Set Data Context", IdeIcon.SET_DATA_CONTEXT, true, "positive-icon", 20, 16,true, _ -> setDataContextHandler());
+        clearDataContextButton = UiUtil.createButton("", "Clear Data Context", IdeIcon.CLEAR_DATA_CONTEXT, true, "negative-icon", 20, 16,true, _ -> clearDataContextHandler());
+        setMessageContextButton = UiUtil.createButton("", "Set Message Context", IdeIcon.SET_MESSAGE_CONTEXT, true, "positive-icon", 20, 16,true, _ -> setMessageContextHandler());
+        clearMessageContextButton = UiUtil.createButton("", "Clear Message Context", IdeIcon.CLEAR_MESSAGE_CONTEXT, true, "negative-icon", 20, 16, true, _ -> clearMessageContextHandler());
 
         // Campaign connection toolbar buttons
-        connectToCampaignButton = UiUtil.createButton("", "Connect to Campaign", FontAwesome.Glyph.CIRCLE, "positive-icon", 1, true, _ -> connectToCampaignHandler());
-        disconnectFromCampaignButton = UiUtil.createButton("", "Disconnect from Campaign", FontAwesome.Glyph.CIRCLE_ALT, "negative-icon", 1, false, _ -> disconnectFromCampaignHandler());
-        createNewFromCampaignButton = UiUtil.createButton("", "Create new from Campaign", FontAwesome.Glyph.FILE, "positive-icon", 1, false, _ -> createNewFromCampaignHandler());
-        refreshFromCampaignButton = UiUtil.createButton("", "Refresh from Campaign", FontAwesome.Glyph.ARROW_CIRCLE_LEFT, "neutral-icon", 1, false, _ -> refreshFromCampaignHandler());
-        pushToCampaignButton = UiUtil.createButton("", "Push to Campaign", FontAwesome.Glyph.ARROW_CIRCLE_RIGHT, "neutral-icon", 1, false, _ -> pushToCampaignHandler());
+        connectToCampaignButton = UiUtil.createButton("", "Connect to Campaign", IdeIcon.CONNECT,  true,"positive-icon", 20, 16,true, _ -> connectToCampaignHandler());
+        disconnectFromCampaignButton = UiUtil.createButton("", "Disconnect from Campaign", IdeIcon.DISCONNECT, true,"negative-icon", 20, 16,false, _ -> disconnectFromCampaignHandler());
+        createNewFromCampaignButton = UiUtil.createButton("", "Create new from Campaign", IdeIcon.NEW_FROM_CAMPAIGN,  true,"positive-icon", 20, 16,false, _ -> createNewFromCampaignHandler());
+        refreshFromCampaignButton = UiUtil.createButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, 16,false, _ -> refreshFromCampaignHandler());
+        pushToCampaignButton = UiUtil.createButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, 16,false, _ -> pushToCampaignHandler());
 
         ToolBar workspaceToolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
         ToolBar campaignToolbar = new ToolBar(connectToCampaignButton, disconnectFromCampaignButton, createNewFromCampaignButton, refreshFromCampaignButton, pushToCampaignButton);
@@ -253,20 +253,20 @@ public class WorkspaceExplorer implements IJavaFxNode {
         bindWorkspace();
 
         // Create roots
-        TreeItem<Object> workspaceRoot = WorkspaceExplorerItem.createHeaderTreeItemObservableText(FontAwesome.Glyph.FOLDER, workspaceName,
+        TreeItem<Object> workspaceRoot = WorkspaceExplorerItem.createHeaderTreeItemObservableText(IdeIcon.WORKSPACE, workspaceName,
                 "workspace-icon", null, this::createNewFile, this::addExistingFile);
 
-        templateRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(FontAwesome.Glyph.ENVELOPE, "Templates",
+        templateRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.TEMPLATE, "Templates",
                 "template-icon", WorkspaceFileType.TEMPLATE, this::createNewFile, this::addExistingFile);
 
-        moduleRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(FontAwesome.Glyph.TASKS, "Modules",
+        moduleRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.MODULE, "Modules",
                 "module-icon", WorkspaceFileType.MODULE, this::createNewFile, this::addExistingFile);
 
-        blockRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(FontAwesome.Glyph.LIST, "Blocks",
+        blockRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.BLOCK, "Blocks",
                 "block-icon", WorkspaceFileType.BLOCK, this::createNewFile, this::addExistingFile);
 
         contextRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(
-                FontAwesome.Glyph.FILE_CODE_ALT, "Contexts",
+                IdeIcon.CONTEXT, "Contexts",
                 "context-icon", WorkspaceFileType.CONTEXT, this::createNewFile, this::addExistingFile);
 
         workspaceRoot.getChildren().setAll(templateRoot, moduleRoot, blockRoot, contextRoot);

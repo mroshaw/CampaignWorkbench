@@ -3,6 +3,7 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
+import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.ContextXml;
 import com.campaignworkbench.workspace.WorkspaceContextFile;
@@ -12,7 +13,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import org.controlsfx.glyphfont.FontAwesome;
 import org.reactfx.Subscription;
 
 import java.util.Objects;
@@ -43,17 +43,17 @@ public final class EditorTab extends Tab {
 
         // Create the toolbar
         // Format toolbar
-        Button formatButton = UiUtil.createButton("", "Format code", FontAwesome.Glyph.ALIGN_LEFT, "positive-icon", 1, true, _ -> formatHandler());
-        Button foldAllButton = UiUtil.createButton("", "Fold all", FontAwesome.Glyph.INDENT, "positive-icon", 1, true, _ -> foldAllHandler());
-        Button unfoldAllButton = UiUtil.createButton("", "Unfold all", FontAwesome.Glyph.DEDENT, "positive-icon", 1, true, _ -> unfoldAllHandler());
+        Button formatButton = UiUtil.createButton("", "Format code", IdeIcon.FORMAT_CODE, true, "positive-icon", 20, 16, true, _ -> formatHandler());
+        Button foldAllButton = UiUtil.createButton("", "Fold all", IdeIcon.FOLD_ALL, true, "positive-icon", 20, 16, true, _ -> foldAllHandler());
+        Button unfoldAllButton = UiUtil.createButton("", "Unfold all",IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, 16, true, _ -> unfoldAllHandler());
         ToolBar formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton);
         formatToolBar.getStyleClass().add("small-toolbar");
 
         // Find toolbar
         Label findLabel = new Label("Find:");
         findField = new TextField();
-        Button findButton = UiUtil.createButton("", "Find all", FontAwesome.Glyph.ARROW_CIRCLE_RIGHT, "positive-icon", 1, true, _ -> findHandler());
-        Button clearFindButton = UiUtil.createButton("", "Clear", FontAwesome.Glyph.TIMES_CIRCLE, "negative-icon", 1, true, _ -> clearFindHandler());
+        Button findButton = UiUtil.createButton("", "Find all", IdeIcon.FIND_START, true, "positive-icon", 20, 16, true, _ -> findHandler());
+        Button clearFindButton = UiUtil.createButton("", "Clear", IdeIcon.FIND_CLEAR, true, "negative-icon", 20, 16, true, _ -> clearFindHandler());
         findReplaceToolBar = new ToolBar(findLabel, findField, findButton, clearFindButton);
         findReplaceToolBar.getStyleClass().add("small-toolbar");
 

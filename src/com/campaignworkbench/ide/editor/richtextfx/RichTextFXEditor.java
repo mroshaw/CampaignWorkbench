@@ -1,7 +1,7 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
 import com.campaignworkbench.ide.IdeException;
-import com.campaignworkbench.ide.IDETheme;
+import com.campaignworkbench.ide.IdeTheme;
 import com.campaignworkbench.ide.IThemeable;
 import com.campaignworkbench.ide.ThemeManager;
 import com.campaignworkbench.ide.editor.ICodeEditor;
@@ -188,7 +188,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     }
 
     @Override
-    public void applyTheme(IDETheme theme) {
+    public void applyTheme(IdeTheme theme) {
         root.getStylesheets().clear();
 
         if (syntaxStyler != null) {

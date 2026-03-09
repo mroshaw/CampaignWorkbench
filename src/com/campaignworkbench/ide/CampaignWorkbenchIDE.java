@@ -90,8 +90,8 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
                 _ -> toggleFindHandler(),
 
-                _ -> setThemeHandler(IDETheme.LIGHT),
-                _ -> setThemeHandler(IDETheme.DARK),
+                _ -> setThemeHandler(IdeTheme.LIGHT),
+                _ -> setThemeHandler(IdeTheme.DARK),
 
                 _ -> showAbout(),
                 _ -> exitApplication()
@@ -173,7 +173,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         System.exit(0);
     }
 
-    private void setThemeHandler(IDETheme ideTheme) {
+    private void setThemeHandler(IdeTheme ideTheme) {
         ThemeManager.setTheme(ideTheme);
     }
 
@@ -182,7 +182,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      *
      */
     @Override
-    public void applyTheme(IDETheme ideTheme) {
+    public void applyTheme(IdeTheme ideTheme) {
 
         // Set AtlantaFX styles
         Application.setUserAgentStylesheet(ideTheme.getAtlantaFxStyleSheet());

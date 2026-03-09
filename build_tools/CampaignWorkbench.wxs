@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Package
+      Name="Campaign Workbench"
+      Manufacturer="Specsavers"
+      Version="1.0.79"
+      UpgradeCode="DFB8D89D-C5AC-4CD3-810E-E73B857E1A51"
+      Scope="perMachine">
+
+    <MajorUpgrade
+        DowngradeErrorMessage="A newer version of Campaign Workbench is already installed."
+        AllowSameVersionUpgrades="no"
+        AllowDowngrades="no" />
+
+    <MediaTemplate />
+
+    <!-- Standard folder tree: Program Files\Campaign Workbench -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Campaign Workbench" />
+    </StandardDirectory>
+
+    <Feature Id="MainFeature" Title="Campaign Workbench" Level="1">
+      <!-- Heat outputs you already have -->
+      <ComponentGroupRef Id="CampaignWorkbenchApp"/>
+      <ComponentGroupRef Id="CampaignWorkbenchRuntime"/>
+      <!-- New: the root EXE (and anything else in the root) -->
+      <ComponentGroupRef Id="CampaignWorkbenchRoot"/>
+    </Feature>
+
+  </Package>
+</Wix>

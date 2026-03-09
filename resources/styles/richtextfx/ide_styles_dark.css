@@ -5,55 +5,38 @@
 *** ToolBar buttons                             ***
 ***************************************************
 */
-.large-toolbar {
-    -fx-spacing: 8px;
-    -fx-padding: 4px 8px 4px 8px;
-}
-
-.large-toolbar .button {
-    -fx-padding: 8px;
-}
-
 .neutral-icon {
-    -fx-text-fill: #F2C14E;
+    -fx-fill: #F2C14E;
 }
 
 .positive-icon {
-    -fx-text-fill: #9ECE6A;
+    -fx-fill: #9ECE6A;
 }
 
 .negative-icon {
-    -fx-text-fill: #F7768E;
+    -fx-fill: #F7768E;
 }
 
 .workspace-icon {
-    -fx-text-fill: #F2C14E;
+    -fx-fill: #F2C14E;
 }
 
 .template-icon {
-    -fx-text-fill: #4FC1FF;
+    -fx-fill: #4FC1FF;
 }
 
 .block-icon {
-    -fx-text-fill: #FF6B6B;
+    -fx-fill: #FF6B6B;
 }
 
 .module-icon {
-    -fx-text-fill: #C586FF;
+    -fx-fill: #C586FF;
 }
 
 .context-icon {
-    -fx-text-fill: #4EC9B0;
+    -fx-fill: #4EC9B0;
 }
 
-.small-toolbar {
-    -fx-spacing: 4px;
-    -fx-max-height: 50px;
-}
-
-.small-toolbar .button {
-    -fx-padding: 4px;
-}
 
 /*
 ***************************************************

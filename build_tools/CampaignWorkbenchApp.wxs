@@ -1,0 +1,198 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Fragment>
+        <DirectoryRef Id="INSTALLFOLDER">
+            <Component Id="cmpLwAkT2aGbS_sM4CkxwmbwxWQd6M" Guid="{E58C8506-2BAC-47B0-82F6-D98549C2CFFC}">
+                <File Id="filLCsPo6KhNiNbPocAf0KiSJpYJvA" KeyPath="yes" Source="SourceDir\.jpackage.xml" />
+            </Component>
+            <Component Id="cmpt5tJBPE1RUJ4YaJXGFTIQ0.agbI" Guid="{42B33BA8-4C8E-49A5-80AF-3040E22F7A0E}">
+                <File Id="filW_ERoW8iVUEewevTqYSxBgm4jkc" KeyPath="yes" Source="SourceDir\AdobeCampaignWorkbench.jar" />
+            </Component>
+            <Component Id="cmp3k9G.p6HZ04jldwnrD4gX58p8.c" Guid="{B97E529D-10E1-413D-8DC6-F55497E6C46B}">
+                <File Id="filBFJ_z0OHjcqJLoeBo8MI.NxGHU0" KeyPath="yes" Source="SourceDir\atlantafx-base-2.1.0.jar" />
+            </Component>
+            <Component Id="cmpebN39usr8X_A93zH1vDD5ia0cEs" Guid="{99D42DDD-E2F0-47EC-B857-17DB94A5ACB3}">
+                <File Id="filt6LWVL6gMQeCjVT8VtU4qzyMQyE" KeyPath="yes" Source="SourceDir\autocomplete-3.3.3.jar" />
+            </Component>
+            <Component Id="cmpHDkPB5g04aY1iZbRBIlegaz97Mg" Guid="{FA60DCF2-85D5-4AD9-8B71-44474DB44AB2}">
+                <File Id="filW1aDGH4s2BWTW9bZKkav3sB.rmU" KeyPath="yes" Source="SourceDir\Campaign Workbench.cfg" />
+            </Component>
+            <Component Id="cmpyJkREYyoYq7nxCSAu3pis8Sdw74" Guid="{8E96D57B-0321-4CED-AF55-AF89EDE67D24}">
+                <File Id="fil5Sza3LZuq6lPhcekR_T9_P9KzIs" KeyPath="yes" Source="SourceDir\controlsfx-11.2.3.jar" />
+            </Component>
+            <Component Id="cmpD3aQz9RrDY8SssrMOmy4shHlxcE" Guid="{6AE84D48-6B0C-42E7-8818-EBE02B719787}">
+                <File Id="filZzG_ou.Z.4uKrGScdsyXFaUUvnY" KeyPath="yes" Source="SourceDir\dbus-java-core-4.2.1.jar" />
+            </Component>
+            <Component Id="cmp6IOS4p_qVhSRWPU7oDIUJVfx23s" Guid="{51EF4AD8-621B-4FCE-BAC9-60A5C995C3BC}">
+                <File Id="filwqV3A.TLRraS3nDnoNHwQ_R7zVY" KeyPath="yes" Source="SourceDir\dbus-java-transport-native-unixsocket-4.2.1.jar" />
+            </Component>
+            <Component Id="cmpGx_ZAQWcCXVBpNVo0AA1W9.Rd60" Guid="{C2D51DE0-5A3D-4531-BA7A-F9535BA134FA}">
+                <File Id="filBP3Mk5.1rbTMDDZRu0OLCCsYCgs" KeyPath="yes" Source="SourceDir\flowless-0.7.4.jar" />
+            </Component>
+            <Component Id="cmp3bCA7RS.848GxYuDdPfZNoV8EpQ" Guid="{7C7C8DF9-C278-4361-B4D6-45699DE1B0A9}">
+                <File Id="fil06JW1ogO4I8RYZBnYDAsj4df2wA" KeyPath="yes" Source="SourceDir\hkdf-1.1.0.jar" />
+            </Component>
+            <Component Id="cmpiVWhQ0j45pOnHAzF1AA8JlrQZEI" Guid="{9A83B825-66DD-42B1-BF0F-B98E7E8D6EDE}">
+                <File Id="filTWBusMdA.tI1h98351eeuCUkaW4" KeyPath="yes" Source="SourceDir\jackson-annotations-2.20.jar" />
+            </Component>
+            <Component Id="cmp4RD2Q3WMGM97Ma2MXnBWpnMacWw" Guid="{AC3D574B-8608-44A5-9732-E173F4727AE7}">
+                <File Id="fil6NgZVy0gTk2tUkk4.tvAcN8xKHo" KeyPath="yes" Source="SourceDir\jackson-annotations-2.21.jar" />
+            </Component>
+            <Component Id="cmpEU7gk4feICwq0f9SNTmBDJw5fcg" Guid="{6C78F3EA-CE4D-4FA6-8298-2F0BD49EC776}">
+                <File Id="filbCFdyFN2mzxM33vFZerV2lvQ8Tg" KeyPath="yes" Source="SourceDir\jackson-core-3.0.4.jar" />
+            </Component>
+            <Component Id="cmpEo3dhriC0.EOPyLK8kbq696z9iQ" Guid="{C3D8480E-E9C7-450B-B936-57432942B7BE}">
+                <File Id="filWzBHeN6dC1eFaiAUg0HcbA3QMJk" KeyPath="yes" Source="SourceDir\jackson-core-3.1.0.jar" />
+            </Component>
+            <Component Id="cmpfgeabCE17bEbDzVhvgBkEiE1Fm4" Guid="{CF1BA153-6DA6-4CDA-B03D-D07E804F95E7}">
+                <File Id="filBcFogDISn5RmWohbnVXy4OFcy3M" KeyPath="yes" Source="SourceDir\jackson-databind-3.0.4.jar" />
+            </Component>
+            <Component Id="cmpoH7uF28TGkzodch8wQXQuBK6gPY" Guid="{FF3382B0-5EC4-4750-894B-79AF6A0F4DF0}">
+                <File Id="filQiwsc7nNJnDwa2Eu3EGbwXp7euQ" KeyPath="yes" Source="SourceDir\jackson-databind-3.1.0.jar" />
+            </Component>
+            <Component Id="cmpOG1GQkFFvz2h5oM7C87rwaAo68w" Guid="{C94FDF96-E990-46E2-ADD3-F36E805D9D3C}">
+                <File Id="fil9PYuG.rxJZUHChbQi_Zq9djYbck" KeyPath="yes" Source="SourceDir\jackson-dataformat-xml-3.1.0.jar" />
+            </Component>
+            <Component Id="cmpo2y3F8ENZvwNbwY1jI2KxBcG1hU" Guid="{0F1F6D33-B560-42D9-B8D2-8AA9C081B61E}">
+                <File Id="filS8HHUHUCrCfk76.W1LB5.Z7WGjc" KeyPath="yes" Source="SourceDir\jackson-jaxrs-base-3.1.0.jar" />
+            </Component>
+            <Component Id="cmpOlyY6MNPmWy4RprhDOU6SV_4gTE" Guid="{5D307212-7752-405F-8CF1-D7E75F3D6D28}">
+                <File Id="filUnTxWMz87.UQX0YhnGQNIO_g4ik" KeyPath="yes" Source="SourceDir\jackson-jaxrs-json-provider-3.1.0.jar" />
+            </Component>
+            <Component Id="cmpSPoSQx6A5LsnvEDqyDXJhwD5G1I" Guid="{BEABE83D-5D1F-45F4-8A76-CADC5CF5527E}">
+                <File Id="filJ6HauJVK5xdCPfMUyPF3pDDDvNs" KeyPath="yes" Source="SourceDir\java-keyring-1.0.4.jar" />
+            </Component>
+            <Component Id="cmpnjRWCV2apUjAcEQGnE.zLo.73zc" Guid="{B180C5EF-3E92-455C-AE3D-96126A1C159D}">
+                <File Id="filQcqT.5wtpxjTsB2UwNsOikOwusU" KeyPath="yes" Source="SourceDir\javafx-base-23-win.jar" />
+            </Component>
+            <Component Id="cmpE7r8QL32TVTp8LGkV6GJ8IJvXwM" Guid="{D5F5FEAF-71D1-47B3-AED2-DC9629857599}">
+                <File Id="filOWTHgS8QbSmTdl8F7bcUYcKW31g" KeyPath="yes" Source="SourceDir\javafx-base-23.jar" />
+            </Component>
+            <Component Id="cmpKSLMH5woboc.SBE1NIH.sM_rIIo" Guid="{5EC6E17F-D2FC-4995-9B6F-0AE388546CC5}">
+                <File Id="filPoSxZ.YMLxR6ADhd4hMdWOfMpT0" KeyPath="yes" Source="SourceDir\javafx-controls-23-win.jar" />
+            </Component>
+            <Component Id="cmp9p0GoC6EVEakj1KhHfzGPaNDF28" Guid="{F4F9C37F-84C0-486B-9E3F-22D6B6888980}">
+                <File Id="filDjpyh3zzDGAWBVAs2sv3UG7Ag04" KeyPath="yes" Source="SourceDir\javafx-controls-23.jar" />
+            </Component>
+            <Component Id="cmp5MnXvBzdTOOnSeVkvY2_SlM_Mdg" Guid="{2DB9ECC2-FEA6-4E90-8CD3-2E64C1A90293}">
+                <File Id="filzacjO85UQL_WdIFtPpwpEic7GiA" KeyPath="yes" Source="SourceDir\javafx-graphics-23-win.jar" />
+            </Component>
+            <Component Id="cmpD6hOHCr75xH_Iyrg8dxdJDiGaOM" Guid="{B5095114-9272-4FC5-AA86-62318D145E7A}">
+                <File Id="filq6alh4Lh3.Weg7siqWerK4zTnpQ" KeyPath="yes" Source="SourceDir\javafx-graphics-23.jar" />
+            </Component>
+            <Component Id="cmpf10dNsW54mOvlss8JMAbUH0SRD8" Guid="{DD8EFF88-A94A-4638-846D-2A2A99DF28BA}">
+                <File Id="filuLUg5kBblnfyo5YcEciZsh_PSBs" KeyPath="yes" Source="SourceDir\jkeychain-1.1.0.jar" />
+            </Component>
+            <Component Id="cmp7rY3hmfdKvnJNG6rveUFGseFW_M" Guid="{08FE8FE6-EEC6-40B3-B48F-9DBEBBFE42F7}">
+                <File Id="filUNbGP7T2j0t.E6_lmossW3ONEFk" KeyPath="yes" Source="SourceDir\jna-5.13.0.jar" />
+            </Component>
+            <Component Id="cmpEPc8KDPCAy9AYOUZWsdwm2mNFPw" Guid="{6BB58AD0-35E5-456C-838C-E788BC663CBD}">
+                <File Id="filRPlQ9OAETHT4pf6BcRK4b4jDRaU" KeyPath="yes" Source="SourceDir\jna-platform-5.13.0.jar" />
+            </Component>
+            <Component Id="cmpMpDIyRbx_XLZJrfS6glTBTgtZME" Guid="{12884D7D-1E77-430D-817F-3ACFA35D71AB}">
+                <File Id="filBtRTjotvmi4sAqMIXs7LNqjpaMQ" KeyPath="yes" Source="SourceDir\languagesupport-3.4.1.jar" />
+            </Component>
+            <Component Id="cmpC5LOrupCbr5iCZf3IJSFbdIrXWY" Guid="{5BA08194-7107-4485-A6D6-26DB24204EBF}">
+                <File Id="filGeWU3BWe8s9uhZnB2ZyW2mibmKI" KeyPath="yes" Source="SourceDir\reactfx-2.0-M5.jar" />
+            </Component>
+            <Component Id="cmpAm.GjlgXUVMhJC2jIcP5FRYvoMU" Guid="{142ED8D4-8083-4977-BA3B-CCC1CC98A252}">
+                <File Id="fil80bCaNtZldBm2y3n5IEagP5wDGM" KeyPath="yes" Source="SourceDir\rhino-1.7.14.jar" />
+            </Component>
+            <Component Id="cmp8ZhiZtRK1aOAq3eHnHb2v0F6frE" Guid="{67DC473A-7431-4502-B110-22B15EDD0A00}">
+                <File Id="filPcVztT0m6kdoDZjM3X8IqEdmOUI" KeyPath="yes" Source="SourceDir\rhino-1.9.0.jar" />
+            </Component>
+            <Component Id="cmpirjbvJwyfXsPe_78ut8P.Qqx0Kw" Guid="{44F1F08B-B070-4F5C-9E57-11B48032D94A}">
+                <File Id="filn4hZmsUYwU.LDd9dMbcc.Jr4DeI" KeyPath="yes" Source="SourceDir\rhino-all-1.9.0.jar" />
+            </Component>
+            <Component Id="cmpZ0EEPi669C9M6ELw.cCy4hebIPw" Guid="{775625F6-5980-42BA-B576-217BC24BFF77}">
+                <File Id="filFsJfzzqdmxcREjj43WrMG88gd.Y" KeyPath="yes" Source="SourceDir\rhino-js-engine-1.7.14.jar" />
+            </Component>
+            <Component Id="cmppn5tRawVrk0_dcOxLPCCxIWPXeE" Guid="{92E5077C-9F18-4437-9201-DE6A75339CC0}">
+                <File Id="filedWibivcFiVmKN_AK3dw8nj5_hE" KeyPath="yes" Source="SourceDir\rhino-tools-1.9.0.jar" />
+            </Component>
+            <Component Id="cmpYz7s.UP1hp0Sg5V4Nirino_w8K4" Guid="{A2D70E4A-5A28-4072-AC3B-2572ADB2BC1F}">
+                <File Id="filvPBuscNsZlFugPiPRylRPO0SLZs" KeyPath="yes" Source="SourceDir\rhino-xml-1.9.0.jar" />
+            </Component>
+            <Component Id="cmp3qExQ4we0kg4BfdV_1p3DQxvDmo" Guid="{625AC134-D557-405A-A1F7-611D5C8508F7}">
+                <File Id="fil10H0ROtqE4wRvxftV_vx7sMYE9k" KeyPath="yes" Source="SourceDir\richtextfx-0.11.7.jar" />
+            </Component>
+            <Component Id="cmp4LRwEYjuBXBtTuj3ORj5v5gq2dk" Guid="{2794D580-0AD0-4DCA-B24C-D806FE27A7E5}">
+                <File Id="fil2cltWiGmd_3Buo9kJNDnurvzkWs" KeyPath="yes" Source="SourceDir\rstaui-3.3.2.jar" />
+            </Component>
+            <Component Id="cmpSLiFRqxZlVKZlrsOfFOSUIfF2TY" Guid="{5940947D-7E6E-4A69-8713-D45059B37FD2}">
+                <File Id="filGKhdB8uEquqapH6jneSn1x4Wk1k" KeyPath="yes" Source="SourceDir\rsyntaxtextarea-3.6.0.jar" />
+            </Component>
+            <Component Id="cmp6pns3RNbg3eZJPYUri8kCaDKQHE" Guid="{21A1FD3D-6D19-4D1F-835B-039122E34C91}">
+                <File Id="fil7wZ_FcCMBbQjtVZHFRWQeqSJfg0" KeyPath="yes" Source="SourceDir\rsyntaxtextarea-3.6.1.jar" />
+            </Component>
+            <Component Id="cmpmEksBX6SdG4A9fQVQG9AStzcZzY" Guid="{11751DA9-472B-4E3B-A468-3E7EFC218A7D}">
+                <File Id="filDhpUYKQqG_wI_IocHqe4zkZ9xEQ" KeyPath="yes" Source="SourceDir\secret-service-1.8.1-jdk17.jar" />
+            </Component>
+            <Component Id="cmpYJekY0ei5wuVpEEuClE0NBineE0" Guid="{51DB8736-7A30-4671-811A-0E3CAE06C29F}">
+                <File Id="filiKamWm7dcH0Vcm4yAiVomfmik_4" KeyPath="yes" Source="SourceDir\slf4j-api-2.0.7.jar" />
+            </Component>
+            <Component Id="cmp74QI4DakLhzTropIa.kbTPE4o4Y" Guid="{F1D62DF4-FD02-4599-A3F3-DD2EE8392B88}">
+                <File Id="fildMXCO_m01slFeFTLVWxPI6g9WRo" KeyPath="yes" Source="SourceDir\stax2-api-4.2.2.jar" />
+            </Component>
+            <Component Id="cmp4zNgPxdK9ZvxKll95dvyq.h2mVw" Guid="{30441078-C3A5-4D0C-805A-A5506C4E6C09}">
+                <File Id="filkB3f2WCpTw7VCnzrZkuWBnf7NNs" KeyPath="yes" Source="SourceDir\undofx-2.1.1.jar" />
+            </Component>
+            <Component Id="cmpKCcLCk0q_X.sxw_B3oaReraWGdA" Guid="{79BA2A25-3A3F-4F01-98E3-B891176BDEC1}">
+                <File Id="filRUbS1Apa93Z9jHVw8vX7OZ.4Ckw" KeyPath="yes" Source="SourceDir\wellbehavedfx-0.3.3.jar" />
+            </Component>
+            <Component Id="cmpdfVS1ZGbmrB4Opu5WLa.BkVV8fs" Guid="{C3C717F9-C88A-4137-B5A7-22A83CE9A4BA}">
+                <File Id="fil0nY_mK4E2Wt56CtKi.wMboippRg" KeyPath="yes" Source="SourceDir\woodstox-core-7.1.1.jar" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="CampaignWorkbenchComponents">
+            <ComponentRef Id="cmpLwAkT2aGbS_sM4CkxwmbwxWQd6M" />
+            <ComponentRef Id="cmpt5tJBPE1RUJ4YaJXGFTIQ0.agbI" />
+            <ComponentRef Id="cmp3k9G.p6HZ04jldwnrD4gX58p8.c" />
+            <ComponentRef Id="cmpebN39usr8X_A93zH1vDD5ia0cEs" />
+            <ComponentRef Id="cmpHDkPB5g04aY1iZbRBIlegaz97Mg" />
+            <ComponentRef Id="cmpyJkREYyoYq7nxCSAu3pis8Sdw74" />
+            <ComponentRef Id="cmpD3aQz9RrDY8SssrMOmy4shHlxcE" />
+            <ComponentRef Id="cmp6IOS4p_qVhSRWPU7oDIUJVfx23s" />
+            <ComponentRef Id="cmpGx_ZAQWcCXVBpNVo0AA1W9.Rd60" />
+            <ComponentRef Id="cmp3bCA7RS.848GxYuDdPfZNoV8EpQ" />
+            <ComponentRef Id="cmpiVWhQ0j45pOnHAzF1AA8JlrQZEI" />
+            <ComponentRef Id="cmp4RD2Q3WMGM97Ma2MXnBWpnMacWw" />
+            <ComponentRef Id="cmpEU7gk4feICwq0f9SNTmBDJw5fcg" />
+            <ComponentRef Id="cmpEo3dhriC0.EOPyLK8kbq696z9iQ" />
+            <ComponentRef Id="cmpfgeabCE17bEbDzVhvgBkEiE1Fm4" />
+            <ComponentRef Id="cmpoH7uF28TGkzodch8wQXQuBK6gPY" />
+            <ComponentRef Id="cmpOG1GQkFFvz2h5oM7C87rwaAo68w" />
+            <ComponentRef Id="cmpo2y3F8ENZvwNbwY1jI2KxBcG1hU" />
+            <ComponentRef Id="cmpOlyY6MNPmWy4RprhDOU6SV_4gTE" />
+            <ComponentRef Id="cmpSPoSQx6A5LsnvEDqyDXJhwD5G1I" />
+            <ComponentRef Id="cmpnjRWCV2apUjAcEQGnE.zLo.73zc" />
+            <ComponentRef Id="cmpE7r8QL32TVTp8LGkV6GJ8IJvXwM" />
+            <ComponentRef Id="cmpKSLMH5woboc.SBE1NIH.sM_rIIo" />
+            <ComponentRef Id="cmp9p0GoC6EVEakj1KhHfzGPaNDF28" />
+            <ComponentRef Id="cmp5MnXvBzdTOOnSeVkvY2_SlM_Mdg" />
+            <ComponentRef Id="cmpD6hOHCr75xH_Iyrg8dxdJDiGaOM" />
+            <ComponentRef Id="cmpf10dNsW54mOvlss8JMAbUH0SRD8" />
+            <ComponentRef Id="cmp7rY3hmfdKvnJNG6rveUFGseFW_M" />
+            <ComponentRef Id="cmpEPc8KDPCAy9AYOUZWsdwm2mNFPw" />
+            <ComponentRef Id="cmpMpDIyRbx_XLZJrfS6glTBTgtZME" />
+            <ComponentRef Id="cmpC5LOrupCbr5iCZf3IJSFbdIrXWY" />
+            <ComponentRef Id="cmpAm.GjlgXUVMhJC2jIcP5FRYvoMU" />
+            <ComponentRef Id="cmp8ZhiZtRK1aOAq3eHnHb2v0F6frE" />
+            <ComponentRef Id="cmpirjbvJwyfXsPe_78ut8P.Qqx0Kw" />
+            <ComponentRef Id="cmpZ0EEPi669C9M6ELw.cCy4hebIPw" />
+            <ComponentRef Id="cmppn5tRawVrk0_dcOxLPCCxIWPXeE" />
+            <ComponentRef Id="cmpYz7s.UP1hp0Sg5V4Nirino_w8K4" />
+            <ComponentRef Id="cmp3qExQ4we0kg4BfdV_1p3DQxvDmo" />
+            <ComponentRef Id="cmp4LRwEYjuBXBtTuj3ORj5v5gq2dk" />
+            <ComponentRef Id="cmpSLiFRqxZlVKZlrsOfFOSUIfF2TY" />
+            <ComponentRef Id="cmp6pns3RNbg3eZJPYUri8kCaDKQHE" />
+            <ComponentRef Id="cmpmEksBX6SdG4A9fQVQG9AStzcZzY" />
+            <ComponentRef Id="cmpYJekY0ei5wuVpEEuClE0NBineE0" />
+            <ComponentRef Id="cmp74QI4DakLhzTropIa.kbTPE4o4Y" />
+            <ComponentRef Id="cmp4zNgPxdK9ZvxKll95dvyq.h2mVw" />
+            <ComponentRef Id="cmpKCcLCk0q_X.sxw_B3oaReraWGdA" />
+            <ComponentRef Id="cmpdfVS1ZGbmrB4Opu5WLa.BkVV8fs" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>

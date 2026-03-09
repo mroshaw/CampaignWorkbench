@@ -1,6 +1,6 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
-import com.campaignworkbench.ide.IDETheme;
+import com.campaignworkbench.ide.IdeTheme;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
@@ -127,7 +127,7 @@ public class XmlStyler implements ISyntaxStyler {
     }
 
     @Override
-    public String getStyleSheet(IDETheme theme) {
+    public String getStyleSheet(IdeTheme theme) {
         return theme.getXmlSyntaxStyleSheet();
     }
 }

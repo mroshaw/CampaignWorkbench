@@ -8,7 +8,7 @@ import java.util.List;
  */
 public final class ThemeManager {
 
-    private static IDETheme currentTheme = IDETheme.DARK;
+    private static IdeTheme currentTheme = IdeTheme.DARK;
     private static final List<IThemeable> themeables = new ArrayList<>();
 
     private ThemeManager() {}
@@ -33,7 +33,7 @@ public final class ThemeManager {
      * Sets a new application-wide theme
      * @param theme the theme to apply
      */
-    public static void setTheme(IDETheme theme) {
+    public static void setTheme(IdeTheme theme) {
         currentTheme = theme;
 
         for (IThemeable themeable : themeables) {

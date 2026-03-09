@@ -1,13 +1,13 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
+import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.workspace.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
-import org.controlsfx.glyphfont.FontAwesome;
-import org.controlsfx.glyphfont.Glyph;
 
 import java.util.function.Consumer;
 
@@ -20,7 +20,7 @@ public class WorkspaceExplorerItem {
 
     abstract static class HeaderTreeItem {
 
-        public final FontAwesome.Glyph icon;
+        public final IdeIcon icon;
         public final String iconStyleClass;
         public final WorkspaceFileType fileType;
 
@@ -31,7 +31,7 @@ public class WorkspaceExplorerItem {
         public final Consumer<WorkspaceFileType> addNewHandler;
         public final Consumer<WorkspaceFileType> addExistingHandler;
 
-        private HeaderTreeItem(FontAwesome.Glyph icon, String iconStyleClass, WorkspaceFileType fileType,
+        private HeaderTreeItem(IdeIcon icon, String iconStyleClass, WorkspaceFileType fileType,
                                Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
             this.icon = icon;
             this.iconStyleClass = iconStyleClass;
@@ -55,30 +55,30 @@ public class WorkspaceExplorerItem {
 
     static class HeaderTreeItemStaticText extends HeaderTreeItem {
 
-        private HeaderTreeItemStaticText(FontAwesome.Glyph icon, String staticText, String iconStyleClass, WorkspaceFileType fileType, Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
+        private HeaderTreeItemStaticText(IdeIcon icon, String staticText, String iconStyleClass, WorkspaceFileType fileType, Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
             super(icon, iconStyleClass, fileType, addNewHandler, addExistingHandler);
 
-            Glyph glyph = new Glyph("FontAwesome", icon).sizeFactor(1);
-            glyph.getStyleClass().add(iconStyleClass);
+            Node iconNode = icon.getIcon(20, iconStyleClass, true);
+            iconNode.setScaleX(16.0/20.0);
             Label labelPart = new Label(staticText);
-            container = new HBox(glyph, labelPart);
+            container = new HBox(iconNode, labelPart);
             this.container.getStyleClass().add("tree-item-container");
         }
     }
 
     static class HeaderTreeItemObservableText extends HeaderTreeItem {
 
-        private HeaderTreeItemObservableText(FontAwesome.Glyph icon, ObservableValue<String> observableText, String iconStyleClass, WorkspaceFileType fileType, Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
+        private HeaderTreeItemObservableText(IdeIcon icon, ObservableValue<String> observableText, String iconStyleClass, WorkspaceFileType fileType, Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
             super(icon, iconStyleClass, fileType, addNewHandler, addExistingHandler);
 
             // Create label
-            Glyph glyph = new Glyph("FontAwesome", icon).sizeFactor(1);
-            glyph.getStyleClass().add(iconStyleClass);
+            Node iconNode = icon.getIcon(20, iconStyleClass, true);
+            iconNode.setScaleX(16.0/20.0);
             Text labelPart = new Text();
             if (observableText != null) {
                 labelPart.textProperty().bind(observableText);
             }
-            this.container = new HBox(glyph, labelPart);
+            this.container = new HBox(iconNode, labelPart);
             this.container.getStyleClass().add("tree-item-container");
         }
     }
@@ -132,13 +132,13 @@ public class WorkspaceExplorerItem {
         return new TreeItem<>(newTreeItem);
     }
 
-    static TreeItem<Object> createHeaderTreeItemStaticText(FontAwesome.Glyph icon, String staticText, String iconStyleClass, WorkspaceFileType fileType,
+    static TreeItem<Object> createHeaderTreeItemStaticText(IdeIcon icon, String staticText, String iconStyleClass, WorkspaceFileType fileType,
                                                            Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
         HeaderTreeItem header = new HeaderTreeItemStaticText(icon, staticText, iconStyleClass, fileType, addNewHandler, addExistingHandler);
         return new TreeItem<>(header);
     }
 
-    static TreeItem<Object> createHeaderTreeItemObservableText(FontAwesome.Glyph icon, ObservableValue<String> observableText, String iconStyleClass, WorkspaceFileType fileType,
+    static TreeItem<Object> createHeaderTreeItemObservableText(IdeIcon icon, ObservableValue<String> observableText, String iconStyleClass, WorkspaceFileType fileType,
                                                                Consumer<WorkspaceFileType> addNewHandler, Consumer<WorkspaceFileType> addExistingHandler) {
         HeaderTreeItem header = new HeaderTreeItemObservableText(icon, observableText, iconStyleClass, fileType, addNewHandler, addExistingHandler);
         return new TreeItem<>(header);

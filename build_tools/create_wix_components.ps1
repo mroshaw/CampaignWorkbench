@@ -1,0 +1,2 @@
+# "C:\Program Files\WiX Toolset v6.0\bin\x64\heat.exe" dir "installer\CampaignWorkbench\runtime" -cg CampaignWorkbenchComponents -dr INSTALLFOLDER -gg -sreg -sfrag -srd -out CampaignWorkbenchRuntime.wxs
+# "C:\Program Files\WiX Toolset v6.0\bin\x64\heat.exe" dir "installer\CampaignWorkbench\App" -cg CampaignWorkbenchComponents -dr INSTALLFOLDER -gg -sreg -sfrag -srd -out CampaignWorkbenchApp.wxs
