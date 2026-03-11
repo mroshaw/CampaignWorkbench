@@ -59,7 +59,6 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         GutterFactory gutterFactory = new GutterFactory(codeArea, foldParser);
         codeArea.setParagraphGraphicFactory(gutterFactory);
 
-
         codeArea.textProperty().addListener((_, _, newText) -> {
             if(syntaxStyler == null) {
                 return;

@@ -21,24 +21,16 @@ public class GutterFactory implements IntFunction<Node> {
     public GutterFactory(CodeArea codeArea, IFoldParser foldParser) {
         this.codeArea = codeArea;
         this.foldParser = foldParser;
-
-        // Parse once on construction
-        foldRegions = foldParser.findFoldRegions(codeArea);
-
-        // Reparse only when text changes, then do a single gutter refresh
-        codeArea.textProperty().addListener((obs, oldText, newText) -> {
-            foldRegions = foldParser.findFoldRegions(codeArea);
-            codeArea.setParagraphGraphicFactory(this);
-        });
-
         codeArea.setParagraphGraphicFactory(this);
     }
 
     @Override
     public Node apply(int paragraphIndex) {
 
-        // Use the cached foldRegions — do NOT call findFoldRegions here
-        if (foldRegions.isParagraphHidden(paragraphIndex)) {
+        // Refresh the folding state
+        foldRegions = foldParser.findFoldRegions(codeArea);
+
+        if(foldRegions.isParagraphHidden(paragraphIndex)) {
             return null;
         }
 
@@ -47,37 +39,42 @@ public class GutterFactory implements IntFunction<Node> {
         box.setAlignment(Pos.CENTER_LEFT);
         box.setMinWidth(60);
         box.getStyleClass().add("gutter");
-
-        // Get the line number node
+        // Get the line number node as a node
         Label lineNo = (Label) SimpleLineNumberFactory.get(codeArea).apply(paragraphIndex);
         lineNo.setMinWidth(36);
         lineNo.getStyleClass().add("line-number");
-
         // Create a fold indicator label
         Label foldIndicator = new Label();
+        // foldIndicator.setMinWidth(20);
         foldIndicator.getStyleClass().add("custom-fold-indicator");
 
         setFoldIndicator(foldIndicator, paragraphIndex);
 
+        // Add the line number and fold indicator to the container and return
         box.getChildren().addAll(lineNo, foldIndicator);
         return box;
     }
 
     private void setFoldIndicator(Label foldIndicator, int paragraphIndex) {
         if (foldParser.isParagraphFolded(paragraphIndex)) {
+
+            // foldIndicator.setGraphic(iconRight);
             foldIndicator.setText("▶");
             foldIndicator.setCursor(Cursor.HAND);
             foldIndicator.setOnMouseClicked(e -> {
                 e.consume();
                 foldParser.unfoldParagraph(paragraphIndex);
+                // Refresh
                 codeArea.setParagraphGraphicFactory(this);
             });
         } else if (foldRegions.isParagraphFoldable(paragraphIndex)) {
+            // foldIndicator.setGraphic(iconDown);
             foldIndicator.setText("▼");
             foldIndicator.setCursor(Cursor.HAND);
             foldIndicator.setOnMouseClicked(e -> {
                 e.consume();
                 foldParser.foldParagraph(paragraphIndex);
+                // Refresh
                 codeArea.setParagraphGraphicFactory(this);
             });
         } else {

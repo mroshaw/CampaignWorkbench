@@ -14,8 +14,6 @@ public interface IFoldParser {
     boolean isParagraphFolded(int paragraphIndex);
     void foldParagraph(int startParagraphIndex);
     void unfoldParagraph(int startParagraphIndex);
-
     void foldAll();
-
     void unfoldAll();
 }
