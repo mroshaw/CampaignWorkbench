@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 /**
  * An implementation of ISyntaxStyler that provides syntax highlighting for Adobe Campaign template code
  */
-public class CampaignStyler implements ISyntaxStyler {
+public class CampaignBlockSyntaxStyler implements ISyntaxStyler {
 
     // ECMAScript 3 keywords
     private static final String[] KEYWORDS = new String[] {
@@ -117,7 +117,7 @@ public class CampaignStyler implements ISyntaxStyler {
     private StyleSpansBuilder<Collection<String>> spansBuilder;
     private int lastSpanEnd;
 
-    public CampaignStyler() {
+    public CampaignBlockSyntaxStyler() {
 
     }
 
