@@ -161,12 +161,12 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
             case JAVASCRIPT:
                 codeFormatter = new JavaScriptFormatter();
                 syntaxStyler = new JavaScriptSyntaxStyler();
-                foldParser = new CampaignFoldParser(codeArea);
+                foldParser = new JavaScriptFoldParser(codeArea);
                 break;
             case HTML:
                 codeFormatter = new JavaScriptFormatter();
                 syntaxStyler = new HtmlSyntaxStyler();
-                foldParser = new CampaignFoldParser(codeArea);
+                foldParser = new HtmlFoldParser(codeArea);
                 break;
         }
     }
