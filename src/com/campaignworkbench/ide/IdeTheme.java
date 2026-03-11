@@ -15,14 +15,16 @@ public enum IdeTheme {
             "/styles/ide_styles_dark.css",
             "/styles/campaign_syntax_styles_dark.css",
             "/styles/xml_syntax_styles_dark.css",
-            "/styles/html_syntax_styles_dark.css"
+            "/styles/campaign_syntax_styles_dark.css",
+            "/styles/campaign_syntax_styles_dark.css"
     ),
     LIGHT (
             new NordLight().getUserAgentStylesheet(),
             "/styles/ide_styles_light.css",
             "/styles/campaign_syntax_styles_light.css",
             "/styles/xml_syntax_styles_light.css",
-            "/styles/html_syntax_styles_light.css"
+            "/styles/campaign_syntax_styles_light.css",
+            "/styles/campaign_syntax_styles_light.css"
     );
 
     private final String atlantaFxStyleSheet;
@@ -30,13 +32,15 @@ public enum IdeTheme {
     private final String campaignSyntaxStyleSheet;
     private final String xmlSyntaxStyleSheet;
     private final String htmlSyntaxStyleSheet;
+    private final String javaScriptSyntaxStyleSheet;
 
-    IdeTheme(String atlantaFxStyleSheet, String ideStyleSheet, String campaignSyntaxStyleSheet, String xmlSyntaxStyleSheet, String htmlSyntaxStyleSheet) {
+    IdeTheme(String atlantaFxStyleSheet, String ideStyleSheet, String campaignSyntaxStyleSheet, String xmlSyntaxStyleSheet, String htmlSyntaxStyleSheet, String javaScriptSyntaxStyleSheet) {
         this.atlantaFxStyleSheet = atlantaFxStyleSheet;
         this.campaignSyntaxStyleSheet = campaignSyntaxStyleSheet;
         this.xmlSyntaxStyleSheet = xmlSyntaxStyleSheet;
         this.htmlSyntaxStyleSheet = htmlSyntaxStyleSheet;
         this.ideStyleSheet = ideStyleSheet;
+        this.javaScriptSyntaxStyleSheet = javaScriptSyntaxStyleSheet;
     }
 
     public String getIdeStyleSheet() {
@@ -53,6 +57,10 @@ public enum IdeTheme {
 
     public String getHtmlSyntaxStyleSheet() {
         return getStylesFromStyleSheet(htmlSyntaxStyleSheet);
+    }
+
+    public String getJavaScriptSyntaxStyleSheet() {
+        return getStylesFromStyleSheet(javaScriptSyntaxStyleSheet);
     }
 
     public String getAtlantaFxStyleSheet() {

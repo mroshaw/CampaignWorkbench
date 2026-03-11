@@ -22,7 +22,6 @@ import org.reactfx.Subscription;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -62,6 +61,9 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
 
         codeArea.textProperty().addListener((_, _, newText) -> {
+            if(syntaxStyler == null) {
+                return;
+            }
             StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(newText);
             if (computedStyleSpans != null) {
                 codeArea.setStyleSpans(0, computedStyleSpans);
@@ -119,6 +121,9 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         codeArea.clear();
         // Replace tab with 2 spaces
         codeArea.replaceText(text.replaceAll("\t", "  "));
+        if(syntaxStyler == null) {
+            return;
+        }
         StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(codeArea.getText());
         if (computedStyleSpans != null) {
             codeArea.setStyleSpans(0, computedStyleSpans);
@@ -140,27 +145,27 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
                 break;
             case MODULE:
                 codeFormatter = new JavaScriptFormatter();
-                syntaxStyler = new CampaignModuleSyntaxStyler();
+                syntaxStyler = new CampaignSyntaxStyler();
                 foldParser = new CampaignFoldParser(codeArea);
                 break;
             case BLOCK:
                 codeFormatter = new JavaScriptFormatter();
-                syntaxStyler = new CampaignBlockSyntaxStyler();
+                syntaxStyler = new CampaignSyntaxStyler();
                 foldParser = new CampaignFoldParser(codeArea);
                 break;
             case TEMPLATE:
                 codeFormatter = new JavaScriptFormatter();
-                syntaxStyler = new CampaignModuleSyntaxStyler();
+                syntaxStyler = new CampaignSyntaxStyler();
                 foldParser = new CampaignFoldParser(codeArea);
                 break;
-                case JAVASCRIPT:
-                    codeFormatter = new JavaScriptFormatter();
-                    syntaxStyler = new CampaignModuleSyntaxStyler();
-                    foldParser = new CampaignFoldParser(codeArea);
+            case JAVASCRIPT:
+                codeFormatter = new JavaScriptFormatter();
+                syntaxStyler = new JavaScriptSyntaxStyler();
+                foldParser = new CampaignFoldParser(codeArea);
                 break;
             case HTML:
                 codeFormatter = new JavaScriptFormatter();
-                syntaxStyler = new CampaignModuleSyntaxStyler();
+                syntaxStyler = new HtmlSyntaxStyler();
                 foldParser = new CampaignFoldParser(codeArea);
                 break;
         }
