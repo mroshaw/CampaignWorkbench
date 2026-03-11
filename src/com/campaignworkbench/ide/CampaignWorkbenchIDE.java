@@ -27,19 +27,16 @@ import java.util.Objects;
  */
 public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
-    /**
-     * The current active workspace
-     */
     private WorkspaceExplorer workspaceExplorer;
     private MainToolBar toolBar;
     private EditorTabPanel editorTabPanel;
     private UiErrorReporter errorReporter;
-    private LogPanel logPanel;
     private ErrorLogPanel errorLogPanel;
     private OutputTabPanel outputPanel;
     private EditorTab currentEditorTab;
     private Scene scene;
-    private Image iconImage;
+
+    TemplateRenderer templateRenderer = new TemplateRenderer();
 
     /**
      * Main entry point for the application
@@ -56,12 +53,12 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         primaryStage.setTitle("Campaign Workbench");
 
         // Set the icon
-        iconImage = new Image(
+        Image iconImage = new Image(
                 Objects.requireNonNull(getClass().getResourceAsStream("/app.png")));
         primaryStage.getIcons().add(iconImage);
 
         // Log panel and Error Reporter
-        logPanel = new LogPanel("Logs");
+        LogPanel logPanel = new LogPanel("Logs");
         errorLogPanel = new ErrorLogPanel("Errors");
         errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> outputPanel.highlightJsLine(line));
 
@@ -337,7 +334,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
             if (selectedWorkspaceFile instanceof Template workspaceContextFile) {
 
-                TemplateRenderResult renderResult = TemplateRenderer.render(
+                TemplateRenderResult renderResult = templateRenderer.render(
                         workspaceExplorer.getWorkspace(),
                         workspaceContextFile
                 );

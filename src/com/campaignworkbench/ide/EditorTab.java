@@ -1,5 +1,7 @@
 package com.campaignworkbench.ide;
 
+import com.campaignworkbench.ide.dialogs.YesNoCancelPopupDialog;
+import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
 import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
@@ -8,11 +10,14 @@ import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.ContextXml;
 import com.campaignworkbench.workspace.WorkspaceContextFile;
 import com.campaignworkbench.workspace.WorkspaceFile;
+import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import org.reactfx.Subscription;
 
 import java.util.Objects;
@@ -28,6 +33,7 @@ public final class EditorTab extends Tab {
     private final TextField findField;
 
     private boolean isTextDirty;
+    private ToggleButton toggleWrapButton;
 
     /**
      * Constructor
@@ -46,7 +52,9 @@ public final class EditorTab extends Tab {
         Button formatButton = UiUtil.createButton("", "Format code", IdeIcon.FORMAT_CODE, true, "positive-icon", 20, 16, true, _ -> formatHandler());
         Button foldAllButton = UiUtil.createButton("", "Fold all", IdeIcon.FOLD_ALL, true, "positive-icon", 20, 16, true, _ -> foldAllHandler());
         Button unfoldAllButton = UiUtil.createButton("", "Unfold all",IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, 16, true, _ -> unfoldAllHandler());
-        ToolBar formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton);
+        toggleWrapButton = UiUtil.createToggleButton("", "Toggle wrap",IdeIcon.WRAP_TEXT, true, "positive-icon", 20, 16, true, null );
+        toggleWrapButton.selectedProperty().addListener(this::toggleWrapHandler);
+        ToolBar formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton, toggleWrapButton);
         formatToolBar.getStyleClass().add("small-toolbar");
 
         // Find toolbar
@@ -77,6 +85,9 @@ public final class EditorTab extends Tab {
         VBox.setVgrow(editor.getNode(), Priority.ALWAYS);
         setContent(container);
         container.getStyleClass().add("editor-tab");
+
+        // Set the on-closed handler
+        this.setOnCloseRequest(this::tabClosedHandler);
     }
 
     public void saveFile() throws IdeException {
@@ -141,6 +152,18 @@ public final class EditorTab extends Tab {
         }
     }
 
+    private void tabClosedHandler(Event event) {
+        if(isTextDirty) {
+            YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Save changes?", "The file contents have changed. Do you want to save?", (Stage) getTabPane().getScene().getWindow());
+            if(result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
+                event.consume();
+            }
+            if(result == YesNoCancelPopupDialog.YesNoCancel.YES) {
+                saveFile();
+            }
+        }
+    }
+
     private void formatHandler() {
         editor.formatCode(2);
     }
@@ -151,6 +174,10 @@ public final class EditorTab extends Tab {
 
     private void unfoldAllHandler() {
         editor.unfoldAll();
+    }
+
+    private void toggleWrapHandler(ObservableValue<? extends Boolean> observable, Boolean wasSelected, Boolean isSelected) {
+        editor.setWrap(isSelected);
     }
 
     private void findHandler() {
@@ -195,7 +222,9 @@ public final class EditorTab extends Tab {
     private SyntaxType determineSyntax(WorkspaceFile workspaceFile) {
 
         return switch (workspaceFile.getFileType()) {
-            case TEMPLATE, BLOCK, MODULE -> SyntaxType.CAMPAIGN;
+            case TEMPLATE -> SyntaxType.TEMPLATE;
+            case BLOCK -> SyntaxType.BLOCK;
+            case MODULE -> SyntaxType.MODULE;
             case CONTEXT -> SyntaxType.XML;
             default -> SyntaxType.PLAIN;
         };

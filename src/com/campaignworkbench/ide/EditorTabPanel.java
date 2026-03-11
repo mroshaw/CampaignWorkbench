@@ -2,12 +2,15 @@ package com.campaignworkbench.ide;
 
 import com.campaignworkbench.workspace.WorkspaceFile;
 import javafx.beans.value.ChangeListener;
+import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Window;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implements a tabbed panel of Editor tabs
@@ -108,7 +111,7 @@ public class EditorTabPanel implements IJavaFxNode {
         EditorTab existingTab = getExistingTab(workspaceFile);
         if(existingTab != null) {
             // Refresh and set focus on the tab
-            getSelected().refreshText();
+            // getSelected().refreshText();
             tabPane.getSelectionModel().select(existingTab);
             return;
         }
@@ -180,8 +183,20 @@ public class EditorTabPanel implements IJavaFxNode {
     }
 
     public void closeAllTabs() {
-        saveAllTabs();
-        tabPane.getTabs().clear();
+        List<Tab> tabs = new ArrayList<>(tabPane.getTabs()); // copy to avoid ConcurrentModificationException
+        for (Tab tab : tabs) {
+            if (tab.isClosable()) {
+                // Fire the close request event
+                Event closeRequestEvent = new Event(Tab.TAB_CLOSE_REQUEST_EVENT);
+                Event.fireEvent(tab, closeRequestEvent);
+
+                // Only close if the event wasn't consumed (i.e. not cancelled)
+                if (!closeRequestEvent.isConsumed()) {
+                    tabPane.getTabs().remove(tab);
+                    Event.fireEvent(tab, new Event(Tab.CLOSED_EVENT));
+                }
+            }
+        }
     }
 
     @Override

@@ -36,7 +36,7 @@ public enum IdeIcon {
     FORMAT_CODE("Text_Grammar_Wand"),
     FOLD_ALL("Text_Collapse"),
     UNFOLD_ALL("Text_Expand"),
-
+    WRAP_TEXT("Text_Wrap"),
     // Find Toolbar
     FIND_START("Search"),
     FIND_CLEAR("Dismiss_Circle");

@@ -1,0 +1,45 @@
+// Campaign Syntax
+// Dark Mode
+
+.code-editor .plain-text {
+    -fx-fill: #eeeeee;
+}
+.code-editor .keyword {
+    -fx-fill: #c586c0;
+}
+.code-editor .brace {
+    -fx-fill: #749da6;
+    -fx-font-weight: bold;
+}
+.code-editor .paren {
+    -fx-fill: #c5c5c5;
+    -fx-font-weight: bold;
+}
+.code-editor .bracket {
+    -fx-fill: #bfbfbf;
+}
+.code-editor .semicolon {
+    -fx-fill: #808080;
+}
+.code-editor .string {
+    -fx-fill: #cE9178;
+}
+
+.code-editor .comment {
+	-fx-fill: #6a9955;
+}
+
+.code-editor .acc-directive    { -fx-fill: #FF7B72; -fx-font-weight: bold; }
+.code-editor .acc-expression   { -fx-fill: #FFD580; -fx-font-weight: bold; }
+.code-editor .acc-scriptlet    { -fx-fill: #D2A8FF; }
+.code-editor .acc-ctx-attr     { -fx-fill: #79C0FF; -fx-font-style: italic; }
+.code-editor .acc-rt-event     { -fx-fill: #56D364; -fx-font-style: italic; }
+.code-editor .html-comment     { -fx-fill: #6A9955; -fx-font-style: italic; }
+.code-editor .html-tag         { -fx-fill: #4EC9B0; -fx-font-weight: bold; }
+.code-editor .html-attr-name   { -fx-fill: #9CDCFE; }
+.code-editor .html-attr-value  { -fx-fill: #CE9178; }
+.code-editor .html-entity      { -fx-fill: #FF8C00; }
+.code-editor .js-keyword       { -fx-fill: #C586C0; -fx-font-weight: bold; }
+.code-editor .js-string        { -fx-fill: #CE9178; }
+.code-editor .js-comment       { -fx-fill: #6A9955; -fx-font-style: italic; }
+.code-editor .js-number        { -fx-fill: #B5CEA8; }

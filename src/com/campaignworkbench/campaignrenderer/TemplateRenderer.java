@@ -12,15 +12,18 @@ import java.nio.file.Path;
  * Main renderer class, responsible for parsing templates, modules, blocks, and XML context
  * to generate an HTML page
  */
-public final class TemplateRenderer {
+public final class TemplateRenderer extends AbstractRenderer {
 
-    private TemplateRenderer() {
+    private final ModuleRenderer moduleRenderer;
+
+    public TemplateRenderer() {
+        moduleRenderer = new ModuleRenderer();
     }
 
     /**
      * @return HTML source of the renderer page
      */
-    public static TemplateRenderResult render(
+    public TemplateRenderResult render(
             Workspace workspace,
             Template template
     ) {
@@ -151,7 +154,7 @@ public final class TemplateRenderer {
 
     // ---------------------------------------------------------------------
 
-    private static String preprocess(
+    private String preprocess(
             Workspace workspace,
             WorkspaceFile workspaceFile,
             String source,
@@ -191,7 +194,8 @@ public final class TemplateRenderer {
                                 null);
                     }
                     String moduleOutput =
-                            ModuleRenderer.renderModule(workspace, module, cx, scope);
+                            moduleRenderer.renderModule(module, cx, scope);
+
                     out.append(preprocess(workspace, workspaceFile, moduleOutput, cx, scope));
                 } else if (directive.contains("view=")) {
                     String name = extractQuoted(directive, "view");
@@ -216,53 +220,7 @@ public final class TemplateRenderer {
 
     // ---------------------------------------------------------------------
 
-    private static String transformToJavaScript(String source) {
-        StringBuilder js = new StringBuilder();
-        js.append("var out = new java.lang.StringBuilder();\n");
-
-        int pos = 0;
-        while (pos < source.length()) {
-            int start = source.indexOf("<%", pos);
-            if (start == -1) {
-                appendText(js, source.substring(pos));
-                break;
-            }
-
-            appendText(js, source.substring(pos, start));
-
-            int end = source.indexOf("%>", start);
-            if (end == -1) {
-                throw new IllegalArgumentException("Unclosed <% tag");
-            }
-
-            String code = source.substring(start + 2, end).trim();
-
-            if (code.startsWith("=")) {
-                js.append("out.append(")
-                        .append(code.substring(1).trim())
-                        .append(");\n");
-            } else {
-                js.append(code).append("\n");
-            }
-
-            pos = end + 2;
-        }
-
-        js.append("out.toString();");
-        return js.toString();
-    }
-
-    private static void appendText(StringBuilder js, String text) {
-        if (text.isEmpty()) return;
-        text = text.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\r\n", "\n")
-                .replace("\r", "\n")
-                .replace("\n", "\\n");
-        js.append("out.append(\"").append(text).append("\");\n");
-    }
-
-    private static String extractQuoted(String directive, String key) {
+    private String extractQuoted(String directive, String key) {
         int keyPos = directive.indexOf(key + "=");
         if (keyPos == -1) {
             throw new IllegalArgumentException(
@@ -281,7 +239,7 @@ public final class TemplateRenderer {
         return directive.substring(quotePos + 1, end);
     }
 
-    private static int getEnd(String directive, String key, int quotePos) {
+    private int getEnd(String directive, String key, int quotePos) {
         if (quotePos >= directive.length()) {
             throw new IllegalArgumentException(
                     "Malformed attribute '" + key + "' in directive: " + directive
@@ -299,7 +257,7 @@ public final class TemplateRenderer {
     }
 
 
-    private static void injectStandardFunctions(Context cx, Scriptable scope) {
+    private void injectStandardFunctions(Context cx, Scriptable scope) {
         cx.evaluateString(scope,
                 "var formatDate = function(d,f){" +
                         " return com.campaignworkbench.campaignrenderer.CampaignFunctions.formatDate(d,f);" +

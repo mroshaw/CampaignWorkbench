@@ -32,6 +32,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -83,6 +84,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private Button createNewFromCampaignButton;
     private Button refreshFromCampaignButton;
     private Button pushToCampaignButton;
+
+    private Label urlHostLabel;
 
     // Main panel
     private VBox workspaceExplorerPanel;
@@ -242,9 +245,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
         createNewFromCampaignButton = UiUtil.createButton("", "Create new from Campaign", IdeIcon.NEW_FROM_CAMPAIGN,  true,"positive-icon", 20, 16,false, _ -> createNewFromCampaignHandler());
         refreshFromCampaignButton = UiUtil.createButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, 16,false, _ -> refreshFromCampaignHandler());
         pushToCampaignButton = UiUtil.createButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, 16,false, _ -> pushToCampaignHandler());
+        urlHostLabel = new Label();
 
         ToolBar workspaceToolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
-        ToolBar campaignToolbar = new ToolBar(connectToCampaignButton, disconnectFromCampaignButton, createNewFromCampaignButton, refreshFromCampaignButton, pushToCampaignButton);
+        ToolBar campaignToolbar = new ToolBar(connectToCampaignButton, disconnectFromCampaignButton, createNewFromCampaignButton, refreshFromCampaignButton, pushToCampaignButton, urlHostLabel);
 
         // TreeView for all items
         treeView = new TreeView<>();
@@ -569,6 +573,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
         errorReporter.logMessage("Connected to Campaign server at: " + campaignServerManager.getEndpointUrl());
         isConnectedToCampaign = true;
+        String endPointUrl = campaignServerManager.getEndpointUrl();
+        String host = URI.create(endPointUrl).getHost(); // "specsavers-mkt-stage14.campaign.adobe.com"
+        String hostname = host.split("\\.")[0];  // "specsavers-mkt-stage14"
+        urlHostLabel.setText(hostname);
         setToolbarButtonStates();
     }
 
@@ -578,6 +586,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
             errorReporter.logMessage("Disconnected from Campaign at: " + campaignServerManager.getEndpointUrl());
             isConnectedToCampaign = false;
             setToolbarButtonStates();
+            urlHostLabel.setText("");
         } catch (ApiException apiException) {
             errorReporter.reportError("An error occurred disconnecting from Adobe Campaign", apiException, true);
         }

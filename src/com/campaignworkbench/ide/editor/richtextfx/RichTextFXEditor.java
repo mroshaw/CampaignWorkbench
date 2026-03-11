@@ -81,14 +81,14 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
                 }
 
                 int startPar = codeArea.offsetToPosition(selection.getStart(), TwoDimensional.Bias.Forward).getMajor();
-                int endPar   = codeArea.offsetToPosition(selection.getEnd(), TwoDimensional.Bias.Backward).getMajor();
+                int endPar = codeArea.offsetToPosition(selection.getEnd(), TwoDimensional.Bias.Backward).getMajor();
 
                 var multi = codeArea.createMultiChange();
 
-                    for (int i = startPar; i <= endPar; i++) {
-                        int lineStart = codeArea.getAbsolutePosition(i, 0);
-                        multi.insertText(lineStart, "  ");
-                    }
+                for (int i = startPar; i <= endPar; i++) {
+                    int lineStart = codeArea.getAbsolutePosition(i, 0);
+                    multi.insertText(lineStart, "  ");
+                }
 
                 multi.commit();
 
@@ -131,21 +131,49 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     }
 
     private void setLanguageHelpers(SyntaxType syntax) {
-        // Set the folding class instance
-        if (Objects.requireNonNull(syntax) == SyntaxType.XML) {
-            codeFormatter = new XmlFormatter();
-            syntaxStyler = new XmlStyler();
-            foldParser = new XmlFoldParser(codeArea);
-        } else {
-            codeFormatter = null;
-            syntaxStyler = new CampaignStyler();
-            foldParser = new CampaignFoldParser(codeArea);
+        // Set the styler, folder and formatter class instances
+        switch (syntax) {
+            case XML:
+                codeFormatter = new XmlFormatter();
+                syntaxStyler = new XmlStyler();
+                foldParser = new XmlFoldParser(codeArea);
+                break;
+            case MODULE:
+                codeFormatter = new JavaScriptFormatter();
+                syntaxStyler = new CampaignModuleSyntaxStyler();
+                foldParser = new CampaignFoldParser(codeArea);
+                break;
+            case BLOCK:
+                codeFormatter = new JavaScriptFormatter();
+                syntaxStyler = new CampaignBlockSyntaxStyler();
+                foldParser = new CampaignFoldParser(codeArea);
+                break;
+            case TEMPLATE:
+                codeFormatter = new JavaScriptFormatter();
+                syntaxStyler = new CampaignModuleSyntaxStyler();
+                foldParser = new CampaignFoldParser(codeArea);
+                break;
+                case JAVASCRIPT:
+                    codeFormatter = new JavaScriptFormatter();
+                    syntaxStyler = new CampaignModuleSyntaxStyler();
+                    foldParser = new CampaignFoldParser(codeArea);
+                break;
+            case HTML:
+                codeFormatter = new JavaScriptFormatter();
+                syntaxStyler = new CampaignModuleSyntaxStyler();
+                foldParser = new CampaignFoldParser(codeArea);
+                break;
         }
     }
 
     @Override
     public void setEditable(boolean editable) {
         codeArea.setEditable(editable);
+    }
+
+    @Override
+    public void setWrap(boolean wrap) {
+        codeArea.setWrapText(wrap);
     }
 
     @Override
@@ -228,7 +256,7 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
     @Override
     public void find(String text) {
-        if (text == null || text.isEmpty()){
+        if (text == null || text.isEmpty()) {
             clearFindHighlight();
             return;
         }

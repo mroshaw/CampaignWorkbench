@@ -12,8 +12,9 @@
 ***************************************************
 */
 .large-toolbar {
-    -fx-spacing: 8px;
-    -fx-padding: 4px 4px 4px 4px;
+    -fx-spacing: 16px;
+    -fx-padding: 4px;
+    -fx-min-height: 46px;
 }
 
 .large-toolbar .separator {
@@ -24,10 +25,14 @@
     -fx-padding: 4px;
 }
 
+.large-toolbar .button-icon {
+    -fx-padding: 4px 8px 4px 4px;
+}
+
 .small-toolbar {
     -fx-spacing: 6px;
-    -fx-padding: 4px 4px 4px 4px;
-    -fx-max-height: 50px;
+    -fx-padding: 4px;
+    -fx-min-height: 36px;
 }
 
 .small-toolbar .separator {
@@ -37,6 +42,13 @@
 
 .small-toolbar .button {
     -fx-padding: 4px;
+}
+
+.small-toolbar .toggle-button {
+    -fx-padding: 4px;
+}
+
+    -fx-padding: 4px 8px 4px 4px;
 }
 
 /*
@@ -118,6 +130,6 @@
 *** Error Log                                   ***
 ***************************************************
 */
-.error-log .tree-view .tree-cell {
+.error-log-panel .tree-view .tree-cell {
     -fx-padding: 2px;
 }

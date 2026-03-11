@@ -31,11 +31,11 @@ public class MainToolBar implements IJavaFxNode {
             EventHandler<ActionEvent> closeEditorTabsHandler,
             EventHandler<ActionEvent> runHandler
     ) {
-        Button openWorkspaceButton = UiUtil.createButton("", "Open Workspace", IdeIcon.OPEN_WORKSPACE, true, "workspace-icon", 20, 16, true, openWorkspaceHandler);
-        Button newWorkspaceButton = UiUtil.createButton("", "New Workspace", IdeIcon.NEW_WORKSPACE, true, "positive-icon", 20, 16, true, newWorkspaceHandler);
-        Button closeWorkspaceButton = UiUtil.createButton("", "Close Workspace", IdeIcon.CLOSE_WORKSPACE, true, "negative-icon", 20, 16, true, closeWorkspaceHandler);
-        Button closeEditorTabsButton = UiUtil.createButton("", "Close all editor tabs", IdeIcon.CLOSE_ALL_TABS, true, "negative-icon", 20, 16, true, closeEditorTabsHandler);
-        runButton = UiUtil.createButton("", "Run template", IdeIcon.RUN_TEMPLATE, true, "positive-icon", 20, 16, false, runHandler);
+        Button openWorkspaceButton = UiUtil.createButton("", "Open Workspace", IdeIcon.OPEN_WORKSPACE, true, "workspace-icon", 20, 20, true, openWorkspaceHandler);
+        Button newWorkspaceButton = UiUtil.createButton("", "New Workspace", IdeIcon.NEW_WORKSPACE, true, "positive-icon", 20, 20, true, newWorkspaceHandler);
+        Button closeWorkspaceButton = UiUtil.createButton("", "Close Workspace", IdeIcon.CLOSE_WORKSPACE, true, "negative-icon", 20, 20, true, closeWorkspaceHandler);
+        Button closeEditorTabsButton = UiUtil.createButton("", "Close all editor tabs", IdeIcon.CLOSE_ALL_TABS, true, "negative-icon", 20, 20, true, closeEditorTabsHandler);
+        runButton = UiUtil.createButton("", "Run template", IdeIcon.RUN_TEMPLATE, true, "positive-icon", 20, 20, false, runHandler);
 
         toolBar = new ToolBar(
                 openWorkspaceButton,

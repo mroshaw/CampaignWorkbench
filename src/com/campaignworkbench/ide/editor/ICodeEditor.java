@@ -38,6 +38,8 @@ public interface ICodeEditor {
      */
     void setEditable(boolean editable);
 
+    void setWrap(boolean wrap);
+
     /**
      * Requests UI focus of the control
      */

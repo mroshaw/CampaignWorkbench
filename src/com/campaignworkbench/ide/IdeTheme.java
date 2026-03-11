@@ -12,17 +12,17 @@ public enum IdeTheme {
 
     DARK (
             new CupertinoDark().getUserAgentStylesheet(),
-            "/styles/richtextfx/ide_styles_dark.css",
-            "/styles/richtextfx/campaign_syntax_styles_dark.css",
-            "/styles/richtextfx/xml_syntax_styles_dark.css",
-            "/styles/richtextfx/html_syntax_styles_dark.css"
+            "/styles/ide_styles_dark.css",
+            "/styles/campaign_syntax_styles_dark.css",
+            "/styles/xml_syntax_styles_dark.css",
+            "/styles/html_syntax_styles_dark.css"
     ),
     LIGHT (
             new NordLight().getUserAgentStylesheet(),
-            "/styles/richtextfx/ide_styles_light.css",
-            "/styles/richtextfx/campaign_syntax_styles_light.css",
-            "/styles/richtextfx/xml_syntax_styles_light.css",
-            "/styles/richtextfx/html_syntax_styles_light.css"
+            "/styles/ide_styles_light.css",
+            "/styles/campaign_syntax_styles_light.css",
+            "/styles/xml_syntax_styles_light.css",
+            "/styles/html_syntax_styles_light.css"
     );
 
     private final String atlantaFxStyleSheet;

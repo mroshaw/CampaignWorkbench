@@ -15,7 +15,7 @@ public class RichTextFXThemeTest extends Application {
         Application.setUserAgentStylesheet(null);
         Application.setUserAgentStylesheet(stylesheet);
 
-        RichTextFXEditor editor = new RichTextFXEditor(SyntaxType.CAMPAIGN);
+        RichTextFXEditor editor = new RichTextFXEditor(SyntaxType.JAVASCRIPT);
         Scene scene = new Scene((Parent) editor.getNode(), 1000, 800);
 
         stage.setTitle("Theme Test");

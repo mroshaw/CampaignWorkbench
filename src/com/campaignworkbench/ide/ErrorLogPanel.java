@@ -35,7 +35,6 @@ public class ErrorLogPanel implements IJavaFxNode {
     public ErrorLogPanel(String label) {
         Label logLabel = new Label(label);
         logLabel.setPadding(new Insets(0,0, 0,5));
-        // logLabel.setStyle("-fx-font-weight: bold;");
 
         errorTreeView = new TreeView<>();
         errorTreeView.setShowRoot(false);

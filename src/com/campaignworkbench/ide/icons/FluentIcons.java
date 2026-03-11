@@ -37,7 +37,7 @@ public class FluentIcons {
         String key = fileName + "@" + size;
         return CACHE.computeIfAbsent(key, k -> {
             String fullPathStr = fullPath.toString();
-            System.out.println("Loading icon: " + fullPathStr);
+            // System.out.println("Loading icon: " + fullPathStr);
             try (InputStream in = FluentIcons.class.getResourceAsStream(fullPathStr)) {
                 if (in == null) throw new IllegalArgumentException("Icon not found: " + fullPath);
 
