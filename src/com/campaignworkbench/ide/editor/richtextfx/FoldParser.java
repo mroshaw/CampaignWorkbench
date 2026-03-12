@@ -21,7 +21,7 @@ public abstract class FoldParser {
 
     public void unfoldAll() {
         for (FoldRegion foldRegion : foldRegions) {
-            if(foldRegion.isFolded()) {
+            if(isParagraphFolded(foldRegion.getStart())) {
                 unfoldParagraph(foldRegion.getStart());
             }
         }
@@ -29,20 +29,18 @@ public abstract class FoldParser {
 
     public void foldAll() {
         for (FoldRegion foldRegion : foldRegions) {
-            if(!foldRegion.isFolded()) {
+            if(!isParagraphFolded(foldRegion.getStart())) {
                 foldParagraph(foldRegion.getStart());
             }
         }
     }
 
     public void foldParagraph(int startParagraphIndex) {
-        foldRegions.setParagraphFolded(startParagraphIndex, true);
         int endParagraphIndex = foldRegions.getFoldParagraphEnd(startParagraphIndex);
         codeArea.foldParagraphs(startParagraphIndex, endParagraphIndex );
     }
 
     public void unfoldParagraph(int startParagraphIndex) {
-        foldRegions.setParagraphFolded(startParagraphIndex, false);
         codeArea.unfoldParagraphs(startParagraphIndex);
     }
 
@@ -51,7 +49,9 @@ public abstract class FoldParser {
     }
 
     public boolean isParagraphFolded(int paragraphIndex) {
-        return foldRegions.isParagraphFolded(paragraphIndex);
+        FoldRegion region = foldRegions.getFoldRegion(paragraphIndex);
+        if (region == null) return false;
+        return codeArea.isFolded(region.getStart() + 1);
     }
 
     public boolean isParagraphFoldable(int paragraphIndex) {
@@ -60,18 +60,12 @@ public abstract class FoldParser {
 
     /// Return true if paragraphIndex is within one of the folded paragraphs
     public boolean isParagraphHidden(int paragraphIndex) {
-        for (FoldRegion foldRegion : foldRegions) {
-            if(foldRegion.isParagraphFolded(paragraphIndex)) {
-                return true;
-            }
-        }
-        return false;
+        return codeArea.isFolded(paragraphIndex);
     }
 
     public void refresh(){
         foldRegions.clear();
         updateFoldRegions();
-        restoreFoldedState();
     }
 
     public abstract void updateFoldRegions();
@@ -89,11 +83,4 @@ public abstract class FoldParser {
         foldRegions.add(startParagraph, endParagraph);
     }
 
-    private void restoreFoldedState() {
-        for (FoldRegion foldRegion : foldRegions) {
-            if (codeArea.isFolded(foldRegion.getStart())) {
-                foldRegion.setFolded(true);
-            }
-        }
-    }
 }

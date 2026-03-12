@@ -40,10 +40,6 @@ public class FoldRegions implements Iterable<FoldRegion> {
         foldRegionMap.clear();
     }
 
-    public void setParagraphFolded(int paragraphIndex, boolean isFolded) {
-        getFoldRegion(paragraphIndex).setFolded(isFolded);
-    }
-
     public int getFoldParagraphEnd(int paragraphIndex) {
         if (!foldRegionMap.containsKey(paragraphIndex)) {
             return paragraphIndex;
@@ -54,14 +50,6 @@ public class FoldRegions implements Iterable<FoldRegion> {
 
     public boolean isParagraphFoldable(int paragraphIndex) {
         return foldRegionMap.containsKey(paragraphIndex);
-    }
-
-    public boolean isParagraphFolded(int paragraphIndex) {
-        FoldRegion foldRegion = foldRegionMap.get(paragraphIndex);
-        if(foldRegion == null) {
-            return false;
-        }
-        return foldRegion.isFolded();
     }
 
     @Override
