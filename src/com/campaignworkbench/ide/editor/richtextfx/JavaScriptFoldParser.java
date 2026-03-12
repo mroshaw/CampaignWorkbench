@@ -31,7 +31,7 @@ public class JavaScriptFoldParser extends FoldParser implements IFoldParser {
     }
 
     @Override
-    public FoldRegions findFoldRegions(CodeArea codeArea) {
+    public FoldRegions findFoldRegions() {
 
         foldRegions = new FoldRegions(codeArea);
         String text = codeArea.getText();

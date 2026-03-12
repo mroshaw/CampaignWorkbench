@@ -19,7 +19,7 @@ public class XmlFoldParser extends FoldParser implements IFoldParser {
         super(codeArea);
     }
 
-    public FoldRegions findFoldRegions(CodeArea codeArea) {
+    public FoldRegions findFoldRegions() {
 
         foldRegions = new FoldRegions(codeArea);
         String text = codeArea.getText();

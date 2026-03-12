@@ -9,7 +9,7 @@ public interface IFoldParser {
     /**
      * Returns foldable regions as (startParagraph, endParagraph) pairs.
      */
-    FoldRegions findFoldRegions(CodeArea codeArea);
+    FoldRegions findFoldRegions();
 
     boolean isParagraphFolded(int paragraphIndex);
     void foldParagraph(int startParagraphIndex);

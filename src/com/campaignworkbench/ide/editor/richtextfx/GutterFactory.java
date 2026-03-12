@@ -28,7 +28,7 @@ public class GutterFactory implements IntFunction<Node> {
     public Node apply(int paragraphIndex) {
 
         // Refresh the folding state
-        foldRegions = foldParser.findFoldRegions(codeArea);
+        foldRegions = foldParser.findFoldRegions();
 
         if(foldRegions.isParagraphHidden(paragraphIndex)) {
             return null;
