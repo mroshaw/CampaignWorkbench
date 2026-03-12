@@ -13,6 +13,8 @@ public interface IFoldParser {
     boolean isParagraphHidden(int paragraphIndex);
     boolean isParagraphFoldable(int paragraphIndex);
 
+    int getFoldParagraphEnd(int paragraphIndex);
+
     void foldParagraph(int startParagraphIndex);
     void unfoldParagraph(int startParagraphIndex);
     void foldAll();

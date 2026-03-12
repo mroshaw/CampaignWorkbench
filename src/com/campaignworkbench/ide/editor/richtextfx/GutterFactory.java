@@ -52,6 +52,12 @@ public class GutterFactory implements IntFunction<Node> {
         return box;
     }
 
+    public void refresh(int fromParagraph, int toParagraph) {
+        for (int i = fromParagraph; i <= toParagraph; i++) {
+            codeArea.recreateParagraphGraphic(i);
+        }
+    }
+
     private void setFoldIndicator(Label foldIndicator, int paragraphIndex) {
         if (foldParser.isParagraphFolded(paragraphIndex)) {
             foldIndicator.setText("▶");
@@ -69,7 +75,7 @@ public class GutterFactory implements IntFunction<Node> {
                 e.consume();
                 foldParser.foldParagraph(paragraphIndex);
                 // Refresh
-                codeArea.setParagraphGraphicFactory(this);
+                refresh(paragraphIndex, foldParser.getFoldParagraphEnd(paragraphIndex));
             });
         } else {
             foldIndicator.setText("");

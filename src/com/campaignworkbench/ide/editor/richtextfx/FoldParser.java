@@ -26,19 +26,6 @@ public abstract class FoldParser {
         foldedParagraphsCache = new HashSet<>();
     }
 
-    // Resolves a paragraph index for a character index
-    private int getParagraphFromCharIndex(int charIndex) {
-        TwoDimensional.Position pos = codeArea.offsetToPosition(charIndex, TwoDimensional.Bias.Forward);
-        return pos.getMajor();
-    }
-
-    protected void addFoldRegion(int startChar, int endChar) {
-        int startParagraph = getParagraphFromCharIndex(startChar);
-        int endParagraph = getParagraphFromCharIndex(endChar);
-
-        foldRegions.add(startParagraph, endParagraph);
-    }
-
     public void unfoldAll() {
         for (FoldRegion foldRegion : foldRegions) {
             if(foldRegion.isFolded()) {
@@ -66,6 +53,10 @@ public abstract class FoldParser {
         codeArea.unfoldParagraphs(startParagraphIndex);
     }
 
+    public int getFoldParagraphEnd(int paragraphIndex) {
+        return foldRegions.getFoldParagraphEnd(paragraphIndex);
+    }
+
     public boolean isParagraphFolded(int paragraphIndex) {
         return foldRegions.isParagraphFolded(paragraphIndex);
     }
@@ -84,21 +75,6 @@ public abstract class FoldParser {
         return false;
     }
 
-    public void backupFoldedState() {
-        foldedParagraphsCache = new HashSet<>();
-        for (FoldRegion foldRegion : foldRegions.values()) {
-            if(foldRegion.isFolded()) {
-                foldedParagraphsCache.add(foldRegion.getStart());
-            }
-        }
-    }
-
-    public void restoreFoldedState() {
-        for(int paragraphIndex : foldedParagraphsCache) {
-            foldRegions.getFoldRegion(paragraphIndex).setFolded(true);
-        }
-    }
-
     public void refresh(){
         foldRegions.clear();
         backupFoldedState();
@@ -107,4 +83,32 @@ public abstract class FoldParser {
     }
 
     public abstract void updateFoldRegions();
+
+    // Resolves a paragraph index for a character index
+    private int getParagraphFromCharIndex(int charIndex) {
+        TwoDimensional.Position pos = codeArea.offsetToPosition(charIndex, TwoDimensional.Bias.Forward);
+        return pos.getMajor();
+    }
+
+    protected void addFoldRegion(int startChar, int endChar) {
+        int startParagraph = getParagraphFromCharIndex(startChar);
+        int endParagraph = getParagraphFromCharIndex(endChar);
+
+        foldRegions.add(startParagraph, endParagraph);
+    }
+
+    private void backupFoldedState() {
+        foldedParagraphsCache = new HashSet<>();
+        for (FoldRegion foldRegion : foldRegions.values()) {
+            if(foldRegion.isFolded()) {
+                foldedParagraphsCache.add(foldRegion.getStart());
+            }
+        }
+    }
+
+    private void restoreFoldedState() {
+        for(int paragraphIndex : foldedParagraphsCache) {
+            foldRegions.getFoldRegion(paragraphIndex).setFolded(true);
+        }
+    }
 }
