@@ -14,6 +14,9 @@ public abstract class FoldParser {
     // Used to translate chars to paragraph indices
     CodeArea codeArea;
 
+    // Debugging
+    int refreshCallCount = 0;
+
     public FoldParser(CodeArea codeArea) {
         this.codeArea = codeArea;
         foldRegions = new FoldRegions();
@@ -42,6 +45,7 @@ public abstract class FoldParser {
 
     public void unfoldParagraph(int startParagraphIndex) {
         codeArea.unfoldParagraphs(startParagraphIndex);
+
     }
 
     public int getFoldParagraphEnd(int paragraphIndex) {
@@ -64,6 +68,8 @@ public abstract class FoldParser {
     }
 
     public void refresh(){
+        refreshCallCount ++;
+        System.out.println("Refresh call count: " +  refreshCallCount);
         foldRegions.clear();
         updateFoldRegions();
     }

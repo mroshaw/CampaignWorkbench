@@ -125,6 +125,8 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         codeArea.clear();
         // Replace tab with 2 spaces
         codeArea.replaceText(text.replaceAll("\t", "  "));
+
+        /*
         if(syntaxStyler == null) {
             return;
         }
@@ -132,6 +134,11 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         if (computedStyleSpans != null) {
             codeArea.setStyleSpans(0, computedStyleSpans);
         }
+        if(foldParser != null) {
+            foldParser.refresh();
+        }
+        */
+
     }
 
     @Override
