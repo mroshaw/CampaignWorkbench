@@ -12,7 +12,7 @@ import java.util.Set;
 public abstract class FoldParser {
 
     // Collection of foldable paragraphs (start, end, folded state)
-    protected FoldRegions foldRegions;
+    private FoldRegions foldRegions;
 
     // Used to temporarily store folded state while foldRegions are updated
     protected Set<Integer> foldedParagraphsCache;
@@ -24,13 +24,6 @@ public abstract class FoldParser {
         this.codeArea = codeArea;
         foldRegions = new FoldRegions();
         foldedParagraphsCache = new HashSet<>();
-    }
-
-    // Updates the fold regions
-    private void setFoldRegions(FoldRegions foldRegions) {
-        backupFoldedState();
-        this.foldRegions = foldRegions;
-        restoreFoldedState();
     }
 
     // Resolves a paragraph index for a character index
@@ -107,8 +100,11 @@ public abstract class FoldParser {
     }
 
     public void refresh(){
-        setFoldRegions(findFoldRegions());
+        foldRegions.clear();
+        backupFoldedState();
+        updateFoldRegions();
+        restoreFoldedState();
     }
 
-    public abstract FoldRegions findFoldRegions();
+    public abstract void updateFoldRegions();
 }

@@ -34,9 +34,8 @@ public class HtmlFoldParser extends FoldParser implements IFoldParser {
     }
 
     @Override
-    public FoldRegions findFoldRegions() {
+    public void updateFoldRegions() {
 
-        foldRegions = new FoldRegions();
         String text = codeArea.getText();
 
         Matcher matcher = TOKEN_PATTERN.matcher(text);
@@ -96,8 +95,6 @@ public class HtmlFoldParser extends FoldParser implements IFoldParser {
                 }
             }
         }
-
-        return foldRegions;
     }
 
     private static class Tag {

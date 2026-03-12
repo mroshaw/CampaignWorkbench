@@ -31,9 +31,8 @@ public class JavaScriptFoldParser extends FoldParser implements IFoldParser {
     }
 
     @Override
-    public FoldRegions findFoldRegions() {
+    public void updateFoldRegions() {
 
-        foldRegions = new FoldRegions();
         String text = codeArea.getText();
 
         Matcher matcher = TOKEN_PATTERN.matcher(text);
@@ -60,7 +59,7 @@ public class JavaScriptFoldParser extends FoldParser implements IFoldParser {
             if (matcher.group(3) != null) {
                 // Block comment close */
                 if (inBlockComment) {
-                    foldRegions.add(commentStart, matcher.end());
+                    addFoldRegion(commentStart, matcher.end());
                     inBlockComment = false;
                     commentStart = -1;
                 }
@@ -80,11 +79,9 @@ public class JavaScriptFoldParser extends FoldParser implements IFoldParser {
                 // }
                 if (!braceStack.isEmpty()) {
                     int start = braceStack.pop();
-                    foldRegions.add(start, matcher.end());
+                    addFoldRegion(start, matcher.end());
                 }
             }
         }
-
-        return foldRegions;
     }
 }

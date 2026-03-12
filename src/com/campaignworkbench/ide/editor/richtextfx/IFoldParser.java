@@ -7,7 +7,7 @@ public interface IFoldParser {
     /**
      * Returns foldable regions as (startParagraph, endParagraph) pairs.
      */
-    FoldRegions findFoldRegions();
+    void updateFoldRegions();
 
     boolean isParagraphFolded(int paragraphIndex);
     boolean isParagraphHidden(int paragraphIndex);

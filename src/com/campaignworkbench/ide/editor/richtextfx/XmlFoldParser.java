@@ -19,9 +19,8 @@ public class XmlFoldParser extends FoldParser implements IFoldParser {
         super(codeArea);
     }
 
-    public FoldRegions findFoldRegions() {
+    public void updateFoldRegions() {
 
-        foldRegions = new FoldRegions();
         String text = codeArea.getText();
 
         Matcher matcher = TAG_PATTERN.matcher(text);
@@ -51,8 +50,6 @@ public class XmlFoldParser extends FoldParser implements IFoldParser {
                 }
             }
         }
-
-        return foldRegions;
     }
 
     private static class Tag {

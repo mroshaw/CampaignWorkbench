@@ -1,10 +1,7 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
-import org.fxmisc.richtext.model.Paragraph;
-
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 
 /**
  * Class implementing a set of fold regions
@@ -37,6 +34,10 @@ public class FoldRegions implements Iterable<FoldRegion> {
             return;
         }
         foldRegionMap.remove(paragraphIndex);
+    }
+
+    public void clear() {
+        foldRegionMap.clear();
     }
 
     public void setParagraphFolded(int paragraphIndex, boolean isFolded) {

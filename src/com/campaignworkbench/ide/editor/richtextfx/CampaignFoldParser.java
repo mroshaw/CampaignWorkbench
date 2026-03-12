@@ -20,9 +20,7 @@ public class CampaignFoldParser extends FoldParser implements IFoldParser {
     }
 
     @Override
-    public FoldRegions findFoldRegions() {
-
-        foldRegions = new FoldRegions();
+    public void updateFoldRegions() {
         String text = codeArea.getText();
 
         Deque<Integer> braceStack = new ArrayDeque<>();
@@ -61,7 +59,5 @@ public class CampaignFoldParser extends FoldParser implements IFoldParser {
                     break;
             }
         }
-
-        return foldRegions;
     }
 }
