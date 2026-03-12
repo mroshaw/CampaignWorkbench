@@ -176,7 +176,7 @@ public final class EditorTab extends Tab {
         editor.unfoldAll();
     }
 
-    private void toggleWrapHandler(ObservableValue<? extends Boolean> observable, Boolean wasSelected, Boolean isSelected) {
+    private void toggleWrapHandler(ObservableValue<? extends Boolean> observable, boolean wasSelected, boolean isSelected) {
         editor.setWrap(isSelected);
     }
 

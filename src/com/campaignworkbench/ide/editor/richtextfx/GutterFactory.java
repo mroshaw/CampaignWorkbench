@@ -16,7 +16,6 @@ public class GutterFactory implements IntFunction<Node> {
 
     private final CodeArea codeArea;
     private final IFoldParser foldParser;
-    private FoldRegions foldRegions;
 
     public GutterFactory(CodeArea codeArea, IFoldParser foldParser) {
         this.codeArea = codeArea;
@@ -27,10 +26,8 @@ public class GutterFactory implements IntFunction<Node> {
     @Override
     public Node apply(int paragraphIndex) {
 
-        // Refresh the folding state
-        foldRegions = foldParser.findFoldRegions();
-
-        if(foldRegions.isParagraphHidden(paragraphIndex)) {
+        if(foldParser.isParagraphHidden(paragraphIndex)) {
+            // System.out.println(paragraphIndex + " is hidden by fold");
             return null;
         }
 
@@ -39,15 +36,15 @@ public class GutterFactory implements IntFunction<Node> {
         box.setAlignment(Pos.CENTER_LEFT);
         box.setMinWidth(60);
         box.getStyleClass().add("gutter");
+
         // Get the line number node as a node
         Label lineNo = (Label) SimpleLineNumberFactory.get(codeArea).apply(paragraphIndex);
         lineNo.setMinWidth(36);
         lineNo.getStyleClass().add("line-number");
+
         // Create a fold indicator label
         Label foldIndicator = new Label();
-        // foldIndicator.setMinWidth(20);
         foldIndicator.getStyleClass().add("custom-fold-indicator");
-
         setFoldIndicator(foldIndicator, paragraphIndex);
 
         // Add the line number and fold indicator to the container and return
@@ -57,8 +54,6 @@ public class GutterFactory implements IntFunction<Node> {
 
     private void setFoldIndicator(Label foldIndicator, int paragraphIndex) {
         if (foldParser.isParagraphFolded(paragraphIndex)) {
-
-            // foldIndicator.setGraphic(iconRight);
             foldIndicator.setText("▶");
             foldIndicator.setCursor(Cursor.HAND);
             foldIndicator.setOnMouseClicked(e -> {
@@ -67,8 +62,7 @@ public class GutterFactory implements IntFunction<Node> {
                 // Refresh
                 codeArea.setParagraphGraphicFactory(this);
             });
-        } else if (foldRegions.isParagraphFoldable(paragraphIndex)) {
-            // foldIndicator.setGraphic(iconDown);
+        } else if (foldParser.isParagraphFoldable(paragraphIndex)) {
             foldIndicator.setText("▼");
             foldIndicator.setCursor(Cursor.HAND);
             foldIndicator.setOnMouseClicked(e -> {

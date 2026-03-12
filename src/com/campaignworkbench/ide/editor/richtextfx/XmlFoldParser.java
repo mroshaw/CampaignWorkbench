@@ -21,7 +21,7 @@ public class XmlFoldParser extends FoldParser implements IFoldParser {
 
     public FoldRegions findFoldRegions() {
 
-        foldRegions = new FoldRegions(codeArea);
+        foldRegions = new FoldRegions();
         String text = codeArea.getText();
 
         Matcher matcher = TAG_PATTERN.matcher(text);
@@ -45,7 +45,7 @@ public class XmlFoldParser extends FoldParser implements IFoldParser {
                     int start = open.startOffset + 1;
                     int end = matcher.end();
                     if (open.name.equals(name) && start != end) {
-                        foldRegions.add(start, end, foldedParagraphs);
+                        addFoldRegion(start, end);
                         break;
                     }
                 }

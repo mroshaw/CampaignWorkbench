@@ -22,7 +22,7 @@ public class CampaignFoldParser extends FoldParser implements IFoldParser {
     @Override
     public FoldRegions findFoldRegions() {
 
-        foldRegions = new FoldRegions(codeArea);
+        foldRegions = new FoldRegions();
         String text = codeArea.getText();
 
         Deque<Integer> braceStack = new ArrayDeque<>();
@@ -42,7 +42,7 @@ public class CampaignFoldParser extends FoldParser implements IFoldParser {
                     if (!braceStack.isEmpty()) {
                         int start = braceStack.pop();
                         if (start != matcher.end()) {
-                            foldRegions.add(start, matcher.end(), foldedParagraphs);
+                            addFoldRegion(start, matcher.end());
                         }
                     }
                     break;
@@ -55,7 +55,7 @@ public class CampaignFoldParser extends FoldParser implements IFoldParser {
                     if (!tagStack.isEmpty()) {
                         int start = tagStack.pop();
                         if (start != matcher.end()) {
-                            foldRegions.add(start, matcher.end(), foldedParagraphs);
+                            addFoldRegion(start, matcher.end());
                         }
                     }
                     break;

@@ -36,7 +36,7 @@ public class HtmlFoldParser extends FoldParser implements IFoldParser {
     @Override
     public FoldRegions findFoldRegions() {
 
-        foldRegions = new FoldRegions(codeArea);
+        foldRegions = new FoldRegions();
         String text = codeArea.getText();
 
         Matcher matcher = TOKEN_PATTERN.matcher(text);
@@ -48,7 +48,7 @@ public class HtmlFoldParser extends FoldParser implements IFoldParser {
 
             if (matcher.group(1) != null) {
                 // Single-line comment: <!-- ... --> - fold if it spans multiple lines
-                foldRegions.add(matcher.start(), matcher.end(), foldedParagraphs);
+                addFoldRegion(matcher.start(), matcher.end());
                 continue;
             }
 
@@ -62,7 +62,7 @@ public class HtmlFoldParser extends FoldParser implements IFoldParser {
             if (matcher.group(3) != null) {
                 // Comment close -->
                 if (inComment) {
-                    foldRegions.add(commentStart, matcher.end(), foldedParagraphs);
+                    addFoldRegion(commentStart, matcher.end());
                     inComment = false;
                     commentStart = -1;
                 }
@@ -90,7 +90,7 @@ public class HtmlFoldParser extends FoldParser implements IFoldParser {
                 while (!stack.isEmpty()) {
                     Tag open = stack.pop();
                     if (open.name.equalsIgnoreCase(name)) {
-                        foldRegions.add(open.startOffset, matcher.end(), foldedParagraphs);
+                        addFoldRegion(open.startOffset, matcher.end());
                         break;
                     }
                 }

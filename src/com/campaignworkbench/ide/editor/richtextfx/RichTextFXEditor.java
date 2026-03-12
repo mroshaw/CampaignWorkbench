@@ -59,13 +59,19 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         GutterFactory gutterFactory = new GutterFactory(codeArea, foldParser);
         codeArea.setParagraphGraphicFactory(gutterFactory);
 
+        // When text changes
         codeArea.textProperty().addListener((_, _, newText) -> {
-            if(syntaxStyler == null) {
-                return;
+            // Re-evaluate and apply styling
+            if(syntaxStyler != null) {
+                StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(newText);
+                if (computedStyleSpans != null) {
+                    codeArea.setStyleSpans(0, computedStyleSpans);
+                }
             }
-            StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(newText);
-            if (computedStyleSpans != null) {
-                codeArea.setStyleSpans(0, computedStyleSpans);
+
+            // Re-evaluate and apply folding
+            if(foldParser != null) {
+                foldParser.refresh();
             }
         });
 

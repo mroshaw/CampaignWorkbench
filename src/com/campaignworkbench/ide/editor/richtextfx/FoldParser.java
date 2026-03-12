@@ -1,10 +1,9 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
 import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.model.TwoDimensional;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -12,51 +11,104 @@ import java.util.Set;
  */
 public abstract class FoldParser {
 
+    // Collection of foldable paragraphs (start, end, folded state)
     protected FoldRegions foldRegions;
-    protected final Set<Integer> foldedParagraphs;
+
+    // Used to temporarily store folded state while foldRegions are updated
+    protected Set<Integer> foldedParagraphsCache;
+
+    // Used to translate chars to paragraph indices
     CodeArea codeArea;
 
     public FoldParser(CodeArea codeArea) {
         this.codeArea = codeArea;
-        foldRegions = new FoldRegions(codeArea);
-        foldedParagraphs = new HashSet<>();
+        foldRegions = new FoldRegions();
+        foldedParagraphsCache = new HashSet<>();
+    }
+
+    // Updates the fold regions
+    private void setFoldRegions(FoldRegions foldRegions) {
+        backupFoldedState();
+        this.foldRegions = foldRegions;
+        restoreFoldedState();
+    }
+
+    // Resolves a paragraph index for a character index
+    private int getParagraphFromCharIndex(int charIndex) {
+        TwoDimensional.Position pos = codeArea.offsetToPosition(charIndex, TwoDimensional.Bias.Forward);
+        return pos.getMajor();
+    }
+
+    protected void addFoldRegion(int startChar, int endChar) {
+        int startParagraph = getParagraphFromCharIndex(startChar);
+        int endParagraph = getParagraphFromCharIndex(endChar);
+
+        foldRegions.add(startParagraph, endParagraph);
     }
 
     public void unfoldAll() {
-        List<Integer> list = new ArrayList<>(foldedParagraphs);
-        for (Integer paragraphIndex : list) {
-            unfoldParagraph(paragraphIndex);
+        for (FoldRegion foldRegion : foldRegions) {
+            if(foldRegion.isFolded()) {
+                unfoldParagraph(foldRegion.getStart());
+            }
         }
     }
 
     public void foldAll() {
         for (FoldRegion foldRegion : foldRegions) {
-            if(!foldRegion.getFoldedState()) {
+            if(!foldRegion.isFolded()) {
                 foldParagraph(foldRegion.getStart());
             }
         }
     }
 
     public void foldParagraph(int startParagraphIndex) {
-        addFoldedParagraph(startParagraphIndex);
-        int endParagraphIndex = foldRegions.getFoldedParagraphEnd(startParagraphIndex);
+        foldRegions.setParagraphFolded(startParagraphIndex, true);
+        int endParagraphIndex = foldRegions.getFoldParagraphEnd(startParagraphIndex);
         codeArea.foldParagraphs(startParagraphIndex, endParagraphIndex );
     }
 
     public void unfoldParagraph(int startParagraphIndex) {
-        removeFoldedParagraph(startParagraphIndex);
+        foldRegions.setParagraphFolded(startParagraphIndex, false);
         codeArea.unfoldParagraphs(startParagraphIndex);
     }
 
-    public void addFoldedParagraph(int startParagraphIndex) {
-        foldedParagraphs.add(startParagraphIndex);
-    }
-
-    public void removeFoldedParagraph(int startParagraphIndex) {
-        foldedParagraphs.remove(startParagraphIndex);
-    }
-
     public boolean isParagraphFolded(int paragraphIndex) {
-        return foldedParagraphs.contains(paragraphIndex);
+        return foldRegions.isParagraphFolded(paragraphIndex);
     }
+
+    public boolean isParagraphFoldable(int paragraphIndex) {
+        return foldRegions.isParagraphFoldable(paragraphIndex);
+    }
+
+    /// Return true if paragraphIndex is within one of the folded paragraphs
+    public boolean isParagraphHidden(int paragraphIndex) {
+        for (FoldRegion foldRegion : foldRegions) {
+            if(foldRegion.isParagraphFolded(paragraphIndex)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void backupFoldedState() {
+        foldedParagraphsCache = new HashSet<>();
+        for (FoldRegion foldRegion : foldRegions.values()) {
+            if(foldRegion.isFolded()) {
+                foldedParagraphsCache.add(foldRegion.getStart());
+            }
+        }
+    }
+
+    public void restoreFoldedState() {
+        for(int paragraphIndex : foldedParagraphsCache) {
+            foldRegions.getFoldRegion(paragraphIndex).setFolded(true);
+        }
+    }
+
+    public void refresh(){
+        setFoldRegions(findFoldRegions());
+    }
+
+    public abstract FoldRegions findFoldRegions();
 }
