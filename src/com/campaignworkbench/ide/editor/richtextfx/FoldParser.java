@@ -72,6 +72,7 @@ public abstract class FoldParser {
         System.out.println("Refresh call count: " +  refreshCallCount);
         foldRegions.clear();
         updateFoldRegions();
+        foldRegions.print();
     }
 
     public abstract void updateFoldRegions();

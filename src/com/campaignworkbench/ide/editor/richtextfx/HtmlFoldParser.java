@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 public class HtmlFoldParser extends FoldParser implements IFoldParser {
 
     // Void elements that never have a closing tag
-    private static final Set<String> VOID_ELEMENTS = Set.of(
+    static final Set<String> VOID_ELEMENTS = Set.of(
             "area", "base", "br", "col", "embed", "hr", "img", "input",
             "link", "meta", "param", "source", "track", "wbr"
     );
@@ -97,7 +97,7 @@ public class HtmlFoldParser extends FoldParser implements IFoldParser {
         }
     }
 
-    private static class Tag {
+    static class Tag {
         final String name;
         final int startOffset;
 

@@ -61,4 +61,11 @@ public class FoldRegions implements Iterable<FoldRegion> {
         return foldRegionMap.values();
     }
 
+    public void print() {
+        System.out.print("FOLD REGION");
+        for (FoldRegion foldRegion : foldRegionMap.values()) {
+            System.out.println("Start: " + foldRegion.getStart() + ", End: " + foldRegion.getEnd());
+        }
+    }
+
 }
