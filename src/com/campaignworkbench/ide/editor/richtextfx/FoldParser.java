@@ -3,19 +3,13 @@ package com.campaignworkbench.ide.editor.richtextfx;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.TwoDimensional;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * Base class for implementing code folding solutions for various languages
  */
 public abstract class FoldParser {
 
     // Collection of foldable paragraphs (start, end, folded state)
-    private FoldRegions foldRegions;
-
-    // Used to temporarily store folded state while foldRegions are updated
-    protected Set<Integer> foldedParagraphsCache;
+    private final FoldRegions foldRegions;
 
     // Used to translate chars to paragraph indices
     CodeArea codeArea;
@@ -23,7 +17,6 @@ public abstract class FoldParser {
     public FoldParser(CodeArea codeArea) {
         this.codeArea = codeArea;
         foldRegions = new FoldRegions();
-        foldedParagraphsCache = new HashSet<>();
     }
 
     public void unfoldAll() {
@@ -77,7 +70,6 @@ public abstract class FoldParser {
 
     public void refresh(){
         foldRegions.clear();
-        backupFoldedState();
         updateFoldRegions();
         restoreFoldedState();
     }
@@ -97,18 +89,11 @@ public abstract class FoldParser {
         foldRegions.add(startParagraph, endParagraph);
     }
 
-    private void backupFoldedState() {
-        foldedParagraphsCache = new HashSet<>();
-        for (FoldRegion foldRegion : foldRegions.values()) {
-            if(foldRegion.isFolded()) {
-                foldedParagraphsCache.add(foldRegion.getStart());
-            }
-        }
-    }
-
     private void restoreFoldedState() {
-        for(int paragraphIndex : foldedParagraphsCache) {
-            foldRegions.getFoldRegion(paragraphIndex).setFolded(true);
+        for (FoldRegion foldRegion : foldRegions) {
+            if (codeArea.isFolded(foldRegion.getStart())) {
+                foldRegion.setFolded(true);
+            }
         }
     }
 }

@@ -49,7 +49,6 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
     public RichTextFXEditor(SyntaxType syntaxType) {
         codeArea = new CodeArea();
         codeArea.setCursor(Cursor.TEXT);
-
         VirtualizedScrollPane<CodeArea> scrollPane = new VirtualizedScrollPane<>(codeArea);
         root = new BorderPane(scrollPane);
         root.getStyleClass().add("code-editor");
