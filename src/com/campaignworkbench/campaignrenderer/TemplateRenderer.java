@@ -193,6 +193,7 @@ public final class TemplateRenderer extends AbstractRenderer {
                                 "Check module name and check module is added to the workspace",
                                 null);
                     }
+                    out.append("<!-- MODULE: ").append(module.getFileName()).append(" -->\n");
                     String moduleOutput =
                             moduleRenderer.renderModule(module, cx, scope);
 
@@ -209,6 +210,7 @@ public final class TemplateRenderer extends AbstractRenderer {
                                 "Check block name and check block is added to the workspace",
                                 null);
                     }
+                    out.append("<!-- BLOCK: ").append(block.getFileName()).append(" -->\n");
                     out.append(preprocess(workspace, block, block.getWorkspaceFileContent(), cx, scope));
                 }
             }

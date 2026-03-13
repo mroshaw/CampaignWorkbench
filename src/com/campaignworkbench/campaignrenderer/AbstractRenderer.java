@@ -47,12 +47,22 @@ public abstract class AbstractRenderer {
 
     protected void appendText(StringBuilder js, String text) {
         if (text.isEmpty()) return;
-        text = text.replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\r\n", "\n")
-                .replace("\r", "\n")
-                .replace("\n", "\\n");
-        js.append("out.append(\"").append(text).append("\");\n");
+        text = text.replace("\r\n", "\n").replace("\r", "\n");
+        String[] lines = text.split("\n", -1);
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i]
+                    .replace("\\", "\\\\")
+                    .replace("\"", "\\\"");
+            if (!line.isEmpty()) {
+                js.append("out.append(\"").append(line).append("\");\n");
+            } else {
+                js.append("\n");
+            }
+            // Append the newline between lines (not after the last segment)
+            if (i < lines.length - 1) {
+                js.append("out.append(\"\\n\");\n");
+            }
+        }
     }
 
     /**

@@ -355,8 +355,8 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         } catch (IdeException ideEx) {
             errorReporter.reportError("An IDE error occurred!", ideEx, true);
         } catch (RendererException renderEx) {
+            outputPanel.setContent("<html><head><title>Error!</title><body><strong>Error rendering HTML</strong></body></html>", renderEx.getSourceCode());
             errorReporter.reportError("A Renderer error occurred!", renderEx, true);
-            outputPanel.setContent("", renderEx.getSourceCode());
         } catch (Exception ex) {
             errorReporter.reportError("An unexpected error occurred!", ex, true);
         }
