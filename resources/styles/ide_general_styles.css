@@ -5,7 +5,7 @@
 
 /* ToolBar buttons */
 .large-toolbar {
-    -fx-spacing: 16px;
+    -fx-spacing: 4px;
     -fx-padding: 4px;
     -fx-min-height: 46px;
 }
@@ -15,33 +15,34 @@
   }
 
 .large-toolbar .button {
-    -fx-padding: 4px;
+    -fx-padding: 8px;
 }
 
 .large-toolbar .button-icon {
-    -fx-padding: 4px 8px 4px 4px;
+    -fx-padding: 0px;
 }
 
 .small-toolbar {
-    -fx-spacing: 6px;
+    -fx-spacing: 2px;
     -fx-padding: 4px;
     -fx-min-height: 40px;
 }
 
 .small-toolbar .separator {
-    -fx-padding: 4px;
+    -fx-padding: 0px;
 
 }
 
 .small-toolbar .button {
-    -fx-padding: 4px;
+    -fx-padding: 6px;
 }
 
 .small-toolbar .toggle-button {
-    -fx-padding: 4px;
+    -fx-padding: 6px;
 }
 
-    -fx-padding: 4px 8px 4px 4px;
+.small-toolbar .button-icon {
+    -fx-padding: 1px;
 }
 
 /* Code Editor */

@@ -232,20 +232,20 @@ public class WorkspaceExplorer implements IJavaFxNode {
         explorerLabel.getStyleClass().add("ide-label");
 
         // Mini toolbar
-        createNewButton = UiUtil.createButton("", "Create new", IdeIcon.NEW_FILE, true, "neutral-icon", 20, 16,true, _ -> createNewHandler());
-        addExistingButton = UiUtil.createButton("", "Add existing",IdeIcon.ADD_FILE, true, "positive-icon", 20, 16, true, _ -> addExistingHandler());
-        removeButton = UiUtil.createButton("", "Remove", IdeIcon.DELETE_FILE, true,"negative-icon", 20, 16, true, _ -> deleteHandler());
-        setDataContextButton = UiUtil.createButton("", "Set Data Context", IdeIcon.SET_DATA_CONTEXT, true, "positive-icon", 20, 16,true, _ -> setDataContextHandler());
-        clearDataContextButton = UiUtil.createButton("", "Clear Data Context", IdeIcon.CLEAR_DATA_CONTEXT, true, "negative-icon", 20, 16,true, _ -> clearDataContextHandler());
-        setMessageContextButton = UiUtil.createButton("", "Set Message Context", IdeIcon.SET_MESSAGE_CONTEXT, true, "positive-icon", 20, 16,true, _ -> setMessageContextHandler());
-        clearMessageContextButton = UiUtil.createButton("", "Clear Message Context", IdeIcon.CLEAR_MESSAGE_CONTEXT, true, "negative-icon", 20, 16, true, _ -> clearMessageContextHandler());
+        createNewButton = UiUtil.createMiniToolbarButton("", "Create new", IdeIcon.NEW_FILE, true, "neutral-icon", 20, true, _ -> createNewHandler());
+        addExistingButton = UiUtil.createMiniToolbarButton("", "Add existing",IdeIcon.ADD_FILE, true, "positive-icon", 20, true, _ -> addExistingHandler());
+        removeButton = UiUtil.createMiniToolbarButton("", "Remove", IdeIcon.DELETE_FILE, true,"negative-icon", 20, true, _ -> deleteHandler());
+        setDataContextButton = UiUtil.createMiniToolbarButton("", "Set Data Context", IdeIcon.SET_DATA_CONTEXT, true, "positive-icon", 20, true, _ -> setDataContextHandler());
+        clearDataContextButton = UiUtil.createMiniToolbarButton("", "Clear Data Context", IdeIcon.CLEAR_DATA_CONTEXT, true, "negative-icon", 20, true, _ -> clearDataContextHandler());
+        setMessageContextButton = UiUtil.createMiniToolbarButton("", "Set Message Context", IdeIcon.SET_MESSAGE_CONTEXT, true, "positive-icon", 20, true, _ -> setMessageContextHandler());
+        clearMessageContextButton = UiUtil.createMiniToolbarButton("", "Clear Message Context", IdeIcon.CLEAR_MESSAGE_CONTEXT, true, "negative-icon", 20,  true, _ -> clearMessageContextHandler());
 
         // Campaign connection toolbar buttons
-        connectToCampaignButton = UiUtil.createButton("", "Connect to Campaign", IdeIcon.CONNECT,  true,"positive-icon", 20, 16,true, _ -> connectToCampaignHandler());
-        disconnectFromCampaignButton = UiUtil.createButton("", "Disconnect from Campaign", IdeIcon.DISCONNECT, true,"negative-icon", 20, 16,false, _ -> disconnectFromCampaignHandler());
-        createNewFromCampaignButton = UiUtil.createButton("", "Create new from Campaign", IdeIcon.NEW_FROM_CAMPAIGN,  true,"positive-icon", 20, 16,false, _ -> createNewFromCampaignHandler());
-        refreshFromCampaignButton = UiUtil.createButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, 16,false, _ -> refreshFromCampaignHandler());
-        pushToCampaignButton = UiUtil.createButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, 16,false, _ -> pushToCampaignHandler());
+        connectToCampaignButton = UiUtil.createMiniToolbarButton("", "Connect to Campaign", IdeIcon.CONNECT,  true,"positive-icon", 20, true, _ -> connectToCampaignHandler());
+        disconnectFromCampaignButton = UiUtil.createMiniToolbarButton("", "Disconnect from Campaign", IdeIcon.DISCONNECT, true,"negative-icon", 20, false, _ -> disconnectFromCampaignHandler());
+        createNewFromCampaignButton = UiUtil.createMiniToolbarButton("", "Create new from Campaign", IdeIcon.NEW_FROM_CAMPAIGN,  true,"positive-icon", 20, false, _ -> createNewFromCampaignHandler());
+        refreshFromCampaignButton = UiUtil.createMiniToolbarButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, false, _ -> refreshFromCampaignHandler());
+        pushToCampaignButton = UiUtil.createMiniToolbarButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, false, _ -> pushToCampaignHandler());
         urlHostLabel = new Label();
 
         ToolBar workspaceToolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);

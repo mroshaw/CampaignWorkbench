@@ -50,10 +50,10 @@ public final class EditorTab extends Tab {
 
         // Create the toolbar
         // Format toolbar
-        Button formatButton = UiUtil.createButton("", "Format code", IdeIcon.FORMAT_CODE, true, "positive-icon", 20, 16, true, _ -> formatHandler());
-        Button foldAllButton = UiUtil.createButton("", "Fold all", IdeIcon.FOLD_ALL, true, "positive-icon", 20, 16, true, _ -> foldAllHandler());
-        Button unfoldAllButton = UiUtil.createButton("", "Unfold all", IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, 16, true, _ -> unfoldAllHandler());
-        toggleWrapButton = UiUtil.createToggleButton("", "Toggle wrap", IdeIcon.WRAP_TEXT, true, "positive-icon", 20, 16, true, null);
+        Button formatButton = UiUtil.createMiniToolbarButton("", "Format code", IdeIcon.FORMAT_CODE, true, "positive-icon", 20, true, _ -> formatHandler());
+        Button foldAllButton = UiUtil.createMiniToolbarButton("", "Fold all", IdeIcon.FOLD_ALL, true, "positive-icon", 20, true, _ -> foldAllHandler());
+        Button unfoldAllButton = UiUtil.createMiniToolbarButton("", "Unfold all", IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, true, _ -> unfoldAllHandler());
+        toggleWrapButton = UiUtil.createMiniToolbarToggleButton("", "Toggle wrap", IdeIcon.WRAP_TEXT, true, "positive-icon", 20, true, null);
         toggleWrapButton.selectedProperty().addListener(this::toggleWrapHandler);
         ToolBar formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton, toggleWrapButton);
         formatToolBar.getStyleClass().add("small-toolbar");
@@ -61,8 +61,8 @@ public final class EditorTab extends Tab {
         // Find toolbar
         Label findLabel = new Label("Find:");
         findField = new TextField();
-        Button findButton = UiUtil.createButton("", "Find all", IdeIcon.FIND_START, true, "positive-icon", 20, 16, true, _ -> findHandler());
-        Button clearFindButton = UiUtil.createButton("", "Clear", IdeIcon.FIND_CLEAR, true, "negative-icon", 20, 16, true, _ -> clearFindHandler());
+        Button findButton = UiUtil.createMiniToolbarButton("", "Find all", IdeIcon.FIND_START, true, "positive-icon", 20, true, _ -> findHandler());
+        Button clearFindButton = UiUtil.createMiniToolbarButton("", "Clear", IdeIcon.FIND_CLEAR, true, "negative-icon", 20, true, _ -> clearFindHandler());
         findReplaceToolBar = new ToolBar(findLabel, findField, findButton, clearFindButton);
         findReplaceToolBar.getStyleClass().add("small-toolbar");
 

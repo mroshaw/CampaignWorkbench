@@ -53,14 +53,6 @@ public class FluentIcons {
                 SVGPath svg = new SVGPath();
                 svg.setContent(pathData);
                 svg.getStyleClass().add("icon");
-
-                // Optional scaling
-                if (size > 0) {
-                    double viewBoxSize = 16.0; // default; could parse viewBox if needed
-                    double scaleFactor = size / viewBoxSize;
-                    svg.getTransforms().add(new Scale(scaleFactor, scaleFactor));
-                }
-
                 return svg;
 
             } catch (Exception e) {
