@@ -1,12 +1,17 @@
 package com.campaignworkbench.ide.editor.richtextfx;
 
 import com.campaignworkbench.ide.IdeException;
-import com.campaignworkbench.ide.IdeTheme;
-import com.campaignworkbench.ide.IThemeable;
-import com.campaignworkbench.ide.ThemeManager;
 import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;
-import javafx.application.Platform;
+import com.campaignworkbench.ide.editor.richtextfx.codeformatting.CampaignFormatter;
+import com.campaignworkbench.ide.editor.richtextfx.codeformatting.ICodeFormatter;
+import com.campaignworkbench.ide.editor.richtextfx.codeformatting.JavaScriptFormatter;
+import com.campaignworkbench.ide.editor.richtextfx.codeformatting.XmlFormatter;
+import com.campaignworkbench.ide.editor.richtextfx.folding.CampaignFoldParser;
+import com.campaignworkbench.ide.editor.richtextfx.folding.HtmlFoldParser;
+import com.campaignworkbench.ide.editor.richtextfx.folding.JavaScriptFoldParser;
+import com.campaignworkbench.ide.editor.richtextfx.folding.XmlFoldParser;
+import com.campaignworkbench.ide.editor.richtextfx.syntaxhighlighting.*;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.IndexRange;
@@ -29,7 +34,7 @@ import java.util.regex.Pattern;
 /**
  * Implementation of ICodeEditor using the RichTextFX library
  */
-public class RichTextFXEditor implements ICodeEditor, IThemeable {
+public class RichTextFXEditor implements ICodeEditor {
 
     private final CodeArea codeArea;
     private final BorderPane root;
@@ -106,8 +111,6 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
                 );
             }
         });
-
-        Platform.runLater(() -> ThemeManager.register(this));
     }
 
     @Override
@@ -122,11 +125,9 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
 
     @Override
     public void setText(String text) {
-        codeArea.clear();
-        // Replace tab with 2 spaces
-        codeArea.replaceText(text.replaceAll("\t", "  "));
+        String newText = text.replace("\t", "  ");
+        codeArea.replaceText(newText);
 
-        /*
         if(syntaxStyler == null) {
             return;
         }
@@ -134,10 +135,6 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         if (computedStyleSpans != null) {
             codeArea.setStyleSpans(0, computedStyleSpans);
         }
-        if(foldParser != null) {
-            foldParser.refresh();
-        }
-        */
 
     }
 
@@ -155,22 +152,22 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
                 foldParser = new XmlFoldParser(codeArea);
                 break;
             case MODULE:
-                codeFormatter = new JavaScriptFormatter();
+                codeFormatter = new CampaignFormatter();
                 syntaxStyler = new CampaignSyntaxStyler();
                 foldParser = new CampaignFoldParser(codeArea);
                 break;
             case BLOCK:
-                codeFormatter = new JavaScriptFormatter();
+                codeFormatter = new CampaignFormatter();
                 syntaxStyler = new CampaignSyntaxStyler();
                 foldParser = new CampaignFoldParser(codeArea);
                 break;
             case TEMPLATE:
-                codeFormatter = new JavaScriptFormatter();
+                codeFormatter = new CampaignFormatter();
                 syntaxStyler = new CampaignSyntaxStyler();
                 foldParser = new CampaignFoldParser(codeArea);
                 break;
             case JAVASCRIPT:
-                codeFormatter = new JavaScriptFormatter();
+                codeFormatter = new CampaignFormatter();
                 syntaxStyler = new JavaScriptSyntaxStyler();
                 foldParser = new JavaScriptFoldParser(codeArea);
                 break;
@@ -231,27 +228,20 @@ public class RichTextFXEditor implements ICodeEditor, IThemeable {
         codeArea.moveTo(caretPos + text.length());
     }
 
-    @Override
-    public void applyTheme(IdeTheme theme) {
-        root.getStylesheets().clear();
-
-        if (syntaxStyler != null) {
-            String languageCss = syntaxStyler.getStyleSheet(theme);
-            root.getStylesheets().add(languageCss);
-        }
-
-    }
-
     public void formatCode(int indentSize) {
-        if (codeFormatter == null) {
+        String formattedCode = "";
+        if (codeFormatter == null || getText().isEmpty()) {
             return;
         }
         try {
-            String formattedCode = codeFormatter.format(getText(), indentSize);
-            setText(formattedCode);
+            formattedCode = codeFormatter.format(getText(), indentSize);
         } catch (Exception ex) {
             throw new IdeException("Error formatting code", ex);
         }
+        if(formattedCode.isEmpty()) {
+            throw new IdeException("Unexpected error formatting code", null);
+        }
+        setText(formattedCode);
     }
 
     @Override

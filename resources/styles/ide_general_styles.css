@@ -1,16 +1,9 @@
-/*
-***************************************************
-*** Top Level IDE                               ***
-***************************************************
-*/
+/* Top Level IDE */
 .workspace-explorer {
     -fx-background-color: -color-bg-subtle;
 }
 
-/**************************************************
-*** ToolBar buttons                             ***
-***************************************************
-*/
+/* ToolBar buttons */
 .large-toolbar {
     -fx-spacing: 16px;
     -fx-padding: 4px;
@@ -51,11 +44,8 @@
     -fx-padding: 4px 8px 4px 4px;
 }
 
-/*
-***************************************************
-*** Code Editor                                 ***
-***************************************************
-*/
+/* Code Editor */
+
 /* Find input text */
 .code-editor .text-input {
     -fx-font-family: 'Consolas';
@@ -80,11 +70,7 @@
     -fx-stroke: -color-fg-default !important;
 }
 
-/*
-***************************************************
-*** Workspace Explorer                          ***
-***************************************************
-*/
+/* Workspace Explorer */
 .workspace-explorer {
     -fx-padding: 4px;
 }
@@ -102,19 +88,11 @@
     -fx-spacing: 8;
 }
 
-/*
-***************************************************
-*** Log Panel                                   ***
-***************************************************
-*/
+/* Log Panel */
 .log-area .log-timestamp {
     -fx-fill: -color-bg-subtle;
     -fx-font-weight: bold;
     -fx-font-size: 11pt;
-}
-
-.log-area .selection-highlight {
-    -fx-fill: #4a90e2;   /* selection background colour */
 }
 
 .log-area .log-message {
@@ -125,11 +103,7 @@
     -fx-stroke: -color-fg-default !important;
 }
 
-/*
-***************************************************
-*** Error Log                                   ***
-***************************************************
-*/
+/* Error Log */
 .error-log-panel .tree-view .tree-cell {
     -fx-padding: 2px;
 }

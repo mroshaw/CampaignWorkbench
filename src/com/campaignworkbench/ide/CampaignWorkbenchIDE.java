@@ -3,6 +3,7 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.ide.dialogs.AboutDialog;
 import com.campaignworkbench.ide.workspaceexplorer.WorkspaceExplorer;
+import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.Template;
 import com.campaignworkbench.workspace.Workspace;
 import com.campaignworkbench.workspace.WorkspaceFile;
@@ -27,6 +28,8 @@ import java.util.Objects;
  */
 public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
+    private static final String ideStyleSheet = "/styles/ide_general_styles.css";
+
     private WorkspaceExplorer workspaceExplorer;
     private MainToolBar toolBar;
     private EditorTabPanel editorTabPanel;
@@ -46,7 +49,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     static void main(String[] args) {
         launch(args);
     }
-
 
     @Override
     public void start(Stage primaryStage) {
@@ -104,12 +106,10 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace, this::workspaceChanged, this::insertIntoCodeHandler, errorReporter);
 
         // Editor tabs
-        editorTabPanel = new EditorTabPanel((_, _, newTab) -> tabPanelChanged(newTab));
+        editorTabPanel = new EditorTabPanel((_, _, newTab) -> tabPanelChanged(newTab), errorReporter);
 
         // Output panes
         outputPanel = new OutputTabPanel();
-
-
 
         SplitPane logSplitPane = new SplitPane();
         logSplitPane.setOrientation(Orientation.HORIZONTAL);
@@ -152,6 +152,9 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         primaryStage.show();
         ThemeManager.register(this);
         Workspace.createWorkspaceRootFolder();
+
+        // Apply styles
+        scene.getStylesheets().add(UiUtil.getStylesFromStyleSheet(ideStyleSheet));
         errorReporter.reportError("Welcome to Campaign workbench!", false);
     }
 
@@ -179,13 +182,15 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      *
      */
     @Override
-    public void applyTheme(IdeTheme ideTheme) {
+    public void applyTheme(IdeTheme oldTheme, IdeTheme newTheme) {
+
+        scene.getStylesheets().remove(oldTheme.getIdeStyleSheet());
 
         // Set AtlantaFX styles
-        Application.setUserAgentStylesheet(ideTheme.getAtlantaFxStyleSheet());
+        Application.setUserAgentStylesheet(newTheme.getAtlantaFxStyleSheet());
 
         // Set IDE theme styles
-        scene.getStylesheets().add(ideTheme.getIdeStyleSheet());
+        scene.getStylesheets().add(newTheme.getIdeStyleSheet());
     }
 
     /**

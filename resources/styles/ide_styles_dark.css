@@ -1,48 +1,54 @@
-@import "ide_general_styles.css";
+/* IDE - Dark Mode */
 
-/*
-***************************************************
-*** ToolBar buttons                             ***
-***************************************************
-*/
-.neutral-icon {
-    -fx-fill: #F2C14E;
-}
+/* General */
+.code-editor .plain-text         { -fx-fill: #D4D4D4; }
 
-.positive-icon {
-    -fx-fill: #9ECE6A;
-}
+/* XML Syntax */
+.code-editor .xml-tagmark        { -fx-fill: #4EC9B0; }
+.code-editor .xml-anytag         { -fx-fill: #CE9178; }
+.code-editor .xml-paren          { -fx-fill: #C586C0; }
+.code-editor .xml-attribute      { -fx-fill: #9CDCFE; }
+.code-editor .xml-avalue         { -fx-fill: #cE9178; }
+.code-editor .xml-comment        { -fx-fill: #6A9955; }
 
-.negative-icon {
-    -fx-fill: #F7768E;
-}
+/* HTML */
+.code-editor .html-comment       { -fx-fill: #6A9955; }
+.code-editor .html-doctype       { -fx-fill: #808080; }
+.code-editor .html-tag           { -fx-fill: #569CD6; }
+.code-editor .html-attr-name     { -fx-fill: #9CDCFE; }
+.code-editor .html-attr-value    { -fx-fill: #CE9178; }
+.code-editor .html-entity        { -fx-fill: #4EC9B0; }
 
-.workspace-icon {
-    -fx-fill: #F2C14E;
-}
+/* JavaScript */
+.code-editor .js-keyword         { -fx-fill: #569CD6; }
+.code-editor .js-string          { -fx-fill: #CE9178; }
+.code-editor .js-comment         { -fx-fill: #6A9955; }
+.code-editor .js-number          { -fx-fill: #B5CEA8; }
+.code-editor .js-brace           { -fx-fill: #FFD700; }
+.code-editor .js-paren           { -fx-fill: #C586C0; }
+.code-editor .js-bracket         { -fx-fill: #4EC9B0; }
+.code-editor .js-semicolon       { -fx-fill: #808080; }
 
-.template-icon {
-    -fx-fill: #4FC1FF;
-}
+/* Adobe Campaign */
+.code-editor .acc-directive      { -fx-fill: #C586C0; }
+.code-editor .acc-expression     { -fx-fill: #9CDCFE; }
+.code-editor .acc-scriptlet      { -fx-fill: #D4D4D4; }
+.code-editor .acc-function       { -fx-fill: #DCDCAA; }
+.code-editor .acc-object         { -fx-fill: #4FC1FF; }
+.code-editor .acc-ctx-attr       { -fx-fill: #9CDCFE; }
+.code-editor .acc-rt-event       { -fx-fill: #9CDCFE; }
 
-.block-icon {
-    -fx-fill: #FF6B6B;
-}
+/* ToolBar buttons */
+.neutral-icon           { -fx-fill: #F2C14E; }
+.positive-icon          { -fx-fill: #9ECE6A; }
+.negative-icon          { -fx-fill: #F7768E; }
+.workspace-icon         { -fx-fill: #F2C14E; }
+.template-icon          { -fx-fill: #4FC1FF; }
+.block-icon             { -fx-fill: #FF6B6B; }
+.module-icon            { -fx-fill: #C586FF; }
+.context-icon           { -fx-fill: #4EC9B0; }
 
-.module-icon {
-    -fx-fill: #C586FF;
-}
-
-.context-icon {
-    -fx-fill: #4EC9B0;
-}
-
-
-/*
-***************************************************
-*** Code Editor                                 ***
-***************************************************
-*/
+/* Code Editor */
 .code-editor .code-area .find-text {
     -rtfx-background-color: yellow !important;
     -fx-fill: black !important;
@@ -56,26 +62,16 @@
 
 .code-editor .paragraph-box .gutter .custom-fold-indicator {
     -fx-background-color: transparent;
-    -fx-text-fill: #00ff00;
+    -fx-text-fill: #008800;
     -fx-font-size: 12pt;
 }
 
-/*
-***************************************************
-*** Workspace Explorer                          ***
-***************************************************
-*/
+/* Workspace Explorer */
 .workspace-explorer .workspace-file-linked {
     -fx-font-weight: bold;
 }
 
-.workspace-explorer .workspace-file {
-
+/* Log area */
+.log-area .selection-highlight {
+    -fx-fill: #4a90e2;   /* selection background colour */
 }
-
-/*
-***************************************************
-*** Log Panel                                   ***
-***************************************************
-*/
-

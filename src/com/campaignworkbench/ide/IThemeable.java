@@ -4,5 +4,5 @@ package com.campaignworkbench.ide;
  * Interface for JavaFX components that support IDEThemes.
  */
 public interface IThemeable {
-    void applyTheme(IdeTheme ideTheme);
+    void applyTheme(IdeTheme oldTheme, IdeTheme newTheme);
 }

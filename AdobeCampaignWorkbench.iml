@@ -8,7 +8,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="cat.inspiracio.rhino.js.engine" level="project" />
     <orderEntry type="library" name="fifesoft.rsyntaxtextarea" level="project" />
     <orderEntry type="library" name="fifesoft.autocomplete" level="project" />
     <orderEntry type="library" name="fifesoft.languagesupport" level="project" />
@@ -19,5 +18,6 @@
     <orderEntry type="library" name="tools.jackson.jaxrs.json.provider" level="project" />
     <orderEntry type="library" name="tools.jackson.core.databind" level="project" />
     <orderEntry type="library" name="tools.jackson.dataformat.xml" level="project" />
+    <orderEntry type="library" name="mozilla.rhino" level="project" />
   </component>
 </module>

@@ -6,7 +6,6 @@
         <element id="module-output" name="AdobeCampaignWorkbench" />
       </element>
       <element id="library" level="project" name="fxmisc.richtext.richtextfx" />
-      <element id="library" level="project" name="cat.inspiracio.rhino.js.engine" />
       <element id="library" level="project" name="fifesoft.autocomplete" />
       <element id="library" level="project" name="fifesoft.rstaui" />
       <element id="library" level="project" name="io.github.mkpaz.atlantafx.base" />

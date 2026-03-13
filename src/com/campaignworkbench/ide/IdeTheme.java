@@ -2,6 +2,7 @@ package com.campaignworkbench.ide;
 
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.NordLight;
+import com.campaignworkbench.util.UiUtil;
 
 import java.net.URL;
 
@@ -12,68 +13,27 @@ public enum IdeTheme {
 
     DARK (
             new CupertinoDark().getUserAgentStylesheet(),
-            "/styles/ide_styles_dark.css",
-            "/styles/campaign_syntax_styles_dark.css",
-            "/styles/xml_syntax_styles_dark.css",
-            "/styles/campaign_syntax_styles_dark.css",
-            "/styles/campaign_syntax_styles_dark.css"
+            "/styles/ide_styles_dark.css"
     ),
+
     LIGHT (
             new NordLight().getUserAgentStylesheet(),
-            "/styles/ide_styles_light.css",
-            "/styles/campaign_syntax_styles_light.css",
-            "/styles/xml_syntax_styles_light.css",
-            "/styles/campaign_syntax_styles_light.css",
-            "/styles/campaign_syntax_styles_light.css"
+            "/styles/ide_styles_light.css"
     );
 
     private final String atlantaFxStyleSheet;
     private final String ideStyleSheet;
-    private final String campaignSyntaxStyleSheet;
-    private final String xmlSyntaxStyleSheet;
-    private final String htmlSyntaxStyleSheet;
-    private final String javaScriptSyntaxStyleSheet;
 
-    IdeTheme(String atlantaFxStyleSheet, String ideStyleSheet, String campaignSyntaxStyleSheet, String xmlSyntaxStyleSheet, String htmlSyntaxStyleSheet, String javaScriptSyntaxStyleSheet) {
+    IdeTheme(String atlantaFxStyleSheet, String ideStyleSheet) {
         this.atlantaFxStyleSheet = atlantaFxStyleSheet;
-        this.campaignSyntaxStyleSheet = campaignSyntaxStyleSheet;
-        this.xmlSyntaxStyleSheet = xmlSyntaxStyleSheet;
-        this.htmlSyntaxStyleSheet = htmlSyntaxStyleSheet;
         this.ideStyleSheet = ideStyleSheet;
-        this.javaScriptSyntaxStyleSheet = javaScriptSyntaxStyleSheet;
     }
 
     public String getIdeStyleSheet() {
-        return ideStyleSheet;
+        return UiUtil.getStylesFromStyleSheet(ideStyleSheet);
     }
-
-    public String getCampaignSyntaxStyleSheet() {
-        return getStylesFromStyleSheet(campaignSyntaxStyleSheet);
-    }
-
-    public String getXmlSyntaxStyleSheet() {
-        return getStylesFromStyleSheet(xmlSyntaxStyleSheet);
-    }
-
-    public String getHtmlSyntaxStyleSheet() {
-        return getStylesFromStyleSheet(htmlSyntaxStyleSheet);
-    }
-
-    public String getJavaScriptSyntaxStyleSheet() {
-        return getStylesFromStyleSheet(javaScriptSyntaxStyleSheet);
-    }
-
     public String getAtlantaFxStyleSheet() {
         return atlantaFxStyleSheet;
     }
 
-    private String getStylesFromStyleSheet(String styleSheet) {
-        URL styleSheetUrl = this.getClass().getResource(styleSheet);
-        if( styleSheetUrl != null ) {
-            return styleSheetUrl.toExternalForm();
-        }
-        else {
-            throw new IdeException("Unable to locate style sheet: " + styleSheet, null);
-        }
-    }
 }

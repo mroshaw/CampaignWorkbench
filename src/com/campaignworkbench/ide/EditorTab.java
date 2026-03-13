@@ -34,13 +34,14 @@ public final class EditorTab extends Tab {
 
     private boolean isTextDirty;
     private ToggleButton toggleWrapButton;
+    private ErrorReporter errorReporter;
 
     /**
      * Constructor
      *
      * @param workspaceFile that the editor is editing
      */
-    public EditorTab(WorkspaceFile workspaceFile) {
+    public EditorTab(WorkspaceFile workspaceFile, ErrorReporter errorReporter) {
 
         this.workspaceFile = workspaceFile;
 
@@ -51,8 +52,8 @@ public final class EditorTab extends Tab {
         // Format toolbar
         Button formatButton = UiUtil.createButton("", "Format code", IdeIcon.FORMAT_CODE, true, "positive-icon", 20, 16, true, _ -> formatHandler());
         Button foldAllButton = UiUtil.createButton("", "Fold all", IdeIcon.FOLD_ALL, true, "positive-icon", 20, 16, true, _ -> foldAllHandler());
-        Button unfoldAllButton = UiUtil.createButton("", "Unfold all",IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, 16, true, _ -> unfoldAllHandler());
-        toggleWrapButton = UiUtil.createToggleButton("", "Toggle wrap",IdeIcon.WRAP_TEXT, true, "positive-icon", 20, 16, true, null );
+        Button unfoldAllButton = UiUtil.createButton("", "Unfold all", IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, 16, true, _ -> unfoldAllHandler());
+        toggleWrapButton = UiUtil.createToggleButton("", "Toggle wrap", IdeIcon.WRAP_TEXT, true, "positive-icon", 20, 16, true, null);
         toggleWrapButton.selectedProperty().addListener(this::toggleWrapHandler);
         ToolBar formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton, toggleWrapButton);
         formatToolBar.getStyleClass().add("small-toolbar");
@@ -118,7 +119,7 @@ public final class EditorTab extends Tab {
 
     private void updateTabText() {
         String tabName = workspaceFile.getFileName().toString();
-        if(isTextDirty) {
+        if (isTextDirty) {
             tabName += "*";
         }
         setText(tabName);
@@ -153,19 +154,23 @@ public final class EditorTab extends Tab {
     }
 
     private void tabClosedHandler(Event event) {
-        if(isTextDirty) {
+        if (isTextDirty) {
             YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Save changes?", "The file contents have changed. Do you want to save?", (Stage) getTabPane().getScene().getWindow());
-            if(result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
+            if (result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
                 event.consume();
             }
-            if(result == YesNoCancelPopupDialog.YesNoCancel.YES) {
+            if (result == YesNoCancelPopupDialog.YesNoCancel.YES) {
                 saveFile();
             }
         }
     }
 
     private void formatHandler() {
-        editor.formatCode(2);
+        try {
+            editor.formatCode(2);
+        } catch (IdeException ideException) {
+            errorReporter.reportError("An error occurred formatting the editor code", ideException, true);
+        }
     }
 
     private void foldAllHandler() {
@@ -182,7 +187,7 @@ public final class EditorTab extends Tab {
 
     private void findHandler() {
         String textToFind = findField.getText();
-        if(!Objects.equals(textToFind, "")) {
+        if (!Objects.equals(textToFind, "")) {
             editor.find(textToFind);
         }
     }

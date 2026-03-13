@@ -18,13 +18,14 @@ import java.util.List;
 public class EditorTabPanel implements IJavaFxNode {
 
     private final TabPane tabPane;
-
+    private final ErrorReporter errorReporter;
     /**
      * Constructor
      *
      * @param tabChangedListener action to call when the tab is changed
      */
-    public EditorTabPanel(ChangeListener<Tab> tabChangedListener) {
+    public EditorTabPanel(ChangeListener<Tab> tabChangedListener, ErrorReporter errorReporter) {
+        this.errorReporter = errorReporter;
         tabPane = new TabPane();
         tabPane.setMinHeight(0);
 
@@ -116,7 +117,7 @@ public class EditorTabPanel implements IJavaFxNode {
             return;
         }
 
-        EditorTab tab = new EditorTab(workspaceFile);
+        EditorTab tab = new EditorTab(workspaceFile, errorReporter);
         tab.setClosable(true);
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);

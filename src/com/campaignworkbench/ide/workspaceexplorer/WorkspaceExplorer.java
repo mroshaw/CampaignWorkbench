@@ -104,7 +104,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
     public WorkspaceExplorer(String labelText,
                              Consumer<WorkspaceFile> fileOpenHandler,
                              Consumer<Workspace> workspaceChangedHandler,
-                             Consumer<String> insertIntoCodeHandler, ErrorReporter errorReporter) {
+                             Consumer<String> insertIntoCodeHandler,
+                             ErrorReporter errorReporter) {
 
         this.fileOpenHandler = fileOpenHandler;
         this.insertIntoCodeHandler = insertIntoCodeHandler;

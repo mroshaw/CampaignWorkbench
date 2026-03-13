@@ -19,7 +19,7 @@ public final class ThemeManager {
      */
     public static void register(IThemeable editor) {
         themeables.add(editor);
-        editor.applyTheme(currentTheme);
+        editor.applyTheme(currentTheme, currentTheme);
     }
 
     /**
@@ -34,10 +34,11 @@ public final class ThemeManager {
      * @param theme the theme to apply
      */
     public static void setTheme(IdeTheme theme) {
+        IdeTheme oldTheme = currentTheme;
         currentTheme = theme;
 
         for (IThemeable themeable : themeables) {
-            themeable.applyTheme(theme);
+            themeable.applyTheme(oldTheme, theme);
         }
     }
 }
