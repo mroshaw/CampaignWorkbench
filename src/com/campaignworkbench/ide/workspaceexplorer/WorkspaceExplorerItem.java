@@ -59,7 +59,6 @@ public class WorkspaceExplorerItem {
             super(icon, iconStyleClass, fileType, addNewHandler, addExistingHandler);
 
             Node iconNode = icon.getIcon(20, iconStyleClass, true);
-            iconNode.setScaleX(16.0/20.0);
             Label labelPart = new Label(staticText);
             container = new HBox(iconNode, labelPart);
             this.container.getStyleClass().add("tree-item-container");
@@ -73,7 +72,6 @@ public class WorkspaceExplorerItem {
 
             // Create label
             Node iconNode = icon.getIcon(20, iconStyleClass, true);
-            iconNode.setScaleX(16.0/20.0);
             Text labelPart = new Text();
             if (observableText != null) {
                 labelPart.textProperty().bind(observableText);
