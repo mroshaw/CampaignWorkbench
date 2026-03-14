@@ -66,7 +66,7 @@ public class RichTextFXEditor implements ICodeEditor {
         // When text changes
         codeArea.textProperty().addListener((_, _, newText) -> {
             // Re-evaluate and apply styling
-            if(syntaxStyler != null) {
+            if (syntaxStyler != null) {
                 StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(newText);
                 if (computedStyleSpans != null) {
                     codeArea.setStyleSpans(0, computedStyleSpans);
@@ -74,41 +74,87 @@ public class RichTextFXEditor implements ICodeEditor {
             }
 
             // Re-evaluate and apply folding
-            if(foldParser != null) {
+            if (foldParser != null) {
                 foldParser.refresh();
             }
         });
 
         codeArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-            if (e.getCode() == KeyCode.TAB) {
-                e.consume();
+            if (e.getCode() != KeyCode.TAB) return;
+            e.consume();
 
-                IndexRange selection = codeArea.getSelection();
+            boolean dedent = e.isShiftDown();
+            IndexRange selection = codeArea.getSelection();
 
-                // No selection → insert two spaces at caret
-                if (selection.getLength() == 0) {
+            // No selection → insert or remove two spaces at caret
+            if (selection.getLength() == 0) {
+                if (!dedent) {
                     codeArea.replaceSelection("  ");
-                    return;
+                } else {
+                    // Remove up to 2 spaces before caret
+                    int caretPos = codeArea.getCaretPosition();
+                    int col = codeArea.offsetToPosition(caretPos, TwoDimensional.Bias.Backward).getMinor();
+                    String lineText = codeArea.getParagraph(codeArea.getCurrentParagraph()).getText();
+                    int spacesToRemove = 0;
+                    for (int i = 0; i < 2 && (col - spacesToRemove) > 0 && lineText.charAt(col - spacesToRemove - 1) == ' '; i++) {
+                        spacesToRemove++;
+                    }
+                    if (spacesToRemove > 0) {
+                        codeArea.deleteText(caretPos - spacesToRemove, caretPos);
+                    }
                 }
+                return;
+            }
 
-                int startPar = codeArea.offsetToPosition(selection.getStart(), TwoDimensional.Bias.Forward).getMajor();
-                int endPar = codeArea.offsetToPosition(selection.getEnd(), TwoDimensional.Bias.Backward).getMajor();
+            int startPar = codeArea.offsetToPosition(selection.getStart(), TwoDimensional.Bias.Forward).getMajor();
+            int endPar = codeArea.offsetToPosition(selection.getEnd(), TwoDimensional.Bias.Backward).getMajor();
 
+            if (!dedent) {
+                // Indent — insert two spaces at the start of each line
                 var multi = codeArea.createMultiChange();
-
                 for (int i = startPar; i <= endPar; i++) {
                     int lineStart = codeArea.getAbsolutePosition(i, 0);
                     multi.insertText(lineStart, "  ");
                 }
-
                 multi.commit();
 
-                // Restore selection expanded by 2 chars per line
                 int lines = endPar - startPar + 1;
                 codeArea.selectRange(
                         selection.getStart(),
                         selection.getEnd() + (lines * 2)
                 );
+            } else {
+                // Dedent — remove up to 2 leading spaces from each line
+                var multi = codeArea.createMultiChange();
+                int[] spacesRemovedPerLine = new int[endPar - startPar + 1];
+                boolean anyChanges = false;
+
+                for (int i = startPar; i <= endPar; i++) {
+                    String lineText = codeArea.getParagraph(i).getText();
+                    int spacesToRemove = 0;
+                    for (int j = 0; j < 2 && j < lineText.length() && lineText.charAt(j) == ' '; j++) {
+                        spacesToRemove++;
+                    }
+                    spacesRemovedPerLine[i - startPar] = spacesToRemove;
+                    if (spacesToRemove > 0) {
+                        int lineStart = codeArea.getAbsolutePosition(i, 0);
+                        multi.deleteText(lineStart, lineStart + spacesToRemove);
+                        anyChanges = true;
+                    }
+                }
+
+                if (!anyChanges) return;
+
+                multi.commit();
+
+                // Restore selection shrunk by spaces removed
+                int firstLineRemoved = spacesRemovedPerLine[0];
+                int totalRemoved = 0;
+                for (int s : spacesRemovedPerLine) totalRemoved += s;
+
+                int newStart = Math.max(0, selection.getStart() - firstLineRemoved);
+                int newEnd = Math.max(newStart, selection.getEnd() - totalRemoved);
+                codeArea.selectRange(newStart, newEnd);
             }
         });
     }
@@ -128,7 +174,7 @@ public class RichTextFXEditor implements ICodeEditor {
         String newText = text.replace("\t", "  ");
         codeArea.replaceText(newText);
 
-        if(syntaxStyler == null) {
+        if (syntaxStyler == null) {
             return;
         }
         StyleSpans<Collection<String>> computedStyleSpans = syntaxStyler.style(codeArea.getText());
@@ -238,7 +284,7 @@ public class RichTextFXEditor implements ICodeEditor {
         } catch (Exception ex) {
             throw new IdeException("Error formatting code", ex);
         }
-        if(formattedCode.isEmpty()) {
+        if (formattedCode.isEmpty()) {
             throw new IdeException("Unexpected error formatting code", null);
         }
         setText(formattedCode);
