@@ -1,0 +1,248 @@
+package com.campaignworkbench.ide.workspaceexplorer;
+
+import com.campaignworkbench.adobecampaignapi.ApiException;
+import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
+import com.campaignworkbench.adobecampaignapi.schemas.EtmModuleSchemaKey;
+import com.campaignworkbench.adobecampaignapi.schemas.EtmModuleRecord;
+import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockRecord;
+import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockSchemaKey;
+import com.campaignworkbench.ide.logging.ErrorReporter;
+import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
+import com.campaignworkbench.util.FileUtil;
+import com.campaignworkbench.workspace.*;
+import javafx.application.Platform;
+import javafx.stage.Stage;
+import javafx.stage.Window;
+
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+public class CampaignOperationsHandler {
+
+    private final CampaignServerManager campaignServerManager;
+    private final ErrorReporter errorReporter;
+    private final Consumer<WorkspaceFile> fileOpenHandler;
+    private final Supplier<Workspace> workspaceSupplier;
+    private final Supplier<WorkspaceFile> selectedFileSupplier;
+    private final Supplier<WorkspaceFileType> selectedFileTypeSupplier;
+    private final Runnable onConnectionStateChanged;
+    private final Supplier<Window> windowSupplier;
+
+    private boolean isConnectedToCampaign;
+    private String connectionHostLabel = "";
+
+    public CampaignOperationsHandler(
+            ErrorReporter errorReporter,
+            Consumer<WorkspaceFile> fileOpenHandler,
+            Supplier<Workspace> workspaceSupplier,
+            Supplier<WorkspaceFile> selectedFileSupplier,
+            Supplier<WorkspaceFileType> selectedFileTypeSupplier,
+            Runnable onConnectionStateChanged,
+            Supplier<Window> windowSupplier) {
+
+        this.errorReporter = errorReporter;
+        this.fileOpenHandler = fileOpenHandler;
+        this.workspaceSupplier = workspaceSupplier;
+        this.selectedFileSupplier = selectedFileSupplier;
+        this.selectedFileTypeSupplier = selectedFileTypeSupplier;
+        this.onConnectionStateChanged = onConnectionStateChanged;
+        this.windowSupplier = windowSupplier;
+        this.campaignServerManager = new CampaignServerManager();
+    }
+
+    public boolean isConnectedToCampaign() {
+        return isConnectedToCampaign;
+    }
+
+    public String getConnectionHostLabel() {
+        return connectionHostLabel;
+    }
+
+    public void connectToCampaignHandler() {
+        try {
+            campaignServerManager.connect();
+        } catch (ApiException apiException) {
+            errorReporter.reportError("An error occurred connecting to Adobe Campaign. Please check File > Settings!", true);
+            return;
+        }
+        errorReporter.logMessage("Connected to Campaign server at: " + campaignServerManager.getEndpointUrl());
+        isConnectedToCampaign = true;
+        String endPointUrl = campaignServerManager.getEndpointUrl();
+        String host = URI.create(endPointUrl).getHost();
+        String hostname = host.split("\\.")[0];
+        connectionHostLabel = hostname;
+        Platform.runLater(onConnectionStateChanged::run);
+    }
+
+    public void disconnectFromCampaignHandler() {
+        try {
+            campaignServerManager.disconnect();
+            errorReporter.logMessage("Disconnected from Campaign at: " + campaignServerManager.getEndpointUrl());
+            isConnectedToCampaign = false;
+            connectionHostLabel = "";
+            Platform.runLater(onConnectionStateChanged::run);
+        } catch (ApiException apiException) {
+            errorReporter.reportError("An error occurred disconnecting from Adobe Campaign", apiException, true);
+        }
+    }
+
+    public Optional<Object> confirmCreateNew() {
+        WorkspaceFileType selectedFileType = selectedFileTypeSupplier.get();
+
+        if (selectedFileType == WorkspaceFileType.BLOCK) {
+            Optional<PersoBlockRecord> newBlock = CampaignBlockPickerDialog.show(windowSupplier.get(), campaignServerManager);
+            return newBlock.map(b -> (Object) b);
+        }
+
+        if (selectedFileType == WorkspaceFileType.MODULE) {
+            Optional<EtmModuleRecord> newModule = CampaignModulePickerDialog.show(windowSupplier.get(), campaignServerManager);
+            return newModule.map(m -> (Object) m);
+        }
+
+        return Optional.empty();
+    }
+
+    public void executeCreateNew(Object record) {
+        WorkspaceFileType selectedFileType = selectedFileTypeSupplier.get();
+
+        if (record instanceof PersoBlockRecord newBlock) {
+            PersoBlockSchemaKey key = (PersoBlockSchemaKey) newBlock.getKey();
+            errorReporter.logMessage("Creating " + selectedFileType + " from Adobe Campaign using " + newBlock.getLabel() + " with key " + key.getId() + ". Please wait...");
+            WorkspaceFile newFile = workspaceSupplier.get().createNewWorkspaceFile(newBlock.getName(), WorkspaceFileType.BLOCK, newBlock.getCode(), key);
+            newFile.setKey(key);
+            fileOpenHandler.accept(newFile);
+        }
+
+        if (record instanceof EtmModuleRecord newModule) {
+            EtmModuleSchemaKey key = (EtmModuleSchemaKey) newModule.getKey();
+            System.out.println("Create new " + selectedFileType + " from " + newModule.getLabel() + " with key (" + key.getNamespace() + ":" + key.getName() + ")");
+            WorkspaceFile newFile = workspaceSupplier.get().createNewWorkspaceFile(newModule.getName(), WorkspaceFileType.MODULE, newModule.getCode(), key);
+            fileOpenHandler.accept(newFile);
+        }
+
+        errorReporter.logMessage("Created new " + selectedFileType + " from Adobe Campaign");
+    }
+
+    public boolean confirmRefresh() {
+        WorkspaceFile selectedFile = selectedFileSupplier.get();
+        WorkspaceFileType selectedFileType = selectedFileTypeSupplier.get();
+
+        if (!selectedFile.hasCampaignKey()) {
+            errorReporter.reportError("The selected file does not have a Campaign key!", true);
+            return false;
+        }
+
+        return YesNoPopupDialog.show("Are you sure?", "Are you sure you want to refresh " + selectedFileType + " " + selectedFile.getFileName() + " from Adobe Campaign?", (Stage) windowSupplier.get()) == YesNoPopupDialog.YesNo.YES;
+    }
+
+    public void executeRefresh() {
+        WorkspaceFile selectedFile = selectedFileSupplier.get();
+        WorkspaceFileType selectedFileType = selectedFileTypeSupplier.get();
+
+        errorReporter.logMessage("Refreshing " + selectedFile.getBaseFileName() + " from Adobe Campaign. Please wait...");
+        try {
+            if (selectedFileType == WorkspaceFileType.BLOCK) {
+                campaignServerManager.refreshBlocks();
+                PersoBlockSchemaKey key = (PersoBlockSchemaKey) selectedFile.getKey();
+                Optional<PersoBlockRecord> block = campaignServerManager.getPersonalizationBlock(key);
+                if (block.isPresent()) {
+                    selectedFile.saveWorkspaceFileContent(block.get().getCode());
+                    fileOpenHandler.accept(selectedFile);
+                }
+            }
+
+            if (selectedFileType == WorkspaceFileType.MODULE) {
+                campaignServerManager.refreshJavaScriptTemplates();
+                EtmModuleSchemaKey key = (EtmModuleSchemaKey) selectedFile.getKey();
+                Optional<EtmModuleRecord> javascriptTemplate = campaignServerManager.getJavaScriptTemplate(key);
+                if (javascriptTemplate.isPresent()) {
+                    selectedFile.saveWorkspaceFileContent(javascriptTemplate.get().getCode());
+                    fileOpenHandler.accept(selectedFile);
+                }
+            }
+            errorReporter.logMessage("Refreshed " + selectedFileType + " " + selectedFile.getBaseFileName() + " from Adobe Campaign");
+        } catch (ApiException apiException) {
+            errorReporter.reportError("An error occurred refreshing " + selectedFile.getBaseFileName() + " from Adobe Campaign", apiException, true);
+        }
+    }
+
+    public Optional<Boolean> confirmPush() {
+        WorkspaceFile selectedFile = selectedFileSupplier.get();
+        WorkspaceFileType selectedFileType = selectedFileTypeSupplier.get();
+
+        if (!selectedFile.hasCampaignKey()) {
+            errorReporter.reportError("The selected file does not have a Campaign key!", true);
+            return Optional.empty();
+        }
+
+        String fileTypeLower = selectedFileType.toString().toLowerCase();
+        String selectedFileName = selectedFile.getFileName();
+
+        if (YesNoPopupDialog.show("Are you sure?", "Are you sure you want to push " + fileTypeLower + " " + selectedFileName + " to Adobe Campaign?", (Stage) windowSupplier.get()) == YesNoPopupDialog.YesNo.NO) {
+            return Optional.empty();
+        }
+
+        boolean doBackup = YesNoPopupDialog.show("Backup existing code?", "Do you want to create a backup of " + fileTypeLower + " " + selectedFileName + " from Adobe Campaign?", (Stage) windowSupplier.get()) == YesNoPopupDialog.YesNo.YES;
+        return Optional.of(doBackup);
+    }
+
+    public void executePush(boolean doBackup) {
+        WorkspaceFile selectedFile = selectedFileSupplier.get();
+        WorkspaceFileType selectedFileType = selectedFileTypeSupplier.get();
+        String fileTypeLower = selectedFileType.toString().toLowerCase();
+        String selectedFileName = selectedFile.getFileName();
+
+        if (selectedFile instanceof EtmModule etmModule) {
+            EtmModuleSchemaKey moduleKey = etmModule.getKey();
+            if (doBackup) {
+                Optional<EtmModuleRecord> backupModule = campaignServerManager.getJavaScriptTemplate(moduleKey);
+                if (backupModule.isPresent()) {
+                    Path backupPath = selectedFile.getBackupFilePath();
+                    try {
+                        FileUtil.write(backupPath, backupModule.get().getCode());
+                        errorReporter.logMessage("Successfully backed up " + fileTypeLower + " " + selectedFileName + " to " + backupPath + " from Campaign server!");
+                    } catch (RuntimeException rte) {
+                        errorReporter.reportError("An error occurred while writing the backup of " + fileTypeLower + " " + selectedFileName + " to " + backupPath, rte, true);
+                    }
+                } else {
+                    errorReporter.reportError("Could not retrieve " + fileTypeLower + " " + selectedFileName + " from Campaign server! Aborting push operation.", true);
+                    return;
+                }
+            }
+            try {
+                campaignServerManager.updateJavascriptTemplate(moduleKey, selectedFile.getWorkspaceFileContent());
+                errorReporter.logMessage("Successfully updated " + fileTypeLower + " " + selectedFileName + " on Campaign server!");
+            } catch (ApiException apiException) {
+                errorReporter.reportError("Failed to update " + fileTypeLower + " " + selectedFileName + " on Campaign server!", apiException, true);
+            }
+        } else if (selectedFile instanceof PersoBlock persoBlock) {
+            PersoBlockSchemaKey blockKey = persoBlock.getKey();
+            if (doBackup) {
+                Optional<PersoBlockRecord> backupBlock = campaignServerManager.getPersonalizationBlock(blockKey);
+                if (backupBlock.isPresent()) {
+                    Path backupPath = selectedFile.getBackupFilePath();
+                    try {
+                        FileUtil.write(backupPath, backupBlock.get().getCode());
+                        errorReporter.logMessage("Successfully backed up " + fileTypeLower + " " + selectedFileName + " to " + backupPath + " from Campaign server!");
+                    } catch (RuntimeException rte) {
+                        errorReporter.reportError("An error occurred while writing the backup of " + fileTypeLower + " " + selectedFileName + " to " + backupPath, rte, true);
+                    }
+                } else {
+                    errorReporter.reportError("Could not retrieve " + fileTypeLower + " " + selectedFileName + " from Campaign server! Aborting push operation.", true);
+                    return;
+                }
+            }
+            try {
+                campaignServerManager.updatePersonalizationBlock(blockKey, selectedFile.getWorkspaceFileContent());
+                errorReporter.logMessage("Successfully updated " + fileTypeLower + " " + selectedFileName + " on Campaign server!");
+            } catch (ApiException apiException) {
+                errorReporter.reportError("Failed to update " + fileTypeLower + " " + selectedFileName + " on Campaign server!", apiException, true);
+            }
+        } else {
+            errorReporter.reportError("File " + fileTypeLower + " " + selectedFileName + " is not supported for syncing with Campaign server!", true);
+        }
+    }
+}

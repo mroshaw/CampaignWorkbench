@@ -2,7 +2,7 @@ package com.campaignworkbench.adobecampaignapi.schemas;
 
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public class Source {
+public class SourceRecord {
 
     @JacksonXmlProperty(isAttribute = true)
     private boolean dependOnFormat;

@@ -2,7 +2,7 @@ package com.campaignworkbench.adobecampaignapi.schemas;
 
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public class PersonalizationBlock implements ISchemaKey {
+public class PersoBlockRecord implements ISchemaKey {
     @JacksonXmlProperty(isAttribute = true)
     private long id;
 
@@ -13,8 +13,8 @@ public class PersonalizationBlock implements ISchemaKey {
     private String label;
 
     // Elements
-    private Source source;
-    private Folder folder;
+    private SourceRecord source;
+    private FolderRecord folder;
 
     public void setId(long id) {
         this.id = id;
@@ -28,11 +28,11 @@ public class PersonalizationBlock implements ISchemaKey {
         this.label = label;
     }
 
-    public void setFolder(Folder folder) {
+    public void setFolder(FolderRecord folder) {
         this.folder = folder;
     }
 
-    public void setSource(Source source) {
+    public void setSource(SourceRecord source) {
         this.source = source;
     }
 
@@ -52,7 +52,7 @@ public class PersonalizationBlock implements ISchemaKey {
         return source.getText();
     }
 
-    public Folder getFolder() {
+    public FolderRecord getFolder() {
         return folder;
     }
 
@@ -66,6 +66,6 @@ public class PersonalizationBlock implements ISchemaKey {
 
     @Override
     public SchemaKey getKey() {
-        return new PersonalizationBlockKey(id);
+        return new PersoBlockSchemaKey(id);
     }
 }

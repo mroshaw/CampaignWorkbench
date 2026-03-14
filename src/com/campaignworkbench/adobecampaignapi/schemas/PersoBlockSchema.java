@@ -5,17 +5,17 @@ import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import java.util.List;
 
-public class PersonalizationBlockCollection extends CampaignSchema {
+public class PersoBlockSchema extends CampaignSchema {
 
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "includeView")
-    private List<PersonalizationBlock> personalisationBlock;
+    private List<PersoBlockRecord> personalisationBlock;
 
-    public PersonalizationBlockCollection() {
+    public PersoBlockSchema() {
         super();
     }
 
-    public List<PersonalizationBlock> getPersonalisationBlocks() {
+    public List<PersoBlockRecord> getPersonalisationBlocks() {
         return personalisationBlock;
     }
 
@@ -43,7 +43,7 @@ public class PersonalizationBlockCollection extends CampaignSchema {
                 """;
     }
 
-    public static String getUpdateXml(PersonalizationBlockKey key, String code) {
+    public static String getUpdateXml(PersoBlockSchemaKey key, String code) {
         return """
                 <includeView xtkschema="nms:includeView" id="%s" _key="@id" >
                 <source><text><![CDATA[%s]]></text></source>

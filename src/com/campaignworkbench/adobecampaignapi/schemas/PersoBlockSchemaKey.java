@@ -8,15 +8,15 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
         setterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE
 )
-public class PersonalizationBlockKey extends SchemaKey {
+public class PersoBlockSchemaKey extends SchemaKey {
     private long id;
 
-    public PersonalizationBlockKey(long id) {
+    public PersoBlockSchemaKey(long id) {
         this.id = id;
     }
 
     // Need for JSON deserialization
-    public PersonalizationBlockKey() {}
+    public PersoBlockSchemaKey() {}
 
     public long getId() {
         return id;

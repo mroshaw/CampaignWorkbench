@@ -8,17 +8,17 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
         setterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE
 )
-public class JavaScriptTemplateKey extends SchemaKey {
+public class EtmModuleSchemaKey extends SchemaKey {
     private String name;
     private String namespace;
 
-    public JavaScriptTemplateKey(String name, String namespace) {
+    public EtmModuleSchemaKey(String name, String namespace) {
         this.name = name;
         this.namespace = namespace;
     }
 
     // Need for JSON deserialization
-    public JavaScriptTemplateKey() {}
+    public EtmModuleSchemaKey() {}
 
     public String getName() {
         return name;

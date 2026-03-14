@@ -1,10 +1,7 @@
 package com.campaignworkbench.test;
 
 import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
-import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlock;
-import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockCollection;
-import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplate;
-import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateCollection;
+import com.campaignworkbench.adobecampaignapi.schemas.*;
 
 import java.util.Optional;
 
@@ -23,10 +20,12 @@ public class CampaignQueryTest {
 
             campaignServerManager.refreshAll();
 
-            Optional<JavaScriptTemplate> template = campaignServerManager.getJavaScriptTemplate("ssg", "ETM_M00_END.js");
+            EtmModuleSchemaKey testKey = new EtmModuleSchemaKey("ssg", "\"ETM_M00_END.js\"");
+
+            Optional<EtmModuleRecord> template = campaignServerManager.getJavaScriptTemplate(testKey);
             template.ifPresent(javaScriptTemplate -> javaScriptTemplate.print(false));
 
-            Optional<PersonalizationBlock> block = campaignServerManager.getPersonalizationBlock(680205044);
+            Optional<PersoBlockRecord> block = campaignServerManager.getPersonalizationBlock(680205044);
             block.ifPresent(includeView -> includeView.print(true));
 
             // IncludeViewCollection blockCollection = CampaignServerManager.getAllPersoBlocks(true);
@@ -41,15 +40,15 @@ public class CampaignQueryTest {
 
     }
 
-    private static void printPersonBlocks(PersonalizationBlockCollection blockCollection) {
-        for (PersonalizationBlock view : blockCollection.getPersonalisationBlocks()) {
+    private static void printPersonBlocks(PersoBlockSchema blockCollection) {
+        for (PersoBlockRecord view : blockCollection.getPersonalisationBlocks()) {
             view.print(false);
         }
     }
 
 
-    private static void printJavaScriptTemplates(JavaScriptTemplateCollection javascriptTemplateCollection) {
-        for (JavaScriptTemplate template : javascriptTemplateCollection.getJavaScriptTemplates()) {
+    private static void printJavaScriptTemplates(EtmModuleSchema javascriptTemplateCollection) {
+        for (EtmModuleRecord template : javascriptTemplateCollection.getJavaScriptTemplates()) {
             template.print(false);
         }
     }

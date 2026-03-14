@@ -6,24 +6,28 @@ package com.campaignworkbench.workspace;
 public enum WorkspaceFileType {
     TEMPLATE(
             "Templates",
+            ".template",
             "Template File",
             "Template Files",
             "*.template"
     ),
     MODULE(
             "Modules",
+            ".module",
             "Module File",
             "Module Files",
             "*.module"
     ),
     BLOCK(
             "Blocks",
+            ".block",
             "Personalization Block File",
             "Block Files",
             "*.block"
     ),
     CONTEXT(
             "ContextXML",
+            ".xml",
             "Contexts",
             "XML Files",
             "*.xml"
@@ -31,6 +35,8 @@ public enum WorkspaceFileType {
 
     // Used to derive paths
     private final String folderName;
+    private final String fileExtension;
+
     // Used to determine text to use in an 'Open File' dialog window
     private final String fileOpenWindowTitle;
     private final String fileOpenExtensionFilterDescription;
@@ -38,12 +44,14 @@ public enum WorkspaceFileType {
 
     WorkspaceFileType(
             String folderName,
+            String fileExtension,
             String fileOpenWindowTitle,
             String fileOpenExtensionFilterDescription,
             String fileOpenExtensionFilter) {
 
-        this.fileOpenWindowTitle = fileOpenWindowTitle;
         this.folderName = folderName;
+        this.fileExtension = fileExtension;
+        this.fileOpenWindowTitle = fileOpenWindowTitle;
         this.fileOpenExtensionFilterDescription = fileOpenExtensionFilterDescription;
         this.fileOpenExtensionFilter = fileOpenExtensionFilter;
     }
@@ -62,6 +70,10 @@ public enum WorkspaceFileType {
 
     public String extensionFilter() {
         return fileOpenExtensionFilter;
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
     }
 
 }

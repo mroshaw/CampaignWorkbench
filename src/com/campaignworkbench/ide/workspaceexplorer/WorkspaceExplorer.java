@@ -1,18 +1,11 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
-import com.campaignworkbench.adobecampaignapi.ApiException;
-import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
-import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateKey;
-import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlock;
-import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplate;
-import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockKey;
-import com.campaignworkbench.ide.*;
-import com.campaignworkbench.ide.TextInputDialog;
+import com.campaignworkbench.ide.logging.ErrorReporter;
+import com.campaignworkbench.ide.IJavaFxNode;
+import com.campaignworkbench.ide.dialogs.TextInputDialog;
 import com.campaignworkbench.ide.dialogs.YesNoCancelPopupDialog;
-import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
 import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.util.FileUtil;
-import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.*;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,7 +16,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -32,7 +27,6 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.io.File;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -44,11 +38,6 @@ import java.util.function.Function;
  * User interface control to explore and navigate the files in a workspace
  */
 public class WorkspaceExplorer implements IJavaFxNode {
-
-    // Context menu labels
-    private static final String createNewButtonText = "Create new";
-    private static final String addExistingButtonText = "Add existing";
-    private static final String removeButtonText = "Remove";
 
     // Observables
     private final StringProperty workspaceName = new SimpleStringProperty("No workspace selected");
@@ -71,21 +60,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private final Consumer<WorkspaceFile> fileOpenHandler;
     private final Consumer<String> insertIntoCodeHandler;
 
-    // Toolbar buttons
-    private Button createNewButton;
-    private Button addExistingButton;
-    private Button removeButton;
-    private Button setDataContextButton;
-    private Button clearDataContextButton;
-    private Button setMessageContextButton;
-    private Button clearMessageContextButton;
-    private Button connectToCampaignButton;
-    private Button disconnectFromCampaignButton;
-    private Button createNewFromCampaignButton;
-    private Button refreshFromCampaignButton;
-    private Button pushToCampaignButton;
-
-    private Label urlHostLabel;
+    // Toolbar
+    private WorkspaceExplorerToolbar toolbar;
 
     // Main panel
     private VBox workspaceExplorerPanel;
@@ -94,8 +70,9 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private WorkspaceFile selectedFile;
 
     private final ErrorReporter errorReporter;
-    private final CampaignServerManager campaignServerManager;
-    private boolean isConnectedToCampaign;
+
+    private final CampaignOperationsHandler campaignOperationsHandler;
+
 
     /**
      * @param labelText           Label to use for the control in the UI
@@ -110,7 +87,17 @@ public class WorkspaceExplorer implements IJavaFxNode {
         this.fileOpenHandler = fileOpenHandler;
         this.insertIntoCodeHandler = insertIntoCodeHandler;
         this.errorReporter = errorReporter;
-        campaignServerManager = new CampaignServerManager();
+
+        campaignOperationsHandler = new CampaignOperationsHandler(
+                errorReporter,
+                fileOpenHandler,
+                this::getWorkspace,
+                () -> selectedFile,
+                () -> selectedFileType,
+                this::onCampaignConnectionStateChanged,
+                this::getWindow
+        );
+
         createUi(labelText);
     }
 
@@ -120,7 +107,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     public void setWorkspace(Workspace workspace) {
         this.workspace.setValue(workspace);
-        setToolbarButtonStates();
+        toolbar.update();
     }
 
     public boolean isWorkspaceOpen() {
@@ -231,25 +218,19 @@ public class WorkspaceExplorer implements IJavaFxNode {
         Label explorerLabel = new Label(labelText);
         explorerLabel.getStyleClass().add("ide-label");
 
-        // Mini toolbar
-        createNewButton = UiUtil.createMiniToolbarButton("", "Create new", IdeIcon.NEW_FILE, true, "neutral-icon", 20, true, _ -> createNewHandler());
-        addExistingButton = UiUtil.createMiniToolbarButton("", "Add existing",IdeIcon.ADD_FILE, true, "positive-icon", 20, true, _ -> addExistingHandler());
-        removeButton = UiUtil.createMiniToolbarButton("", "Remove", IdeIcon.DELETE_FILE, true,"negative-icon", 20, true, _ -> deleteHandler());
-        setDataContextButton = UiUtil.createMiniToolbarButton("", "Set Data Context", IdeIcon.SET_DATA_CONTEXT, true, "positive-icon", 20, true, _ -> setDataContextHandler());
-        clearDataContextButton = UiUtil.createMiniToolbarButton("", "Clear Data Context", IdeIcon.CLEAR_DATA_CONTEXT, true, "negative-icon", 20, true, _ -> clearDataContextHandler());
-        setMessageContextButton = UiUtil.createMiniToolbarButton("", "Set Message Context", IdeIcon.SET_MESSAGE_CONTEXT, true, "positive-icon", 20, true, _ -> setMessageContextHandler());
-        clearMessageContextButton = UiUtil.createMiniToolbarButton("", "Clear Message Context", IdeIcon.CLEAR_MESSAGE_CONTEXT, true, "negative-icon", 20,  true, _ -> clearMessageContextHandler());
-
-        // Campaign connection toolbar buttons
-        connectToCampaignButton = UiUtil.createMiniToolbarButton("", "Connect to Campaign", IdeIcon.CONNECT,  true,"positive-icon", 20, true, _ -> connectToCampaignHandler());
-        disconnectFromCampaignButton = UiUtil.createMiniToolbarButton("", "Disconnect from Campaign", IdeIcon.DISCONNECT, true,"negative-icon", 20, false, _ -> disconnectFromCampaignHandler());
-        createNewFromCampaignButton = UiUtil.createMiniToolbarButton("", "Create new from Campaign", IdeIcon.NEW_FROM_CAMPAIGN,  true,"positive-icon", 20, false, _ -> createNewFromCampaignHandler());
-        refreshFromCampaignButton = UiUtil.createMiniToolbarButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, false, _ -> refreshFromCampaignHandler());
-        pushToCampaignButton = UiUtil.createMiniToolbarButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, false, _ -> pushToCampaignHandler());
-        urlHostLabel = new Label();
-
-        ToolBar workspaceToolbar = new ToolBar(createNewButton, addExistingButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
-        ToolBar campaignToolbar = new ToolBar(connectToCampaignButton, disconnectFromCampaignButton, createNewFromCampaignButton, refreshFromCampaignButton, pushToCampaignButton, urlHostLabel);
+        toolbar = new WorkspaceExplorerToolbar(
+                campaignOperationsHandler,
+                this::getWorkspace,
+                () -> selectedFile,
+                () -> selectedFileType,
+                this::createNewHandler,
+                this::addExistingHandler,
+                this::deleteHandler,
+                this::setDataContextHandler,
+                this::clearDataContextHandler,
+                this::setMessageContextHandler,
+                this::clearMessageContextHandler
+        );
 
         // TreeView for all items
         treeView = new TreeView<>();
@@ -282,7 +263,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         WorkspaceExplorerItem.applyCellFactory(treeView);
 
         // Create the main explorer container
-        workspaceExplorerPanel = new VBox(explorerLabel, campaignToolbar, workspaceToolbar, treeView);
+        workspaceExplorerPanel = new VBox(explorerLabel, toolbar.getCampaignToolbar(), toolbar.getWorkspaceToolbar(), treeView);
         workspaceExplorerPanel.setMinHeight(0);
         VBox.setVgrow(treeView, Priority.ALWAYS);
 
@@ -294,10 +275,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         // Set style classes
         workspaceExplorerPanel.getStyleClass().add("workspace-explorer");
-        workspaceToolbar.getStyleClass().add("small-toolbar");
-        campaignToolbar.getStyleClass().add("small-toolbar");
-
-        setToolbarButtonStates();
+        toolbar.update();
     }
 
     private void selectionChangedHandler(ObservableValue obs, TreeItem oldItem, TreeItem newItem) {
@@ -320,95 +298,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 selectedFileType = parentFolder.fileType;
                 selectedFile = null;
             }
-            setToolbarButtonStates();
-        }
-    }
-
-    private void setToolbarButtonStates() {
-
-        if(workspace.getValue() == null) {
-            setDataContextButton.setDisable(true);
-            clearDataContextButton.setDisable(true);
-            setMessageContextButton.setDisable(true);
-            clearMessageContextButton.setDisable(true);
-            addExistingButton.setDisable(true);
-            createNewButton.setDisable(true);
-            removeButton.setDisable(true);
-            pushToCampaignButton.setDisable(true);
-            refreshFromCampaignButton.setDisable(true);
-            createNewFromCampaignButton.setDisable(true);
-            connectToCampaignButton.setDisable(true);
-            disconnectFromCampaignButton.setDisable(true);
-            return;
-        }
-
-        connectToCampaignButton.setDisable(isConnectedToCampaign);
-        disconnectFromCampaignButton.setDisable(!isConnectedToCampaign);
-
-        if (selectedFile == null) {
-            setDataContextButton.setDisable(true);
-            clearDataContextButton.setDisable(true);
-            setMessageContextButton.setDisable(true);
-            clearMessageContextButton.setDisable(true);
-        }
-
-        if (selectedFileType == null) {
-            addExistingButton.setDisable(true);
-            createNewButton.setDisable(true);
-            removeButton.setDisable(true);
-            return;
-        }
-
-        createNewButton.setTooltip(new Tooltip(createNewButtonText + " " + selectedFileType.toString().toLowerCase()));
-        addExistingButton.setTooltip(new Tooltip(addExistingButtonText + " " + selectedFileType.toString().toLowerCase()));
-        removeButton.setTooltip(new Tooltip(removeButtonText + " " + selectedFileType.toString().toLowerCase()));
-
-        boolean isWorkspaceFileSelected = selectedFile != null;
-        boolean isTemplateSelected = selectedFileType == WorkspaceFileType.TEMPLATE && isWorkspaceFileSelected;
-        boolean isModuleSelected = selectedFileType == WorkspaceFileType.MODULE && isWorkspaceFileSelected;
-
-        addExistingButton.setDisable(false);
-        createNewButton.setDisable(false);
-        removeButton.setDisable(!isWorkspaceFileSelected);
-
-        switch (selectedFileType) {
-            case TEMPLATE:
-                pushToCampaignButton.setDisable(!(isTemplateSelected && isConnectedToCampaign));
-
-                setDataContextButton.setDisable(!isTemplateSelected);
-                clearDataContextButton.setDisable(!isTemplateSelected);
-                setMessageContextButton.setDisable(!isTemplateSelected);
-                clearMessageContextButton.setDisable(!isTemplateSelected);
-                pushToCampaignButton.setDisable(!isConnectedToCampaign);
-                break;
-            case MODULE:
-                createNewFromCampaignButton.setDisable(!isConnectedToCampaign);
-                pushToCampaignButton.setDisable(!(isWorkspaceFileSelected && isConnectedToCampaign && selectedFile.hasCampaignKey()));
-                refreshFromCampaignButton.setDisable(!(isWorkspaceFileSelected && isConnectedToCampaign && selectedFile.hasCampaignKey()));
-                setDataContextButton.setDisable(!isModuleSelected);
-                clearDataContextButton.setDisable(!isModuleSelected);
-                setMessageContextButton.setDisable(true);
-                clearMessageContextButton.setDisable(true);
-                break;
-            case BLOCK:
-                createNewFromCampaignButton.setDisable(!isConnectedToCampaign);
-                pushToCampaignButton.setDisable(!(isWorkspaceFileSelected && isConnectedToCampaign && selectedFile.hasCampaignKey()));
-                refreshFromCampaignButton.setDisable(!(isWorkspaceFileSelected && isConnectedToCampaign && selectedFile.hasCampaignKey()));
-                setDataContextButton.setDisable(true);
-                clearDataContextButton.setDisable(true);
-                setMessageContextButton.setDisable(true);
-                clearMessageContextButton.setDisable(true);
-                break;
-            case CONTEXT:
-            default:
-                pushToCampaignButton.setDisable(true);
-                refreshFromCampaignButton.setDisable(true);
-                createNewFromCampaignButton.setDisable(true);
-                setDataContextButton.setDisable(true);
-                clearDataContextButton.setDisable(true);
-                setMessageContextButton.setDisable(true);
-                clearMessageContextButton.setDisable(true);
-                break;
+            toolbar.update();
         }
     }
 
@@ -452,7 +342,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
             errorReporter.reportError("The selected folder is not a valid workspace folder!", true);
         }
 
-        setToolbarButtonStates();
+        toolbar.update();
     }
 
     public void saveWorkspace() {
@@ -510,6 +400,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
     }
 
+    private void onCampaignConnectionStateChanged() {
+        toolbar.onCampaignConnectionStateChanged();
+    }
+
     private void insertIntoCode(String textToInsert) {
         insertIntoCodeHandler.accept(textToInsert);
     }
@@ -562,133 +456,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private void clearMessageContextHandler() {
         if (selectedFile instanceof Template workspaceFile) {
             workspaceFile.clearMessageContext();
-        }
-    }
-
-    private void connectToCampaignHandler() {
-        try {
-            campaignServerManager.connect();
-        } catch (ApiException apiException) {
-            errorReporter.reportError("An error occurred connecting to Adobe Campaign. Please check File > Settings!", true);
-            return;
-        }
-        errorReporter.logMessage("Connected to Campaign server at: " + campaignServerManager.getEndpointUrl());
-        isConnectedToCampaign = true;
-        String endPointUrl = campaignServerManager.getEndpointUrl();
-        String host = URI.create(endPointUrl).getHost(); // "specsavers-mkt-stage14.campaign.adobe.com"
-        String hostname = host.split("\\.")[0];  // "specsavers-mkt-stage14"
-        urlHostLabel.setText(hostname);
-        setToolbarButtonStates();
-    }
-
-    private void disconnectFromCampaignHandler() {
-        try {
-            campaignServerManager.disconnect();
-            errorReporter.logMessage("Disconnected from Campaign at: " + campaignServerManager.getEndpointUrl());
-            isConnectedToCampaign = false;
-            setToolbarButtonStates();
-            urlHostLabel.setText("");
-        } catch (ApiException apiException) {
-            errorReporter.reportError("An error occurred disconnecting from Adobe Campaign", apiException, true);
-        }
-    }
-
-    private void createNewFromCampaignHandler() {
-        if(selectedFileType == WorkspaceFileType.BLOCK) {
-            Optional<PersonalizationBlock> newBlock = CampaignBlockPickerDialog.show(getWindow(), campaignServerManager);
-            if(newBlock.isEmpty()) {
-                return;
-            }
-
-            PersonalizationBlockKey key = (PersonalizationBlockKey)newBlock.get().getKey();
-            // System.out.println("Create new " + selectedFileType + " from " + newBlock.get().getLabel() + " with key " + key.getId());
-
-            errorReporter.logMessage("Creating " + selectedFileType + " from Adobe Campaign using " + newBlock.get().getLabel() + " with key " + key.getId() + ". Please wait...");
-            WorkspaceFile newFile = workspace.get().createNewWorkspaceFile(newBlock.get().getName(), WorkspaceFileType.BLOCK, newBlock.get().getCode(), key);
-            newFile.setKey(key);
-            fileOpenHandler.accept(newFile);
-        }
-
-        if(selectedFileType == WorkspaceFileType.MODULE) {
-            Optional<JavaScriptTemplate> newModule = CampaignModulePickerDialog.show(getWindow(), campaignServerManager);
-            if(newModule.isEmpty()) {
-                return;
-            }
-            JavaScriptTemplateKey key = (JavaScriptTemplateKey)newModule.get().getKey();
-            System.out.println("Create new " + selectedFileType + " from " + newModule.get().getLabel() + " with key (" + key.getNamespace() + ":" + key.getName() + ")");
-
-            WorkspaceFile newFile = workspace.get().createNewWorkspaceFile(newModule.get().getName(), WorkspaceFileType.MODULE, newModule.get().getCode(), key);
-
-            fileOpenHandler.accept(newFile);
-        }
-        errorReporter.logMessage("Created new " + selectedFileType + " from Adobe Campaign");
-    }
-
-    private void refreshFromCampaignHandler() {
-        if(!selectedFile.hasCampaignKey())
-        {
-            errorReporter.reportError("The selected file does not have a Campaign key!", true);
-            return;
-        }
-
-        if(YesNoPopupDialog.show("Are you sure?", "Are you sure you want to refresh " + selectedFileType + " " + selectedFile.getFileName() + " from Adobe Campaign?", (Stage) getNode().getScene().getWindow()) == YesNoPopupDialog.YesNo.NO) {
-            return;
-        }
-
-
-        errorReporter.logMessage("Refreshing " + selectedFile.getBaseFileName() + " from Adobe Campaign. Please wait...");
-        try {
-            if (selectedFileType == WorkspaceFileType.BLOCK) {
-                campaignServerManager.refreshBlocks();
-                PersonalizationBlockKey key = (PersonalizationBlockKey) selectedFile.getKey();
-                Optional<PersonalizationBlock> block = campaignServerManager.getPersonalizationBlock(key.getId());
-                if (block.isPresent()) {
-                    selectedFile.saveWorkspaceFileContent(block.get().getCode());
-                    fileOpenHandler.accept(selectedFile);
-                }
-            }
-
-            if (selectedFileType == WorkspaceFileType.MODULE) {
-                campaignServerManager.refreshJavaScriptTemplates();
-                JavaScriptTemplateKey key = (JavaScriptTemplateKey) selectedFile.getKey();
-                Optional<JavaScriptTemplate> javascriptTemplate = campaignServerManager.getJavaScriptTemplate(key.getNamespace(), key.getName());
-                if (javascriptTemplate.isPresent()) {
-                    selectedFile.saveWorkspaceFileContent(javascriptTemplate.get().getCode());
-                    fileOpenHandler.accept(selectedFile);
-                }
-            }
-            errorReporter.logMessage("Refreshed " + selectedFileType + " " + selectedFile.getBaseFileName() + " from Adobe Campaign");
-        } catch (ApiException apiException) {
-            errorReporter.reportError("An error occurred refreshing " + selectedFile.getBaseFileName() + " from Adobe Campaign", apiException, true);
-        }
-    }
-
-    private void pushToCampaignHandler() {
-        if(!selectedFile.hasCampaignKey())
-        {
-            errorReporter.reportError("The selected file does not have a Campaign key!", true);
-            return;
-        }
-
-        if(YesNoPopupDialog.show("Are you sure?", "Are you sure you want to push " + selectedFileType + " " + selectedFile.getFileName() + " to Adobe Campaign?", (Stage) getNode().getScene().getWindow()) == YesNoPopupDialog.YesNo.NO) {
-            return;
-        }
-
-        try {
-            switch(selectedFileType) {
-                case BLOCK:
-                    campaignServerManager.updatePersonalizationBlock((PersonalizationBlockKey) selectedFile.getKey(), selectedFile.getWorkspaceFileContent());
-                    break;
-                case MODULE:
-                    campaignServerManager.updateJavascriptTemplate((JavaScriptTemplateKey) selectedFile.getKey(), selectedFile.getWorkspaceFileContent());
-                    break;
-                default:
-                    errorReporter.reportError("The file type " + selectedFileType + " is not supported for updating on Campaign!", true);
-                    return;
-            }
-            errorReporter.logMessage("Updated " + selectedFileType + " " + selectedFile.getBaseFileName() + " on Adobe Campaign");
-        } catch (ApiException apiException) {
-            errorReporter.reportError("An error occurred updating " + selectedFile.getBaseFileName() + " on Adobe Campaign", apiException, true);
         }
     }
 

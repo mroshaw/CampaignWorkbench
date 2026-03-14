@@ -2,7 +2,7 @@ package com.campaignworkbench.adobecampaignapi.schemas;
 
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public class Folder {
+public class FolderRecord {
     @JacksonXmlProperty(isAttribute = true)
     private long id;
 

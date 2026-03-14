@@ -19,7 +19,7 @@ public class CredentialStore {
         }
     }
 
-    public void save(String clientId, String clientSecret, String endpointUrl) {
+    public void save(String instanceName, String clientId, String clientSecret, String endpointUrl) {
         try {
             keyring.setPassword(SERVICE, "client_id", clientId);
             keyring.setPassword(SERVICE, "client_secret", clientSecret);

@@ -5,20 +5,20 @@ import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
 import java.util.List;
 
-public class JavaScriptTemplateCollection extends CampaignSchema {
+public class EtmModuleSchema extends CampaignSchema {
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "jst")
-    private List<JavaScriptTemplate> javaScriptTemplates;
+    private List<EtmModuleRecord> javaScriptTemplates;
 
-    public JavaScriptTemplateCollection() {
+    public EtmModuleSchema() {
         super();
     }
 
-    public List<JavaScriptTemplate> getJavaScriptTemplates() {
+    public List<EtmModuleRecord> getJavaScriptTemplates() {
         return javaScriptTemplates;
     }
 
-    public void setJavaScriptTemplates(List<JavaScriptTemplate> javaScriptTemplates) {
+    public void setJavaScriptTemplates(List<EtmModuleRecord> javaScriptTemplates) {
         this.javaScriptTemplates = javaScriptTemplates;
     }
 
@@ -38,7 +38,7 @@ public class JavaScriptTemplateCollection extends CampaignSchema {
                 """;
     }
 
-    public static String getUpdateXml(JavaScriptTemplateKey key, String code) {
+    public static String getUpdateXml(EtmModuleSchemaKey key, String code) {
         return """
                 <jst xtkschema="xtk:jst" name="%s" namespace="%s" _key="@name,@namespace" >
                 <code><![CDATA[%s]]></code>

@@ -1,20 +1,20 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
 import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
-import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlock;
-import com.campaignworkbench.ide.PickerDialog;
+import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockRecord;
+import com.campaignworkbench.ide.dialogs.PickerDialog;
 import javafx.collections.FXCollections;
 import javafx.stage.Window;
 
 import java.util.Optional;
 
-public class CampaignBlockPickerDialog extends PickerDialog<PersonalizationBlock> {
+public class CampaignBlockPickerDialog extends PickerDialog<PersoBlockRecord> {
 
-    public static Optional<PersonalizationBlock> show(Window owner, CampaignServerManager campaignServerManager) {
+    public static Optional<PersoBlockRecord> show(Window owner, CampaignServerManager campaignServerManager) {
         return new CampaignBlockPickerDialog().showInternal(owner, campaignServerManager);
     }
 
-    public Optional<PersonalizationBlock> showInternal(Window owner, CampaignServerManager campaignServerManager) {
+    public Optional<PersoBlockRecord> showInternal(Window owner, CampaignServerManager campaignServerManager) {
 
         var blocks = FXCollections.observableArrayList(
                 campaignServerManager.getAllPersoBlocks(true)

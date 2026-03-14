@@ -25,8 +25,8 @@ public class CampaignServerManager {
     private final XmlMapper mapper = new XmlMapper();
 
     // Maintain a single list of static blocks and JavaScript templates
-    private PersonalizationBlockCollection allPersonalizationBlocks = new PersonalizationBlockCollection();
-    private JavaScriptTemplateCollection allJavaScriptTemplates = new JavaScriptTemplateCollection();
+    private PersoBlockSchema allPersonalizationBlocks = new PersoBlockSchema();
+    private EtmModuleSchema allJavaScriptTemplates = new EtmModuleSchema();
 
     public boolean connect() throws ApiException {
         Optional<String> endPointUrl = credentials.getEndpointUrl();
@@ -46,6 +46,10 @@ public class CampaignServerManager {
 
         // Connect to the Campaign SOAP instance
         soapClient = new SoapClient(endPointUrl.get(), accessToken);
+
+        // Refresh the object cache
+        refreshAll();
+
         return true;
     }
 
@@ -62,7 +66,7 @@ public class CampaignServerManager {
         return endPointUrl.orElse("");
     }
 
-    public PersonalizationBlockCollection getAllPersoBlocks(boolean refresh) throws ApiException {
+    public PersoBlockSchema getAllPersoBlocks(boolean refresh) throws ApiException {
         if (!allPersonalizationBlocks.isInitialized() || refresh) {
             refreshBlocks();
 
@@ -70,7 +74,7 @@ public class CampaignServerManager {
         return allPersonalizationBlocks;
     }
 
-    public JavaScriptTemplateCollection getAllJavaScriptTemplates(boolean refresh) throws ApiException {
+    public EtmModuleSchema getAllJavaScriptTemplates(boolean refresh) throws ApiException {
         if(!allJavaScriptTemplates.isInitialized() || refresh) {
             refreshJavaScriptTemplates();
         }
@@ -78,13 +82,13 @@ public class CampaignServerManager {
     }
 
     public void refreshBlocks() throws ApiException {
-        String innerResultXml = querySchema(PersonalizationBlockCollection.getQueryXml());
-        allPersonalizationBlocks = mapper.readValue(innerResultXml, PersonalizationBlockCollection.class);
+        String innerResultXml = querySchema(PersoBlockSchema.getQueryXml());
+        allPersonalizationBlocks = mapper.readValue(innerResultXml, PersoBlockSchema.class);
     }
 
     public void refreshJavaScriptTemplates() throws ApiException {
-        String innerResultXml = querySchema(JavaScriptTemplateCollection.getQueryXml());
-        allJavaScriptTemplates = mapper.readValue(innerResultXml, JavaScriptTemplateCollection.class);
+        String innerResultXml = querySchema(EtmModuleSchema.getQueryXml());
+        allJavaScriptTemplates = mapper.readValue(innerResultXml, EtmModuleSchema.class);
     }
 
     public void refreshAll() throws ApiException {
@@ -92,7 +96,11 @@ public class CampaignServerManager {
         refreshJavaScriptTemplates();
     }
 
-    public Optional<PersonalizationBlock> getPersonalizationBlock(long id) {
+    public Optional<PersoBlockRecord> getPersonalizationBlock(PersoBlockSchemaKey blockKey) {
+        return getPersonalizationBlock(blockKey.getId());
+    }
+
+    public Optional<PersoBlockRecord> getPersonalizationBlock(long id) {
         if (allPersonalizationBlocks == null || allPersonalizationBlocks.getPersonalisationBlocks() == null) {
             return Optional.empty();
         }
@@ -102,7 +110,11 @@ public class CampaignServerManager {
                 .findFirst();
     }
 
-    public Optional<JavaScriptTemplate> getJavaScriptTemplate(String namespace, String name) {
+    public Optional<EtmModuleRecord> getJavaScriptTemplate(EtmModuleSchemaKey templateKey) {
+        return getJavaScriptTemplate(templateKey.getNamespace(), templateKey.getName());
+    }
+
+    private Optional<EtmModuleRecord> getJavaScriptTemplate(String namespace, String name) {
         if (allJavaScriptTemplates == null) {
             return Optional.empty();
         }
@@ -148,8 +160,8 @@ public class CampaignServerManager {
         return writer.toString();
     }
 
-    public void updatePersonalizationBlock(PersonalizationBlockKey key, String code) throws ApiException {
-        String updateXml = PersonalizationBlockCollection.getUpdateXml(key, code);
+    public void updatePersonalizationBlock(PersoBlockSchemaKey key, String code) throws ApiException {
+        String updateXml = PersoBlockSchema.getUpdateXml(key, code);
         String updateResultXml;
         try {
             updateResultXml = soapClient.sendUpdateRequest(updateXml);
@@ -158,8 +170,8 @@ public class CampaignServerManager {
         }
     }
 
-    public void updateJavascriptTemplate(JavaScriptTemplateKey key, String code) throws ApiException {
-        String updateXml = JavaScriptTemplateCollection.getUpdateXml(key, code);
+    public void updateJavascriptTemplate(EtmModuleSchemaKey key, String code) throws ApiException {
+        String updateXml = EtmModuleSchema.getUpdateXml(key, code);
         String updateResultXml;
         try {
             updateResultXml = soapClient.sendUpdateRequest(updateXml);

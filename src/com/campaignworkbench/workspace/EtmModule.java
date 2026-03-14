@@ -1,7 +1,6 @@
 package com.campaignworkbench.workspace;
 
-import com.campaignworkbench.adobecampaignapi.schemas.JavaScriptTemplateKey;
-import com.campaignworkbench.adobecampaignapi.schemas.PersonalizationBlockKey;
+import com.campaignworkbench.adobecampaignapi.schemas.EtmModuleSchemaKey;
 import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
@@ -16,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 )
 public class EtmModule extends WorkspaceContextFile {
 
-    private JavaScriptTemplateKey schemaKey;
+    private EtmModuleSchemaKey schemaKey;
 
     public EtmModule(String fileName, Workspace workspace) {
         super(fileName, WorkspaceFileType.MODULE, workspace);
@@ -26,11 +25,11 @@ public class EtmModule extends WorkspaceContextFile {
 
     @Override
     public void setKey(SchemaKey schemaKey) {
-        this.schemaKey = (JavaScriptTemplateKey) schemaKey;
+        this.schemaKey = (EtmModuleSchemaKey) schemaKey;
     }
 
     @Override
-    public JavaScriptTemplateKey getKey() {
+    public EtmModuleSchemaKey getKey() {
         return schemaKey;
     }
 

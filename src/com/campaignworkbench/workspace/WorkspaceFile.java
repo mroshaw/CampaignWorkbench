@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Class representing an Adobe Campaign specific file used in the workspace.
@@ -60,6 +62,20 @@ public abstract class WorkspaceFile {
 
     public Path getAbsoluteFilePath() {
         return workspace.getRootFolderPath().resolve(getRelativeFilePath());
+    }
+
+    public Path getAbsoluteFolderPath() {
+        return workspace.getRootFolderPath().resolve(Paths.get(fileType.getFolderName()));
+    }
+
+    public Path getBackupFilePath() {
+        return getAbsoluteFolderPath().resolve(getBackupFileName());
+    }
+
+    public String getBackupFileName() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        String timestamp = LocalDateTime.now().format(formatter);
+        return getBaseFileName() + "_" + timestamp + fileType.getFileExtension();
     }
 
     public WorkspaceFileType getFileType() {

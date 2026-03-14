@@ -234,6 +234,12 @@ public class Workspace {
     }
 
     public WorkspaceFile createNewWorkspaceFile(String fileName, WorkspaceFileType fileType, String content, SchemaKey schemaKey) {
+
+        // Append extension if not provided
+        if(!fileName.contains(".")) {
+            fileName += fileType.getFileExtension();
+        }
+
         WorkspaceFile newFile = createNewWorkspaceFile(fileName, fileType);
 
         newFile.saveWorkspaceFileContent(content);
