@@ -110,17 +110,25 @@ public class CampaignOperationsHandler {
 
         if (record instanceof PersoBlockRecord newBlock) {
             PersoBlockSchemaKey key = (PersoBlockSchemaKey) newBlock.getKey();
-            errorReporter.logMessage("Creating " + selectedFileType + " from Adobe Campaign using " + newBlock.getLabel() + " with key " + key.getId() + ". Please wait...");
-            WorkspaceFile newFile = workspaceSupplier.get().createNewWorkspaceFile(newBlock.getName(), WorkspaceFileType.BLOCK, newBlock.getCode(), key);
-            newFile.setKey(key);
-            fileOpenHandler.accept(newFile);
+            try {
+                WorkspaceFile newFile = workspaceSupplier.get().createNewWorkspaceFile(newBlock.getName(), WorkspaceFileType.BLOCK, newBlock.getCode(), key);
+                newFile.setKey(key);
+                Platform.runLater(() -> fileOpenHandler.accept(newFile));
+            } catch (WorkspaceException we) {
+                errorReporter.reportError("An error occurred while creating " + newBlock.getName(), we, true);
+            }
+
         }
 
         if (record instanceof EtmModuleRecord newModule) {
             EtmModuleSchemaKey key = (EtmModuleSchemaKey) newModule.getKey();
-            System.out.println("Create new " + selectedFileType + " from " + newModule.getLabel() + " with key (" + key.getNamespace() + ":" + key.getName() + ")");
-            WorkspaceFile newFile = workspaceSupplier.get().createNewWorkspaceFile(newModule.getName(), WorkspaceFileType.MODULE, newModule.getCode(), key);
-            fileOpenHandler.accept(newFile);
+            try {
+                WorkspaceFile newFile = workspaceSupplier.get().createNewWorkspaceFile(newModule.getName(), WorkspaceFileType.MODULE, newModule.getCode(), key);
+                newFile.setKey(key);
+                Platform.runLater(() -> fileOpenHandler.accept(newFile));
+            } catch (WorkspaceException we) {
+                errorReporter.reportError("An error occurred while creating " + newModule.getName(), we, true);
+            }
         }
 
         errorReporter.logMessage("Created new " + selectedFileType + " from Adobe Campaign");
@@ -150,7 +158,7 @@ public class CampaignOperationsHandler {
                 Optional<PersoBlockRecord> block = campaignServerManager.getPersonalizationBlock(key);
                 if (block.isPresent()) {
                     selectedFile.saveWorkspaceFileContent(block.get().getCode());
-                    fileOpenHandler.accept(selectedFile);
+                    Platform.runLater(() -> fileOpenHandler.accept(selectedFile));
                 }
             }
 
@@ -160,7 +168,7 @@ public class CampaignOperationsHandler {
                 Optional<EtmModuleRecord> javascriptTemplate = campaignServerManager.getJavaScriptTemplate(key);
                 if (javascriptTemplate.isPresent()) {
                     selectedFile.saveWorkspaceFileContent(javascriptTemplate.get().getCode());
-                    fileOpenHandler.accept(selectedFile);
+                    Platform.runLater(() -> fileOpenHandler.accept(selectedFile));
                 }
             }
             errorReporter.logMessage("Refreshed " + selectedFileType + " " + selectedFile.getBaseFileName() + " from Adobe Campaign");

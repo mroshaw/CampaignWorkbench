@@ -108,3 +108,12 @@
 .error-log-panel .tree-view .tree-cell {
     -fx-padding: 2px;
 }
+
+/* Pickers */
+.picker-tableview .table-row-cell {
+    -fx-cell-size: 24px;
+}
+
+.picker-tableview .table-cell {
+    -fx-padding: 2px 4px;
+}
