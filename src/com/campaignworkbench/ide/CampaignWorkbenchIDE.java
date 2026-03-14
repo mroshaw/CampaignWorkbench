@@ -2,6 +2,18 @@ package com.campaignworkbench.ide;
 
 import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.ide.dialogs.AboutDialog;
+import com.campaignworkbench.ide.dialogs.SettingsDialog;
+import com.campaignworkbench.ide.editor.EditorTab;
+import com.campaignworkbench.ide.editor.EditorTabPanel;
+import com.campaignworkbench.ide.logging.ErrorLogPanel;
+import com.campaignworkbench.ide.logging.LogPanel;
+import com.campaignworkbench.ide.logging.UiErrorReporter;
+import com.campaignworkbench.ide.results.OutputTabPanel;
+import com.campaignworkbench.ide.themes.IThemeable;
+import com.campaignworkbench.ide.themes.IdeTheme;
+import com.campaignworkbench.ide.themes.ThemeManager;
+import com.campaignworkbench.ide.toolbars.MainMenuBar;
+import com.campaignworkbench.ide.toolbars.MainToolBar;
 import com.campaignworkbench.ide.workspaceexplorer.WorkspaceExplorer;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.Template;
@@ -123,7 +135,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 workspaceExplorer.getNode(),
                 editorTabPanel.getNode()
         );
-        workspaceEditorSplit.setDividerPositions(0.28);
+        workspaceEditorSplit.setDividerPositions(0.30);
         SplitPane.setResizableWithParent(workspaceExplorer.getNode(), false);
 
         // --- Split: (Workspace+Editor) | Preview ---
@@ -133,7 +145,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 workspaceEditorSplit,
                 outputPanel.getNode()
         );
-        editorPreviewSplit.setDividerPositions(0.72);
+        editorPreviewSplit.setDividerPositions(0.71);
         // SplitPane.setResizableWithParent(previewSplitPane, false);
 
         VBox topBar = new VBox(menuBar.getNode(), toolBar.getNode());

@@ -1,4 +1,4 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.themes;
 
 import java.util.ArrayList;
 import java.util.List;

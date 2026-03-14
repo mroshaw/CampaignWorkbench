@@ -1,4 +1,4 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.logging;
 
 public interface ErrorReporter {
     void reportError(String message, boolean displayAlert);

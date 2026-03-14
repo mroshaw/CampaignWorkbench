@@ -1,5 +1,9 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.results;
 
+import com.campaignworkbench.ide.IJavaFxNode;
+import com.campaignworkbench.ide.themes.IThemeable;
+import com.campaignworkbench.ide.themes.IdeTheme;
+import com.campaignworkbench.ide.themes.ThemeManager;
 import com.campaignworkbench.ide.editor.SyntaxType;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -79,7 +83,7 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
     }
 
     @Override
-    public void applyTheme(IdeTheme oldTheme,  IdeTheme newTheme) {
+    public void applyTheme(IdeTheme oldTheme, IdeTheme newTheme) {
         switch(newTheme) {
             case LIGHT:
                 setBackgroundColor("#ffffff");

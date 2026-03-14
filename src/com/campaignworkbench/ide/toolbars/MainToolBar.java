@@ -1,5 +1,6 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.toolbars;
 
+import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.util.UiUtil;
 import javafx.event.ActionEvent;

@@ -1,5 +1,7 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.editor;
 
+import com.campaignworkbench.ide.IJavaFxNode;
+import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import javafx.beans.value.ChangeListener;
 import javafx.event.Event;

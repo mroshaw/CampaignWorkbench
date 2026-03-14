@@ -1,4 +1,4 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.logging;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;

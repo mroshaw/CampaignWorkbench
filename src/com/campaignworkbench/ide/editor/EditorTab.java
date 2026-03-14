@@ -1,10 +1,9 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.editor;
 
+import com.campaignworkbench.ide.IdeException;
 import com.campaignworkbench.ide.dialogs.YesNoCancelPopupDialog;
-import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
-import com.campaignworkbench.ide.editor.ICodeEditor;
-import com.campaignworkbench.ide.editor.SyntaxType;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
+import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.ContextXml;

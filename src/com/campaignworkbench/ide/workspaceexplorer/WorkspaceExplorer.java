@@ -144,28 +144,19 @@ public class WorkspaceExplorer implements IJavaFxNode {
             } else {
                 workspaceName.bind(newWorkspace.getNameProperty());
 
-                // Sort children
-                // System.out.println("Sorting templates");
-                FXCollections.sort(newWorkspace.getTemplates(), Comparator.comparing(Template::getBaseFileName));
                 // Bind children to workspace.templates
                 templatesListener = bindListToTree(newWorkspace.getTemplates(), templateRoot, template ->
                         WorkspaceExplorerItem.createTemplateTreeItem(template, this::deleteExistingFile), Comparator.comparing(Template::getBaseFileName)
                 );
 
-                // System.out.println("Sorting blocks");
-                FXCollections.sort(newWorkspace.getBlocks(), Comparator.comparing(PersoBlock::getBaseFileName));
                 modulesListener = bindListToTree(newWorkspace.getModules(), moduleRoot, module ->
                         WorkspaceExplorerItem.createModuleTreeItem(module, this::insertIntoCode, this::deleteExistingFile), Comparator.comparing(EtmModule::getBaseFileName)
                 );
 
-                // System.out.println("Sorting modules");
-                FXCollections.sort(newWorkspace.getModules(), Comparator.comparing(EtmModule::getBaseFileName));
                 blocksListener = bindListToTree(newWorkspace.getBlocks(), blockRoot, block ->
                         WorkspaceExplorerItem.createBlockTreeItem(block, this::insertIntoCode, this::deleteExistingFile), Comparator.comparing(PersoBlock::getBaseFileName)
                 );
 
-                // System.out.println("Sorting contexts");
-                FXCollections.sort(newWorkspace.getContexts(), Comparator.comparing(ContextXml::getBaseFileName));
                 contextsListener = bindListToTree(newWorkspace.getContexts(), contextRoot, context ->
                         WorkspaceExplorerItem.createContextTreeItem(context, this::deleteExistingFile), Comparator.comparing(ContextXml::getBaseFileName)
                 );
@@ -179,18 +170,21 @@ public class WorkspaceExplorer implements IJavaFxNode {
             Function<T, TreeItem<Object>> mapper,
             Comparator<T> sorter) {
 
+        Comparator<TreeItem<Object>> treeItemSorter = (a, b) -> {
+            T valA = (T) ((WorkspaceExplorerItem.WorkspaceFileTreeItem) a.getValue()).workspaceFile;
+            T valB = (T) ((WorkspaceExplorerItem.WorkspaceFileTreeItem) b.getValue()).workspaceFile;
+            return sorter.compare(valA, valB);
+        };
+
         // Initial population
         parentRoot.getChildren().clear();
         for (T item : list) {
             parentRoot.getChildren().add(mapper.apply(item));
         }
-
-        // Sort initial children
-        sortTreeItems(parentRoot, sorter);
+        FXCollections.sort(parentRoot.getChildren(), treeItemSorter);
 
         ListChangeListener<T> listener = change -> {
             while (change.next()) {
-
                 if (change.wasRemoved()) {
                     for (T removed : change.getRemoved()) {
                         parentRoot.getChildren().removeIf(child ->
@@ -205,6 +199,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
                     for (T added : change.getAddedSubList()) {
                         parentRoot.getChildren().add(mapper.apply(added));
                     }
+                    FXCollections.sort(parentRoot.getChildren(), treeItemSorter);
                 }
             }
         };
@@ -499,14 +494,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
                     evt.consume();
                 }
             }
-        });
-    }
-
-    private <T> void sortTreeItems(TreeItem<Object> parentRoot, Comparator<T> sorter) {
-        FXCollections.sort(parentRoot.getChildren(), (a, b) -> {
-            T valA = (T) ((WorkspaceExplorerItem.WorkspaceFileTreeItem) a.getValue()).workspaceFile;
-            T valB = (T) ((WorkspaceExplorerItem.WorkspaceFileTreeItem) b.getValue()).workspaceFile;
-            return sorter.compare(valA, valB);
         });
     }
 

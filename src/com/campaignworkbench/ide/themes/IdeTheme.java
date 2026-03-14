@@ -1,10 +1,8 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.themes;
 
 import atlantafx.base.theme.CupertinoDark;
 import atlantafx.base.theme.NordLight;
 import com.campaignworkbench.util.UiUtil;
-
-import java.net.URL;
 
 /**
  * Visual theme applicable to the entire IDE user interface

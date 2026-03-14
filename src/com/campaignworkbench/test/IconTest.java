@@ -1,6 +1,6 @@
 package com.campaignworkbench.test;
 
-import com.campaignworkbench.ide.IdeTheme;
+import com.campaignworkbench.ide.themes.IdeTheme;
 import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.util.UiUtil;
 import javafx.application.Application;

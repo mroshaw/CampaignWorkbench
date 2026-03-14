@@ -1,6 +1,5 @@
 package com.campaignworkbench.ide.editor.richtextfx.syntaxhighlighting;
 
-import com.campaignworkbench.ide.IdeTheme;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 

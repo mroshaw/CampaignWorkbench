@@ -1,4 +1,4 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.themes;
 
 /**
  * Interface for JavaFX components that support IDEThemes.

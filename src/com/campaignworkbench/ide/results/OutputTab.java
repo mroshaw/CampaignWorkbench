@@ -1,4 +1,4 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.results;
 
 import com.campaignworkbench.ide.editor.ICodeEditor;
 import com.campaignworkbench.ide.editor.SyntaxType;

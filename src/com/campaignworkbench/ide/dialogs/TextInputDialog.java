@@ -1,4 +1,4 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.dialogs;
 import javafx.stage.Window;
 
 import java.util.Optional;

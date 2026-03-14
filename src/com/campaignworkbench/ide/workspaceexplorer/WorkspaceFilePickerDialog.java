@@ -1,6 +1,6 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
-import com.campaignworkbench.ide.PickerDialog;
+import com.campaignworkbench.ide.dialogs.PickerDialog;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import javafx.collections.ObservableList;
 import javafx.stage.Window;

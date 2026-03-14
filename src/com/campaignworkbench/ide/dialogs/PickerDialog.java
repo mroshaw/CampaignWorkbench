@@ -1,4 +1,4 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.dialogs;
 
 import javafx.collections.ObservableList;
 import javafx.scene.Node;

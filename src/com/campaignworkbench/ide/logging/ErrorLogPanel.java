@@ -1,6 +1,7 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.logging;
 
 import com.campaignworkbench.campaignrenderer.RendererException;
+import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import javafx.geometry.Insets;
 import javafx.scene.Node;

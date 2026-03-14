@@ -1,5 +1,6 @@
-package com.campaignworkbench.ide;
+package com.campaignworkbench.ide.logging;
 
+import com.campaignworkbench.ide.IJavaFxNode;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;

@@ -1,6 +1,6 @@
 package com.campaignworkbench.util;
 
-import com.campaignworkbench.ide.FileChooserConfig;
+import com.campaignworkbench.ide.dialogs.FileChooserConfig;
 import com.campaignworkbench.workspace.Workspace;
 import com.campaignworkbench.workspace.WorkspaceFileType;
 import javafx.stage.FileChooser;
