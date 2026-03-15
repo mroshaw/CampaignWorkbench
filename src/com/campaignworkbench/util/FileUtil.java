@@ -121,6 +121,7 @@ public final class FileUtil {
                     "Context XML files",
                     "*.xml"
             );
+            default -> null;
         };
     }
 }

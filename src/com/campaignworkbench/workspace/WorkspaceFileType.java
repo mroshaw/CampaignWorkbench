@@ -31,6 +31,13 @@ public enum WorkspaceFileType {
             "Contexts",
             "XML Files",
             "*.xml"
+    ),
+    BACKUP(
+            "Backup",
+            "",
+            "Backup File",
+            "Backup Files",
+            "*.*"
     );
 
     // Used to derive paths

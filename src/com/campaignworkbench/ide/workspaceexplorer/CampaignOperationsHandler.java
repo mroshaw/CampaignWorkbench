@@ -8,14 +8,13 @@ import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockRecord;
 import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockSchemaKey;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
-import com.campaignworkbench.util.FileUtil;
+
 import com.campaignworkbench.workspace.*;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.net.URI;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -208,16 +207,12 @@ public class CampaignOperationsHandler {
             if (doBackup) {
                 Optional<EtmModuleRecord> backupModule = campaignServerManager.getJavaScriptTemplate(moduleKey);
                 if (backupModule.isPresent()) {
-                    Path backupPath = selectedFile.getBackupFilePath();
                     try {
-                        FileUtil.write(backupPath, backupModule.get().getCode());
-                        errorReporter.logMessage("Successfully backed up " + fileTypeLower + " " + selectedFileName + " to " + backupPath + " from Campaign server!");
-                    } catch (RuntimeException rte) {
-                        errorReporter.reportError("An error occurred while writing the backup of " + fileTypeLower + " " + selectedFileName + " to " + backupPath, rte, true);
+                        workspaceSupplier.get().createBackup(selectedFile, backupModule.get().getCode());
+                        errorReporter.logMessage("Successfully backed up " + fileTypeLower + " " + selectedFileName + " from Campaign server!");
+                    } catch (WorkspaceException we) {
+                        errorReporter.reportError("An error occurred while creating the backup of " + fileTypeLower + " " + selectedFileName, we, true);
                     }
-                } else {
-                    errorReporter.reportError("Could not retrieve " + fileTypeLower + " " + selectedFileName + " from Campaign server! Aborting push operation.", true);
-                    return;
                 }
             }
             try {
@@ -231,16 +226,12 @@ public class CampaignOperationsHandler {
             if (doBackup) {
                 Optional<PersoBlockRecord> backupBlock = campaignServerManager.getPersonalizationBlock(blockKey);
                 if (backupBlock.isPresent()) {
-                    Path backupPath = selectedFile.getBackupFilePath();
                     try {
-                        FileUtil.write(backupPath, backupBlock.get().getCode());
-                        errorReporter.logMessage("Successfully backed up " + fileTypeLower + " " + selectedFileName + " to " + backupPath + " from Campaign server!");
-                    } catch (RuntimeException rte) {
-                        errorReporter.reportError("An error occurred while writing the backup of " + fileTypeLower + " " + selectedFileName + " to " + backupPath, rte, true);
+                        workspaceSupplier.get().createBackup(selectedFile, backupBlock.get().getCode());
+                        errorReporter.logMessage("Successfully backed up " + fileTypeLower + " " + selectedFileName + " from Campaign server!");
+                    } catch (WorkspaceException we) {
+                        errorReporter.reportError("An error occurred while creating the backup of " + fileTypeLower + " " + selectedFileName, we, true);
                     }
-                } else {
-                    errorReporter.reportError("Could not retrieve " + fileTypeLower + " " + selectedFileName + " from Campaign server! Aborting push operation.", true);
-                    return;
                 }
             }
             try {

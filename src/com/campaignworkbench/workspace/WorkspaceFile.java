@@ -40,6 +40,11 @@ public abstract class WorkspaceFile {
         this.workspace = workspace;
     }
 
+    @JsonIgnore
+    Workspace getWorkspace(){
+        return this.workspace;
+    }
+
     public String getFileName() {
         return fileName;
     }

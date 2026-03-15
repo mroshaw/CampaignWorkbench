@@ -225,6 +225,7 @@ public class Workspace {
             case MODULE -> modules;
             case BLOCK -> blocks;
             case CONTEXT -> contexts;
+            case BACKUP -> null;
         };
 
         return fileList.stream()
@@ -319,6 +320,54 @@ public class Workspace {
         save();
     }
 
+    public BackupFile createBackup(WorkspaceFile sourceFile, String serverContent) {
+        WorkspaceFileType sourceFileType = sourceFile.getFileType();
+        ensureBackupFolderExists(sourceFileType);
+
+        String timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss"));
+        String backupFileName = sourceFile.getBaseFileName() + "_" + timestamp + getExtension(sourceFile.getFileName());
+
+        BackupFile backup = new BackupFile(backupFileName, sourceFileType, this);
+        try {
+            Files.createFile(backup.getAbsoluteFilePath());
+        } catch (IOException ioe) {
+            throw new WorkspaceException("An error occurred creating backup file: " + backupFileName, ioe);
+        }
+        backup.saveWorkspaceFileContent(serverContent);
+
+        if (sourceFile instanceof EtmModule module) {
+            module.getBackups().add(backup);
+        } else if (sourceFile instanceof PersoBlock block) {
+            block.getBackups().add(backup);
+        }
+
+        save();
+        return backup;
+    }
+
+    public void restoreBackup(BackupFile backup, WorkspaceFile targetFile) {
+        String content = backup.getWorkspaceFileContent();
+        targetFile.saveWorkspaceFileContent(content);
+    }
+
+    private void ensureBackupFolderExists(WorkspaceFileType sourceFileType) {
+        Path backupFolder = getRootFolderPath()
+                .resolve(sourceFileType.getFolderName())
+                .resolve(WorkspaceFileType.BACKUP.getFolderName());
+        if (!Files.exists(backupFolder)) {
+            try {
+                Files.createDirectory(backupFolder);
+            } catch (IOException ioe) {
+                throw new WorkspaceException("An error occurred creating backup folder: " + backupFolder, ioe);
+            }
+        }
+    }
+
+    private String getExtension(String fileName) {
+        int dot = fileName.lastIndexOf('.');
+        return dot >= 0 ? fileName.substring(dot) : "";
+    }
 
     private String getConfigFileName() {
         return getName() + ".json";
@@ -389,8 +438,13 @@ public class Workspace {
                 if (module.getDataContextFile() != null) {
                     module.getDataContextFile().setWorkspace(this);
                 }
+                for (BackupFile b : module.getBackups()) b.setWorkspace(this);
+
             });
-            this.blocks.forEach(block -> block.setWorkspace(this));
+            this.blocks.forEach(block -> {
+                block.setWorkspace(this);
+                for (BackupFile bf : block.getBackups()) bf.setWorkspace(this);
+            });
             this.contexts.forEach(context -> context.setWorkspace(this));
 
             nameProperty.setValue(jsonFilePath.getParent().getFileName().toString());

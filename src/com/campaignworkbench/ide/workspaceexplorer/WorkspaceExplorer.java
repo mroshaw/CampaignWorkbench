@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
+import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.dialogs.TextInputDialog;
@@ -150,12 +151,12 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 );
 
                 modulesListener = bindListToTree(newWorkspace.getModules(), moduleRoot, module ->
-                        WorkspaceExplorerItem.createModuleTreeItem(module, this::insertIntoCode, this::deleteExistingFile), Comparator.comparing(EtmModule::getBaseFileName)
-                );
+                                WorkspaceExplorerItem.createModuleTreeItem(module, this::insertIntoCode, this::deleteExistingFile, this::restoreBackupHandler),
+                        Comparator.comparing(EtmModule::getBaseFileName));
 
                 blocksListener = bindListToTree(newWorkspace.getBlocks(), blockRoot, block ->
-                        WorkspaceExplorerItem.createBlockTreeItem(block, this::insertIntoCode, this::deleteExistingFile), Comparator.comparing(PersoBlock::getBaseFileName)
-                );
+                                WorkspaceExplorerItem.createBlockTreeItem(block, this::insertIntoCode, this::deleteExistingFile, this::restoreBackupHandler),
+                        Comparator.comparing(PersoBlock::getBaseFileName));
 
                 contextsListener = bindListToTree(newWorkspace.getContexts(), contextRoot, context ->
                         WorkspaceExplorerItem.createContextTreeItem(context, this::deleteExistingFile), Comparator.comparing(ContextXml::getBaseFileName)
@@ -395,6 +396,29 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
     }
 
+    private void restoreBackupHandler(BackupFile backup) {
+        String sourceBaseName = backup.getBaseFileName().replaceAll("_\\d{4}-\\d{2}-\\d{2}_\\d{6}$", "");
+        WorkspaceFile targetFile = getWorkspace().getWorkspaceFile(sourceBaseName, backup.getSourceFileType());
+
+        if (targetFile == null) {
+            errorReporter.reportError("Could not find the source file to restore: " + sourceBaseName, true);
+            return;
+        }
+        if (YesNoPopupDialog.show(
+                "Confirm Restore",
+                "Are you sure you want to restore " + targetFile.getFileName() + " from this backup? The current file content will be overwritten.",
+                (Stage) getNode().getScene().getWindow()) == YesNoPopupDialog.YesNo.NO) {
+            return;
+        }
+        try {
+            getWorkspace().restoreBackup(backup, targetFile);
+            fileOpenHandler.accept(targetFile);
+            errorReporter.logMessage("Restored " + targetFile.getBaseFileName() + " from backup " + backup.getFileName());
+        } catch (WorkspaceException e) {
+            errorReporter.reportError("An error occurred restoring the backup for " + targetFile.getBaseFileName(), e, true);
+        }
+    }
+
     private void onCampaignConnectionStateChanged() {
         toolbar.onCampaignConnectionStateChanged();
     }
@@ -496,6 +520,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
             }
         });
     }
+
+
 
     private Window getWindow() {
         return workspaceExplorerPanel.getScene().getWindow();
