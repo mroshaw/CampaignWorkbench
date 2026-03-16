@@ -203,7 +203,6 @@ public class WorkspaceExplorerItem {
         );
 
         moduleItem.getChildren().addAll(dataContextItem);
-        // templateItem.setExpanded(true); // optional: expand by default
 
         // Bind child items to the Template properties
         etmModule.getDataContextFileProperty().addListener((obs, oldFile, newFile) -> {

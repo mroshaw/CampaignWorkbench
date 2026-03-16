@@ -97,9 +97,11 @@ public class Workspace {
         contexts.setAll(list);
     }
 
-    public Workspace(String name, boolean createNew) {
+    public Workspace(String name, String campaignInstanceId, boolean createNew) {
 
         this.nameProperty.setValue(name);
+
+        this.campaignInstanceId = campaignInstanceId;
 
         if (createNew) {
             createNewWorkspace();
@@ -461,7 +463,7 @@ public class Workspace {
             this.contexts.forEach(context -> context.setWorkspace(this));
 
             nameProperty.setValue(jsonFilePath.getParent().getFileName().toString());
-
+            this.campaignInstanceId = newWorkspace.campaignInstanceId;
             sortAllLists();
 
         } catch (IOException ioe) {

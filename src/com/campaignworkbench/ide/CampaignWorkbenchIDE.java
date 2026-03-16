@@ -79,6 +79,8 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
         errorReporter = new UiErrorReporter(logPanel, errorLogPanel);
 
+        appSettings = AppSettingsManager.load();
+
         // Menu and toolbar
         MainMenuBar menuBar = new MainMenuBar(
                 _ -> newWorkspaceHandler(),
@@ -166,7 +168,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         primaryStage.show();
         ThemeManager.register(this);
         Workspace.createWorkspaceRootFolder();
-        appSettings = AppSettingsManager.load();
 
         // Apply styles
         scene.getStylesheets().add(UiUtil.getStylesFromStyleSheet(ideStyleSheet));

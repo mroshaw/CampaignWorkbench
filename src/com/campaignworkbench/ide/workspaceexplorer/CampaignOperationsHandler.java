@@ -93,7 +93,7 @@ public class CampaignOperationsHandler {
         try {
             campaignServerManager.connect();
         } catch (ApiException apiException) {
-            errorReporter.reportError("An error occurred connecting to Adobe Campaign. Please check File > Settings!", true);
+            errorReporter.reportError("An error occurred connecting to Adobe Campaign. Please check File > Settings!", apiException, true);
             return;
         }
         errorReporter.logMessage("Connected to Campaign server at: " + campaignServerManager.getEndpointUrl());

@@ -1,13 +1,12 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
 import com.campaignworkbench.ide.AppSettings;
-import com.campaignworkbench.ide.dialogs.NewWorkspaceDialog;
-import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
-import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.ide.IJavaFxNode;
-import com.campaignworkbench.ide.dialogs.TextInputDialog;
+import com.campaignworkbench.ide.dialogs.NewWorkspaceDialog;
 import com.campaignworkbench.ide.dialogs.YesNoCancelPopupDialog;
+import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
 import com.campaignworkbench.ide.icons.IdeIcon;
+import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.workspace.*;
 import javafx.beans.property.ObjectProperty;
@@ -310,8 +309,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         Optional<NewWorkspaceDialog.Result> result = NewWorkspaceDialog.show(getWindow(), appSettings);
         result.ifPresent(r -> {
-            Workspace newWorkspace = new Workspace(r.workspaceName(), true);
-            newWorkspace.setCampaignInstanceId(r.instance().getId());
+            Workspace newWorkspace = new Workspace(r.workspaceName(), r.instance().getId(), true);
+            newWorkspace.save();
             setWorkspace(newWorkspace);
         });
     }
@@ -334,8 +333,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (Files.exists(expectedJsonFile) && Files.isRegularFile(expectedJsonFile)) {
             // System.out.println("File exists: " + expectedJsonFile);
             try {
-                setWorkspace(new Workspace(folderName, false));
-                getWorkspace().load();
+                setWorkspace(new Workspace(folderName, null, false));
             } catch (WorkspaceException workspaceException) {
                 errorReporter.reportError("Could not load workspace!", workspaceException, true);
             }
