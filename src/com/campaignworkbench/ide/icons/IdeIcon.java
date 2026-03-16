@@ -40,7 +40,10 @@ public enum IdeIcon {
     // Find Toolbar
     FIND_START("Search"),
     FIND_CLEAR("Dismiss_Circle"),
-    FOLDER_SYNC("Folder_Sync");
+    FOLDER_SYNC("Folder_Sync"),
+    BACK("Arrow_Circle_Left"),
+    FORWARD("Arrow_Circle_Right"),
+    HOME("Home");
 
     private final String iconName;
 

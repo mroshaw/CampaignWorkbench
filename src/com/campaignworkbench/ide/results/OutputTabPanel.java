@@ -20,7 +20,7 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
     private final OutputTab sourceCodeTab;
     private final OutputTab preSourceCodeTab;
 
-    private final WebView webView;
+    private final WebPreviewTab webPreviewTab;
 
     /**
      * Constructor
@@ -29,17 +29,15 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
         tabPane = new TabPane();
 
         // Web View
-        webView = new WebView();
-        webView.setCursor(Cursor.TEXT);
-
-        Tab webViewTab = new Tab("Web View", webView);
-        webViewTab.setClosable(false);
+        webPreviewTab = new WebPreviewTab("Web View");
+        webPreviewTab.setCursor(Cursor.TEXT);
+        webPreviewTab.setClosable(false);
         sourceCodeTab = new OutputTab("HTML Source", SyntaxType.HTML);
         sourceCodeTab.setEditable(false);
         preSourceCodeTab = new OutputTab("JS Pre Source", SyntaxType.JAVASCRIPT);
         preSourceCodeTab.setEditable(false);
 
-        tabPane.getTabs().addAll(webViewTab, sourceCodeTab, preSourceCodeTab);
+        tabPane.getTabs().addAll(webPreviewTab, sourceCodeTab, preSourceCodeTab);
 
         tabPane.getSelectionModel().selectedItemProperty().addListener((_, _, selectedTab) -> refreshTab(selectedTab));
 
@@ -66,7 +64,7 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
     }
 
     private void setWebContent(String content) {
-        webView.getEngine().loadContent(content);
+        webPreviewTab.setContent(content);
     }
 
     private void setSourceCodeContent(String content) {
@@ -106,7 +104,7 @@ public class OutputTabPanel implements IJavaFxNode, IThemeable {
                         "  style.innerHTML = 'html, body { background: " + color + " !important; }';" +
                         "})();";
 
-        webView.getEngine().executeScript(script);
+        webPreviewTab.executeScript(script);
     }
 
     public void highlightJsLine(int lineNumber) {
