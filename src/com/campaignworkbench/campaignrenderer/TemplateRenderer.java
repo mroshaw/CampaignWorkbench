@@ -81,6 +81,16 @@ public final class TemplateRenderer extends AbstractRenderer {
                     null
             );
 
+            // Add a Document Context
+            String dummyDocument = "<document type='test'/>";
+            cx.evaluateString(
+                    scope,
+                    "var document = new XML(`" + dummyDocument + "`);",
+                    messageContextFile.getFileName().toString(),
+                    1,
+                    null
+            );
+
             scope.put("xmlContext", scope, messageContextContent);
 
             injectStandardFunctions(cx, scope);
