@@ -1,93 +1,109 @@
 package com.campaignworkbench.ide.dialogs;
 
-import com.campaignworkbench.adobecampaignapi.CredentialStore;
+import com.campaignworkbench.adobecampaignapi.CampaignInstance;
+import com.campaignworkbench.ide.AppSettings;
+import com.campaignworkbench.ide.AppSettingsManager;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.stage.Window;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
 
 import java.util.Optional;
 
+/**
+ * Settings dialog for managing Campaign instances.
+ * Lists all configured instances and allows the user to add, edit, and remove them.
+ * Credentials are never shown or stored outside the system Keyring.
+ */
 public class SettingsDialog {
 
-    private static final String TITLE = "Campaign Configuration";
+    private static final String TITLE = "Settings";
 
-    public static void show(Window owner) {
+    public static void show(Stage owner, AppSettings appSettings) {
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle(TITLE);
         dialog.initOwner(owner);
-        dialog.setResizable(false);
+        dialog.setResizable(true);
 
-        ButtonType saveButtonType = new ButtonType("Save", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+        ButtonType closeButtonType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
+        dialog.getDialogPane().getButtonTypes().add(closeButtonType);
 
-        // Layout
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(12);
-        grid.setPadding(new Insets(20));
-        grid.setAlignment(Pos.CENTER_LEFT);
+        // Instance list (working copy so changes are only committed on save within sub-dialogs)
+        ObservableList<CampaignInstance> instanceItems =
+                FXCollections.observableArrayList(appSettings.getInstances());
 
-        // Fields
-        TextField endpointField = new TextField();
-        endpointField.setPromptText("https://your-server.example.com");
-        endpointField.setPrefColumnCount(30);
-
-        TextField instanceNameField = new TextField();
-        instanceNameField.setPromptText("Development");
-        instanceNameField.setPrefColumnCount(30);
-
-        CredentialStore credentialStore = new CredentialStore();
-
-        // Pre-populate URL only
-        Optional<String> endpointUrl = credentialStore.getEndpointUrl();
-        endpointUrl.ifPresent(endpointField::setText);
-        PasswordField clientIdField = new PasswordField();
-        clientIdField.setPromptText("Client ID");
-
-        PasswordField clientSecretField = new PasswordField();
-        clientSecretField.setPromptText("Client Secret");
-
-        // Labels
-        grid.add(new Label("Instance Name:"), 0, 0);
-        grid.add(instanceNameField, 1, 0);
-
-        grid.add(new Label("Connection URL:"), 0, 1);
-        grid.add(endpointField, 1, 1);
-
-        grid.add(new Label("Client ID:"), 0, 2);
-        grid.add(clientIdField, 1, 2);
-
-        grid.add(new Label("Client Secret:"), 0, 3);
-        grid.add(clientSecretField, 1, 3);
-
-        dialog.getDialogPane().setContent(grid);
-
-        // Save action
-        dialog.setResultConverter(dialogButton -> {
-            if (dialogButton == saveButtonType) {
-
-                String instanceName = instanceNameField.getText() != null
-                ? instanceNameField.getText().trim() : "";
-
-                String newEndpointUrl = endpointField.getText() != null
-                        ? endpointField.getText().trim()
-                        : "";
-
-                String newClientId = clientIdField.getText() != null
-                        ? clientIdField.getText().trim()
-                        : "";
-
-                String newClientSecret = clientSecretField.getText() != null
-                        ? clientSecretField.getText().trim()
-                        : "";
-
-                credentialStore.save(instanceName, newClientId, newClientSecret, newEndpointUrl);
+        ListView<CampaignInstance> instanceListView = new ListView<>(instanceItems);
+        instanceListView.setPrefHeight(200);
+        instanceListView.setPrefWidth(260);
+        instanceListView.setCellFactory(_ -> new ListCell<>() {
+            @Override
+            protected void updateItem(CampaignInstance item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getName());
             }
-            return null;
         });
+
+        // Buttons
+        Button addButton = new Button("Add...");
+        Button editButton = new Button("Edit...");
+        Button removeButton = new Button("Remove");
+
+        editButton.setDisable(true);
+        removeButton.setDisable(true);
+
+        instanceListView.getSelectionModel().selectedItemProperty().addListener((_, _, selected) -> {
+            editButton.setDisable(selected == null);
+            removeButton.setDisable(selected == null);
+        });
+
+        addButton.setOnAction(_ -> {
+            Optional<CampaignInstance> result = InstanceEditDialog.showForNew(owner);
+            result.ifPresent(newInstance -> {
+                appSettings.addInstance(newInstance);
+                AppSettingsManager.save(appSettings);
+                instanceItems.setAll(appSettings.getInstances());
+            });
+        });
+
+        editButton.setOnAction(_ -> {
+            CampaignInstance selected = instanceListView.getSelectionModel().getSelectedItem();
+            if (selected == null) return;
+            InstanceEditDialog.showForEdit(owner, selected);
+            // Credentials saved within the dialog; name change reflected via observable list refresh
+            AppSettingsManager.save(appSettings);
+            instanceItems.setAll(appSettings.getInstances());
+        });
+
+        removeButton.setOnAction(_ -> {
+            CampaignInstance selected = instanceListView.getSelectionModel().getSelectedItem();
+            if (selected == null) return;
+            boolean confirmed = YesNoPopupDialog.show(
+                    "Remove instance?",
+                    "Remove '" + selected.getName() + "'? Stored credentials will also be deleted.", owner) == YesNoPopupDialog.YesNo.YES;
+            if (confirmed) {
+                selected.getCredentialStore().clear();
+                appSettings.removeInstance(selected);
+                AppSettingsManager.save(appSettings);
+                instanceItems.setAll(appSettings.getInstances());
+            }
+        });
+
+        VBox buttonBox = new VBox(8, addButton, editButton, removeButton);
+        buttonBox.setAlignment(Pos.TOP_LEFT);
+
+        HBox instancePanel = new HBox(12, instanceListView, buttonBox);
+        instancePanel.setAlignment(Pos.TOP_LEFT);
+
+        VBox content = new VBox(12);
+        content.setPadding(new Insets(20));
+        content.getChildren().addAll(new Label("Campaign Instances:"), instancePanel);
+
+        dialog.getDialogPane().setContent(content);
+        dialog.getDialogPane().setPrefWidth(420);
 
         dialog.showAndWait();
     }

@@ -50,6 +50,9 @@ public class Workspace {
     private final ObservableList<ContextXml> contexts =
             FXCollections.observableArrayList();
 
+    @JsonProperty("campaignInstanceId")
+    private String campaignInstanceId;
+
     @JsonIgnore
     private final StringProperty nameProperty = new SimpleStringProperty();
 
@@ -154,6 +157,16 @@ public class Workspace {
     public static Path getWorkspacesRootPath() {
         File userDir = new File(System.getProperty("user.home"));
         return userDir.toPath().resolve(workspacesRootName);
+    }
+
+    @JsonProperty("campaignInstanceId")
+    public String getCampaignInstanceId() {
+        return campaignInstanceId;
+    }
+
+    @JsonProperty("campaignInstanceId")
+    public void setCampaignInstanceId(String campaignInstanceId) {
+        this.campaignInstanceId = campaignInstanceId;
     }
 
     public void sortAllLists() {

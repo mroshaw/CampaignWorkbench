@@ -1,11 +1,13 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
 import com.campaignworkbench.adobecampaignapi.ApiException;
+import com.campaignworkbench.adobecampaignapi.CampaignInstance;
 import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
 import com.campaignworkbench.adobecampaignapi.schemas.EtmModuleSchemaKey;
 import com.campaignworkbench.adobecampaignapi.schemas.EtmModuleRecord;
 import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockRecord;
 import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockSchemaKey;
+import com.campaignworkbench.ide.AppSettings;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
 
@@ -29,6 +31,7 @@ public class CampaignOperationsHandler {
     private final Supplier<WorkspaceFileType> selectedFileTypeSupplier;
     private final Runnable onConnectionStateChanged;
     private final Supplier<Window> windowSupplier;
+    private final AppSettings appSettings;
 
     private boolean isConnectedToCampaign;
     private String connectionHostLabel = "";
@@ -40,7 +43,8 @@ public class CampaignOperationsHandler {
             Supplier<WorkspaceFile> selectedFileSupplier,
             Supplier<WorkspaceFileType> selectedFileTypeSupplier,
             Runnable onConnectionStateChanged,
-            Supplier<Window> windowSupplier) {
+            Supplier<Window> windowSupplier,
+            AppSettings appSettings) {
 
         this.errorReporter = errorReporter;
         this.fileOpenHandler = fileOpenHandler;
@@ -49,7 +53,32 @@ public class CampaignOperationsHandler {
         this.selectedFileTypeSupplier = selectedFileTypeSupplier;
         this.onConnectionStateChanged = onConnectionStateChanged;
         this.windowSupplier = windowSupplier;
+        this.appSettings = appSettings;
         this.campaignServerManager = new CampaignServerManager();
+    }
+
+    /**
+     * Called when a workspace is opened or created. Looks up the CampaignInstance
+     * for the workspace and wires it into the CampaignServerManager.
+     */
+    public void onWorkspaceChanged(Workspace workspace) {
+        isConnectedToCampaign = false;
+        connectionHostLabel = "";
+
+        if (workspace == null || workspace.getCampaignInstanceId() == null) {
+            campaignServerManager.setCampaignInstance(null);
+            return;
+        }
+
+        Optional<CampaignInstance> instance = appSettings.findById(workspace.getCampaignInstanceId());
+        if (instance.isPresent()) {
+            campaignServerManager.setCampaignInstance(instance.get());
+        } else {
+            campaignServerManager.setCampaignInstance(null);
+            errorReporter.reportError(
+                    "The Campaign instance configured for this workspace could not be found. " +
+                            "Please check File > Settings and reassign an instance.", true);
+        }
     }
 
     public boolean isConnectedToCampaign() {

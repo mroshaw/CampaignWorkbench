@@ -1,5 +1,7 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
+import com.campaignworkbench.ide.AppSettings;
+import com.campaignworkbench.ide.dialogs.NewWorkspaceDialog;
 import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.ide.IJavaFxNode;
@@ -70,6 +72,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private WorkspaceFileType selectedFileType;
     private WorkspaceFile selectedFile;
 
+    private final AppSettings appSettings;
+
     private final ErrorReporter errorReporter;
 
     private final CampaignOperationsHandler campaignOperationsHandler;
@@ -83,11 +87,13 @@ public class WorkspaceExplorer implements IJavaFxNode {
                              Consumer<WorkspaceFile> fileOpenHandler,
                              Consumer<Workspace> workspaceChangedHandler,
                              Consumer<String> insertIntoCodeHandler,
-                             ErrorReporter errorReporter) {
+                             ErrorReporter errorReporter,
+                             AppSettings appSettings) {
 
         this.fileOpenHandler = fileOpenHandler;
         this.insertIntoCodeHandler = insertIntoCodeHandler;
         this.errorReporter = errorReporter;
+        this.appSettings = appSettings;
 
         campaignOperationsHandler = new CampaignOperationsHandler(
                 errorReporter,
@@ -96,7 +102,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 () -> selectedFile,
                 () -> selectedFileType,
                 this::onCampaignConnectionStateChanged,
-                this::getWindow
+                this::getWindow,
+                appSettings
         );
 
         createUi(labelText);
@@ -108,6 +115,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     public void setWorkspace(Workspace workspace) {
         this.workspace.setValue(workspace);
+        campaignOperationsHandler.onWorkspaceChanged(workspace);
         toolbar.update();
     }
 
@@ -300,13 +308,11 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     public void createNewWorkspace() {
 
-        Optional<String> result = TextInputDialog.show(getWindow(), "Create workspace", "Please enter a unique name for the new workspace", "Workspace name:");
-
-        result.ifPresent(workspaceName -> {
-            // Only executed if OK was clicked and text was not empty
-            System.out.println("Workspace Name: " + workspaceName);
-
-            setWorkspace(new Workspace(workspaceName, true));
+        Optional<NewWorkspaceDialog.Result> result = NewWorkspaceDialog.show(getWindow(), appSettings);
+        result.ifPresent(r -> {
+            Workspace newWorkspace = new Workspace(r.workspaceName(), true);
+            newWorkspace.setCampaignInstanceId(r.instance().getId());
+            setWorkspace(newWorkspace);
         });
     }
 

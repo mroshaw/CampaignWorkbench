@@ -50,6 +50,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private OutputTabPanel outputPanel;
     private EditorTab currentEditorTab;
     private Scene scene;
+    private AppSettings appSettings;
 
     TemplateRenderer templateRenderer = new TemplateRenderer();
 
@@ -115,7 +116,8 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 _ -> runTemplate());
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace, this::workspaceChanged, this::insertIntoCodeHandler, errorReporter);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace, this::workspaceChanged,
+                this::insertIntoCodeHandler, errorReporter, appSettings);
 
         // Editor tabs
         editorTabPanel = new EditorTabPanel((_, _, newTab) -> tabPanelChanged(newTab), errorReporter);
@@ -164,6 +166,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         primaryStage.show();
         ThemeManager.register(this);
         Workspace.createWorkspaceRootFolder();
+        appSettings = AppSettingsManager.load();
 
         // Apply styles
         scene.getStylesheets().add(UiUtil.getStylesFromStyleSheet(ideStyleSheet));
@@ -395,6 +398,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     }
 
     private void showSettings() {
-        SettingsDialog.show(scene.getWindow());
+        SettingsDialog.show((Stage) scene.getWindow(), appSettings);
     }
 }

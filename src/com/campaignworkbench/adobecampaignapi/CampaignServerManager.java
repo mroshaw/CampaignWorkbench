@@ -20,7 +20,7 @@ import java.util.Optional;
 public class CampaignServerManager {
     private final AuthClient authClient = new AuthClient();
     private SoapClient soapClient;
-    private final CredentialStore credentials = new CredentialStore();
+    private CampaignInstance campaignInstance;
     private final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     private final XmlMapper mapper = new XmlMapper();
 
@@ -28,7 +28,16 @@ public class CampaignServerManager {
     private PersoBlockSchema allPersonalizationBlocks = new PersoBlockSchema();
     private EtmModuleSchema allJavaScriptTemplates = new EtmModuleSchema();
 
+    public void setCampaignInstance(CampaignInstance instance) {
+        this.campaignInstance = instance;
+    }
+
     public boolean connect() throws ApiException {
+        if (campaignInstance == null) {
+            throw new ApiException("No Campaign instance is configured for this workspace.", null);
+        }
+
+        CredentialStore credentials = campaignInstance.getCredentialStore();
         Optional<String> endPointUrl = credentials.getEndpointUrl();
         Optional<String> clientId = credentials.getClientId();
         Optional<String> clientSecret = credentials.getClientSecret();
@@ -56,26 +65,28 @@ public class CampaignServerManager {
     public void disconnect() throws ApiException {
         try {
             soapClient.client.close();
-          } catch (Exception exception) {
+        } catch (Exception exception) {
             throw new ApiException("Could not disconnect from the Campaign SOAP instance!", exception);
         }
     }
 
     public String getEndpointUrl() {
-        Optional<String> endPointUrl = credentials.getEndpointUrl();
+        if (campaignInstance == null) {
+            return "";
+        }
+        Optional<String> endPointUrl = campaignInstance.getCredentialStore().getEndpointUrl();
         return endPointUrl.orElse("");
     }
 
     public PersoBlockSchema getAllPersoBlocks(boolean refresh) throws ApiException {
         if (!allPersonalizationBlocks.isInitialized() || refresh) {
             refreshBlocks();
-
         }
         return allPersonalizationBlocks;
     }
 
     public EtmModuleSchema getAllJavaScriptTemplates(boolean refresh) throws ApiException {
-        if(!allJavaScriptTemplates.isInitialized() || refresh) {
+        if (!allJavaScriptTemplates.isInitialized() || refresh) {
             refreshJavaScriptTemplates();
         }
         return allJavaScriptTemplates;
@@ -104,7 +115,6 @@ public class CampaignServerManager {
         if (allPersonalizationBlocks == null || allPersonalizationBlocks.getPersonalisationBlocks() == null) {
             return Optional.empty();
         }
-
         return allPersonalizationBlocks.getPersonalisationBlocks().stream()
                 .filter(iv -> iv.getId() == id)
                 .findFirst();
@@ -118,14 +128,12 @@ public class CampaignServerManager {
         if (allJavaScriptTemplates == null) {
             return Optional.empty();
         }
-
         return allJavaScriptTemplates.getJavaScriptTemplates().stream()
-                .filter(javascriptTemplate -> javascriptTemplate.getNamespace().equals(namespace) && javascriptTemplate.getName().equals(name))
+                .filter(t -> t.getNamespace().equals(namespace) && t.getName().equals(name))
                 .findFirst();
     }
 
     private String querySchema(String queryXml) {
-        // Run a queryDef against the Campaign server
         String queryResultXml;
         try {
             queryResultXml = soapClient.sendQueryRequest(queryXml);
@@ -133,7 +141,6 @@ public class CampaignServerManager {
             throw new ApiException("An error occurred while querying Personalisation Blocks!", apiException);
         }
 
-        // Deserialize the result to object instances
         try {
             factory.setNamespaceAware(true);
             Document doc = factory
@@ -142,10 +149,7 @@ public class CampaignServerManager {
 
             NodeList nodes = doc.getElementsByTagName("pdomOutput");
             Element pdomOutput = (Element) nodes.item(0);
-
-            // Get first child (includeView-collection)
             Node collectionNode = pdomOutput.getFirstChild();
-
             return nodeToString(collectionNode);
 
         } catch (Exception exception) {
@@ -162,9 +166,8 @@ public class CampaignServerManager {
 
     public void updatePersonalizationBlock(PersoBlockSchemaKey key, String code) throws ApiException {
         String updateXml = PersoBlockSchema.getUpdateXml(key, code);
-        String updateResultXml;
         try {
-            updateResultXml = soapClient.sendUpdateRequest(updateXml);
+            soapClient.sendUpdateRequest(updateXml);
         } catch (ApiException apiException) {
             throw new ApiException("An error occurred while updating Personalisation Block with key: " + key.getId(), apiException);
         }
@@ -172,9 +175,8 @@ public class CampaignServerManager {
 
     public void updateJavascriptTemplate(EtmModuleSchemaKey key, String code) throws ApiException {
         String updateXml = EtmModuleSchema.getUpdateXml(key, code);
-        String updateResultXml;
         try {
-            updateResultXml = soapClient.sendUpdateRequest(updateXml);
+            soapClient.sendUpdateRequest(updateXml);
         } catch (ApiException apiException) {
             throw new ApiException("An error occurred while updating JavaScriptTemplate with key: " + key.getNamespace() + key.getName(), apiException);
         }
