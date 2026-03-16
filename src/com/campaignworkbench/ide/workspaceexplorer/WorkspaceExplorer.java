@@ -76,7 +76,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private final ErrorReporter errorReporter;
 
     private final CampaignOperationsHandler campaignOperationsHandler;
-
+    Consumer<Workspace> workspaceChangedHandler;
 
     /**
      * @param labelText           Label to use for the control in the UI
@@ -90,6 +90,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
                              AppSettings appSettings) {
 
         this.fileOpenHandler = fileOpenHandler;
+        this.workspaceChangedHandler = workspaceChangedHandler;
         this.insertIntoCodeHandler = insertIntoCodeHandler;
         this.errorReporter = errorReporter;
         this.appSettings = appSettings;
@@ -313,6 +314,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
             Workspace newWorkspace = new Workspace(r.workspaceName(), r.instance().getId(), true);
             newWorkspace.save();
             setWorkspace(newWorkspace);
+            workspaceChangedHandler.accept(newWorkspace);
         });
     }
 
@@ -334,7 +336,9 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (Files.exists(expectedJsonFile) && Files.isRegularFile(expectedJsonFile)) {
             // System.out.println("File exists: " + expectedJsonFile);
             try {
-                setWorkspace(new Workspace(folderName, null, false));
+                Workspace newWorkspace = new Workspace(folderName, null, false);
+                setWorkspace(newWorkspace);
+                workspaceChangedHandler.accept(newWorkspace);
             } catch (WorkspaceException workspaceException) {
                 errorReporter.reportError("Could not load workspace!", workspaceException, true);
             }
