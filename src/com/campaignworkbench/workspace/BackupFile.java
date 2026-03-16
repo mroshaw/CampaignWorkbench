@@ -2,9 +2,11 @@ package com.campaignworkbench.workspace;
 
 import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 
 /**
  * Represents a timestamped backup of an EtmModule or PersoBlock, taken before a push to Campaign.
@@ -20,15 +22,30 @@ public class BackupFile extends WorkspaceFile {
     // The file type of the source file this backs up (MODULE or BLOCK)
     private WorkspaceFileType sourceFileType;
 
-    public BackupFile(String fileName, WorkspaceFileType sourceFileType, Workspace workspace) {
+    private String originalFileName;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime backupDate;
+
+    public BackupFile(String fileName, String originalFileName, WorkspaceFileType sourceFileType, Workspace workspace) {
         super(fileName, WorkspaceFileType.BACKUP, workspace);
         this.sourceFileType = sourceFileType;
+        this.originalFileName = originalFileName;
+        backupDate = LocalDateTime.now();
     }
 
     public BackupFile() {}
 
     public WorkspaceFileType getSourceFileType() {
         return sourceFileType;
+    }
+
+    public String getOriginalFileName() {
+        return originalFileName;
+    }
+
+    public LocalDateTime getBackupDate() {
+        return backupDate;
     }
 
     /**

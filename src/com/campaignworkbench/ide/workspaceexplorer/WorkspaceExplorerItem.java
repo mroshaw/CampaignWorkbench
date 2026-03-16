@@ -10,6 +10,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -308,7 +310,13 @@ public class WorkspaceExplorerItem {
                         TreeItem<Object> backupItem = getTreeItem();
                         TreeItem<Object> grandparent = backupItem.getParent().getParent();
 
-                        setText(backupTreeItem.backupFile.getBaseFileName());
+                        BackupFile backupFile = backupTreeItem.backupFile;
+                        String dateText = backupFile.getBackupDate() != null
+                                ? backupFile.getBackupDate().format(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss"))
+                                : backupTreeItem.backupFile.getBaseFileName();
+                        String backupText = dateText;
+
+                        setText(backupText);
                         getStyleClass().add("backup-file");
                         ContextMenu menu = new ContextMenu();
                         MenuItem restore = new MenuItem("Restore...");
@@ -347,15 +355,30 @@ public class WorkspaceExplorerItem {
         // TreeItem<Object> backupsRoot = new TreeItem<>("Backups");
         TreeItem<Object> backupsRoot = createHeaderTreeItemStaticText(IdeIcon.FOLDER_SYNC, "Backups", "backup-icon", null, null, null);
 
-        for (BackupFile backup : backups) {
-            backupsRoot.getChildren().add(new TreeItem<>(new BackupTreeItem(backup, restoreHandler, deleteHandler)));
-        }
+        backups.stream()
+                .sorted(Comparator.comparing(BackupFile::getBackupDate,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
+                .forEach(backup -> backupsRoot.getChildren()
+                        .add(new TreeItem<>(new BackupTreeItem(backup, restoreHandler, deleteHandler))));
 
         backups.addListener((ListChangeListener<BackupFile>) change -> {
             while (change.next()) {
                 if (change.wasAdded()) {
                     for (BackupFile added : change.getAddedSubList()) {
-                        backupsRoot.getChildren().add(0, new TreeItem<>(new BackupTreeItem(added, restoreHandler, deleteHandler)));
+                        TreeItem<Object> newItem = new TreeItem<>(new BackupTreeItem(added, restoreHandler, deleteHandler));
+                        int insertAt = 0;
+                        for (int i = 0; i < backupsRoot.getChildren().size(); i++) {
+                            Object val = backupsRoot.getChildren().get(i).getValue();
+                            if (val instanceof BackupTreeItem bt
+                                    && added.getBackupDate() != null
+                                    && bt.backupFile.getBackupDate() != null
+                                    && added.getBackupDate().isBefore(bt.backupFile.getBackupDate())) {
+                                insertAt = i + 1;
+                            } else {
+                                break;
+                            }
+                        }
+                        backupsRoot.getChildren().add(insertAt, newItem);
                     }
                 }
                 if (change.wasRemoved()) {

@@ -359,7 +359,7 @@ public class Workspace {
                 .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd_HHmmss"));
         String backupFileName = sourceFile.getBaseFileName() + "_" + timestamp + getExtension(sourceFile.getFileName());
 
-        BackupFile backup = new BackupFile(backupFileName, sourceFileType, this);
+        BackupFile backup = new BackupFile(backupFileName, sourceFile.getBaseFileName(), sourceFileType, this);
         try {
             Files.createFile(backup.getAbsoluteFilePath());
         } catch (IOException ioe) {

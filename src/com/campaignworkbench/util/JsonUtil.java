@@ -13,8 +13,8 @@ import java.nio.file.Path;
 public final class JsonUtil {
 
     // Singleton ObjectMapper instance
+
     private static final ObjectMapper mapper = JsonMapper.builder()
-            // You can register modules here if needed
             .build();
 
     private JsonUtil() {} // private constructor for utility class
