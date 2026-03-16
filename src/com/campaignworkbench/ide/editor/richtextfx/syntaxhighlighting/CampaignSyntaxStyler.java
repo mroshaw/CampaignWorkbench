@@ -109,6 +109,11 @@ public class CampaignSyntaxStyler implements ISyntaxStyler {
 
     @Override
     public StyleSpans<Collection<String>> style(String text) {
+
+        if (text.isEmpty()) {
+            return StyleSpans.singleton(Collections.emptyList(), 0);
+        }
+
         StyleSpansBuilder<Collection<String>> builder = new StyleSpansBuilder<>();
         Matcher m = MASTER.matcher(text);
         int lastEnd = 0;

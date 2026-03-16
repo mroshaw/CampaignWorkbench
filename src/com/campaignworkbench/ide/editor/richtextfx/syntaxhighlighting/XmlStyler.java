@@ -37,6 +37,10 @@ public class XmlStyler implements ISyntaxStyler {
     @Override
     public StyleSpans<Collection<String>> style(String text) {
 
+        if (text.isEmpty()) {
+            return StyleSpans.singleton(Collections.emptyList(), 0);
+        }
+
         Matcher matcher = XML_TAG.matcher(text);
         int lastKwEnd = 0;
 

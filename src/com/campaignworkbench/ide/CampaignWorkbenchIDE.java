@@ -240,7 +240,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
             errorReporter.reportError("An error occurred while creating a new workspace: " + ideEx.getMessage(), ideEx, true);
         }
     }
-    
+
     private void saveWorkspaceHandler() {
         try {
             workspaceExplorer.saveWorkspace();
