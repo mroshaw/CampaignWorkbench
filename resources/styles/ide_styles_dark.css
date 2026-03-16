@@ -56,6 +56,10 @@
 }
 
 /* Gutter */
+.gutter {
+    -fx-background-color: -color-bg-subtle;
+ }
+
 .code-editor .paragraph-box .gutter .line-number {
     -fx-text-fill: #d4d4d4;
     -fx-background-color: transparent;

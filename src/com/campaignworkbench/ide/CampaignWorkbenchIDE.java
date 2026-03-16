@@ -203,6 +203,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         scene.getStylesheets().remove(oldTheme.getIdeStyleSheet());
 
         // Set AtlantaFX styles
+        Application.setUserAgentStylesheet(null); // clear first
         Application.setUserAgentStylesheet(newTheme.getAtlantaFxStyleSheet());
 
         // Set IDE theme styles

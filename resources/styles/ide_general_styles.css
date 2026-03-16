@@ -57,7 +57,7 @@
 .code-editor .code-area {
     /* -fx-background-color: linear-gradient(to right, -color-bg-subtle 0%, -color-bg-subtle 60px, -color-bg-default 60px, -color-bg-default 100%); */
     -fx-background-color: -color-bg-subtle, linear-gradient(to right, -color-bg-default, -color-bg-default)!important ;
-    -fx-background-insets: 0, 0 0 0 50;
+    -fx-background-insets: 0, 0 0 0 60;
     -fx-tab-size: 4;
     -fx-font-family: 'Consolas';
     -fx-font-size: 11pt;
