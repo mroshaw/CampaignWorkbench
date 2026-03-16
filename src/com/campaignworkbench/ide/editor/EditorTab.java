@@ -97,6 +97,10 @@ public final class EditorTab extends Tab {
         updateTabText();
     }
 
+    public void setEditable(boolean isEditable) {
+        editor.setEditable(isEditable);
+    }
+
     public void refreshText() {
         editor.setText(workspaceFile.getWorkspaceFileContent());
     }

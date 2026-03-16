@@ -56,4 +56,8 @@ public class EtmModule extends WorkspaceContextFile {
         return schemaKey;
     }
 
+    public void removeBackup(BackupFile backup) {
+        backups.remove(backup);
+    }
+
 }

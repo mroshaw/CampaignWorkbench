@@ -37,6 +37,10 @@ public class PersoBlock extends WorkspaceFile {
         if (list != null) backups.setAll(list);
     }
 
+    public void removeBackup(BackupFile backup) {
+        backups.remove(backup);
+    }
+
     public ObservableList<BackupFile> getBackups() {
         return backups;
     }
@@ -45,6 +49,7 @@ public class PersoBlock extends WorkspaceFile {
     }
 
     public PersoBlock() {}
+
 
     @Override
     public void setKey(SchemaKey schemaKey) {

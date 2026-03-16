@@ -222,6 +222,10 @@ public class RichTextFXEditor implements ICodeEditor {
                 syntaxStyler = new HtmlSyntaxStyler();
                 foldParser = new HtmlFoldParser(codeArea);
                 break;
+            default:
+                codeFormatter = new CampaignFormatter();
+                syntaxStyler = new CampaignSyntaxStyler();
+                foldParser = new CampaignFoldParser(codeArea);
         }
     }
 

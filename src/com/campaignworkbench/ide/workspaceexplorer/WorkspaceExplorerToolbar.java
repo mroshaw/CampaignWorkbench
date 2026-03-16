@@ -14,6 +14,7 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class WorkspaceExplorerToolbar {
@@ -44,6 +45,7 @@ public class WorkspaceExplorerToolbar {
     private final ToolBar workspaceToolbar;
     private final ToolBar campaignToolbar;
 
+    private final Consumer<WorkspaceFile> openFileConsumer;
     private final CampaignOperationsHandler campaignOperationsHandler;
     private final Supplier<Workspace> workspaceSupplier;
     private final Supplier<WorkspaceFile> selectedFileSupplier;
@@ -54,18 +56,21 @@ public class WorkspaceExplorerToolbar {
             Supplier<Workspace> workspaceSupplier,
             Supplier<WorkspaceFile> selectedFileSupplier,
             Supplier<WorkspaceFileType> selectedFileTypeSupplier,
+            Consumer<WorkspaceFile> openFileConsumer,
             Runnable createNew,
             Runnable addExisting,
             Runnable remove,
             Runnable setDataContext,
             Runnable clearDataContext,
             Runnable setMessageContext,
-            Runnable clearMessageContext) {
+            Runnable clearMessageContext
+            ) {
 
         this.campaignOperationsHandler = campaignOperationsHandler;
         this.workspaceSupplier = workspaceSupplier;
         this.selectedFileSupplier = selectedFileSupplier;
         this.selectedFileTypeSupplier = selectedFileTypeSupplier;
+        this.openFileConsumer = openFileConsumer;
 
         createNewButton = UiUtil.createMiniToolbarButton("", "Create new", IdeIcon.NEW_FILE, true, "neutral-icon", 20, true, _ -> createNew.run());
         addExistingButton = UiUtil.createMiniToolbarButton("", "Add existing", IdeIcon.ADD_FILE, true, "positive-icon", 20, true, _ -> addExisting.run());
@@ -80,12 +85,18 @@ public class WorkspaceExplorerToolbar {
         createNewFromCampaignButton = UiUtil.createMiniToolbarButton("", "Create new from Campaign", IdeIcon.NEW_FROM_CAMPAIGN, true, "positive-icon", 20, false, _ -> {
             Optional<Object> selection = campaignOperationsHandler.confirmCreateNew();
             selection.ifPresent(record ->
-                    withBusyCursor(() -> campaignOperationsHandler.executeCreateNew(record))
+                    withBusyCursor(() -> {
+                        campaignOperationsHandler.executeCreateNew(record);
+                        // Platform.runLater(() -> openFileConsumer.accept(selectedFileSupplier.get()));
+                    })
             );
         });
         refreshFromCampaignButton = UiUtil.createMiniToolbarButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, false, _ -> {
             if (campaignOperationsHandler.confirmRefresh()) {
-                withBusyCursor(campaignOperationsHandler::executeRefresh);
+                withBusyCursor(() -> {
+                    campaignOperationsHandler.executeRefresh();
+                    // openFileConsumer.accept(selectedFileSupplier.get());
+                });
             }
         });
         pushToCampaignButton = UiUtil.createMiniToolbarButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, false, _ -> {

@@ -29,6 +29,12 @@ public class SettingsDialog {
         dialog.initOwner(owner);
         dialog.setResizable(true);
 
+        TabPane settingsTabPane = new TabPane();
+        Tab instanceSettingsTab = new Tab("Instances");
+        Tab viewSettingsTab = new Tab("View");
+
+        settingsTabPane.getTabs().addAll(instanceSettingsTab, viewSettingsTab);
+
         ButtonType closeButtonType = new ButtonType("Close", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().add(closeButtonType);
 
@@ -98,11 +104,13 @@ public class SettingsDialog {
         HBox instancePanel = new HBox(12, instanceListView, buttonBox);
         instancePanel.setAlignment(Pos.TOP_LEFT);
 
-        VBox content = new VBox(12);
-        content.setPadding(new Insets(20));
-        content.getChildren().addAll(new Label("Campaign Instances:"), instancePanel);
+        VBox instanceContent = new VBox(12);
+        instanceContent.setPadding(new Insets(20));
+        instanceContent.getChildren().addAll(new Label("Campaign Instances:"), instancePanel);
 
-        dialog.getDialogPane().setContent(content);
+        instanceSettingsTab.setContent(instanceContent);
+
+        dialog.getDialogPane().setContent(settingsTabPane);
         dialog.getDialogPane().setPrefWidth(420);
 
         dialog.showAndWait();

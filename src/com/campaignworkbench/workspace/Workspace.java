@@ -312,6 +312,22 @@ public class Workspace {
         }
     }
 
+    public void removeWorkspaceBackupFile(WorkspaceFile workspaceFile, BackupFile backupFile, boolean deleteFromFileSystem) {
+        System.out.println("Removing: " + backupFile.getBaseFileName());
+
+        if(workspaceFile instanceof EtmModule etmModule) {
+            etmModule.removeBackup(backupFile);
+        }
+
+        if(workspaceFile instanceof PersoBlock persoBlock) {
+            persoBlock.removeBackup(backupFile);
+        }
+
+        if (deleteFromFileSystem) {
+            backupFile.deleteFromFileSystem();
+        }
+    }
+
     public void removeWorkspaceFile(WorkspaceFile fileToRemove, boolean deleteFromFileSystem) {
         System.out.println("Removing: " + fileToRemove.getBaseFileName());
         if (deleteFromFileSystem) {

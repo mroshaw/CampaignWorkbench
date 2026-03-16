@@ -71,7 +71,7 @@ public class MainMenuBar implements IJavaFxNode {
         Menu openMenu = new Menu("Open");
         Menu newMenu = new Menu("New");
         Menu addMenu = new Menu("Add Existing");
-        MenuItem settingsItem = new MenuItem("Settings");
+        MenuItem settingsItem = new MenuItem("Settings...");
         settingsItem.setOnAction(settingsHandler);
 
         MenuItem openWorkspaceMenu = new MenuItem("Workspace");

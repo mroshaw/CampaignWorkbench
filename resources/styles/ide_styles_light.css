@@ -39,14 +39,15 @@
 .code-editor .acc-rt-event       { -fx-fill: #0070C1; }
 
 /* ToolBar buttons */
-.neutral-icon       { -fx-fill: #B7791F; }
-.positive-icon      { -fx-fill: #4E8F00; }
-.negative-icon      { -fx-fill: #AD1457; }
-.workspace-icon     { -fx-fill: #B7791F; }
-.template-icon      { -fx-fill: #2F5DA8; }
-.block-icon         { -fx-fill: #AD1457; }
-.module-icon        { -fx-fill: #4E8F00; }
-.context-icon       { -fx-fill: #4EC9B0; }
+.neutral-icon           { -fx-fill: #B7791F; }
+.positive-icon          { -fx-fill: #4E8F00; }
+.negative-icon          { -fx-fill: #AD1457; }
+.workspace-icon         { -fx-fill: #B7791F; }
+.template-icon          { -fx-fill: #2F5DA8; }
+.block-icon             { -fx-fill: #AD1457; }
+.module-icon            { -fx-fill: #4E8F00; }
+.context-icon           { -fx-fill: #4EC9B0; }
+.backup-icon            { -fx-fill: #B7791F; }
 
 /* Code Editor */
 .code-editor .code-area .find-text {

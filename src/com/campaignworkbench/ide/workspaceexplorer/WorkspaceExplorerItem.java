@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
@@ -108,10 +109,12 @@ public class WorkspaceExplorerItem {
     static class BackupTreeItem {
         public final BackupFile backupFile;
         public final Consumer<BackupFile> restoreHandler;
+        public final BiConsumer<WorkspaceFile, BackupFile> deleteHandler;
 
-        BackupTreeItem(BackupFile backupFile, Consumer<BackupFile> restoreHandler) {
+        BackupTreeItem(BackupFile backupFile, Consumer<BackupFile> restoreHandler, BiConsumer<WorkspaceFile, BackupFile> deleteHandler) {
             this.backupFile = backupFile;
             this.restoreHandler = restoreHandler;
+            this.deleteHandler = deleteHandler;
         }
     }
 
@@ -188,7 +191,8 @@ public class WorkspaceExplorerItem {
         return templateItem;
     }
 
-    static TreeItem<Object> createModuleTreeItem(EtmModule etmModule, Consumer<String> getFileNameContextHandler, Consumer<WorkspaceFile> deleteHandler, Consumer<BackupFile> restoreHandler) {
+    static TreeItem<Object> createModuleTreeItem(EtmModule etmModule, Consumer<String> getFileNameContextHandler,
+                                                 Consumer<WorkspaceFile> deleteHandler, Consumer<BackupFile> restoreHandler, BiConsumer<WorkspaceFile, BackupFile> deleteBackupHandler) {
         // Create parent TreeItem for the Template itself
         TreeItem<Object> moduleItem = WorkspaceExplorerItem.createWorkspaceFileTreeItem(
                 etmModule,
@@ -203,19 +207,21 @@ public class WorkspaceExplorerItem {
         );
 
         moduleItem.getChildren().addAll(dataContextItem);
+        // templateItem.setExpanded(true); // optional: expand by default
 
         // Bind child items to the Template properties
         etmModule.getDataContextFileProperty().addListener((obs, oldFile, newFile) -> {
             setTreeItemValue(dataContextItem, new ContextTreeItem(newFile, "Data"));
         });
 
-        TreeItem<Object> backupsHeaderItem = createBackupsHeaderTreeItem(etmModule.getBackups(), restoreHandler);
+        TreeItem<Object> backupsHeaderItem = createBackupsHeaderTreeItem(etmModule.getBackups(), restoreHandler, deleteBackupHandler);
         moduleItem.getChildren().addAll(dataContextItem, backupsHeaderItem);
 
         return moduleItem;
     }
 
-    static TreeItem<Object> createBlockTreeItem(PersoBlock block, Consumer<String> getFileNameContextHandler, Consumer<WorkspaceFile> deleteHandler, Consumer<BackupFile> restoreHandler) {
+    static TreeItem<Object> createBlockTreeItem(PersoBlock block, Consumer<String> getFileNameContextHandler,
+                                                Consumer<WorkspaceFile> deleteHandler, Consumer<BackupFile> restoreHandler, BiConsumer<WorkspaceFile, BackupFile> deleteBackupHandler) {
         // Create parent TreeItem for the Template itself
         TreeItem<Object> blockItem = WorkspaceExplorerItem.createWorkspaceFileTreeItem(
                 block,
@@ -223,7 +229,7 @@ public class WorkspaceExplorerItem {
                 deleteHandler
         );
 
-        TreeItem<Object> backupsHeaderItem = createBackupsHeaderTreeItem(block.getBackups(), restoreHandler);
+        TreeItem<Object> backupsHeaderItem = createBackupsHeaderTreeItem(block.getBackups(), restoreHandler, deleteBackupHandler);
         blockItem.getChildren().addAll(backupsHeaderItem);
 
         return blockItem;
@@ -301,12 +307,22 @@ public class WorkspaceExplorerItem {
                         setContextMenu(menu);
                     }
                     case BackupTreeItem backupTreeItem -> {
+                        TreeItem<Object> backupItem = getTreeItem();
+                        TreeItem<Object> grandparent = backupItem.getParent().getParent();
+
                         setText(backupTreeItem.backupFile.getBaseFileName());
                         getStyleClass().add("backup-file");
                         ContextMenu menu = new ContextMenu();
                         MenuItem restore = new MenuItem("Restore...");
+                        MenuItem delete = new MenuItem("Delete...");
+                        delete.setOnAction(_ -> {
+                            if (grandparent != null && grandparent.getValue() instanceof WorkspaceFileTreeItem parentFile) {
+                                backupTreeItem.deleteHandler.accept(parentFile.workspaceFile, backupTreeItem.backupFile);
+                            }
+                        });
                         restore.setOnAction(_ -> backupTreeItem.restoreHandler.accept(backupTreeItem.backupFile));
                         menu.getItems().add(restore);
+                        menu.getItems().add(delete);
                         setContextMenu(menu);
                     }
                     case String s when s.equals("Backups") -> {
@@ -327,19 +343,21 @@ public class WorkspaceExplorerItem {
 
     private static TreeItem<Object> createBackupsHeaderTreeItem(
             ObservableList<BackupFile> backups,
-            Consumer<BackupFile> restoreHandler) {
+            Consumer<BackupFile> restoreHandler,
+            BiConsumer<WorkspaceFile, BackupFile> deleteHandler) {
 
-        TreeItem<Object> backupsRoot = new TreeItem<>("Backups");
+        // TreeItem<Object> backupsRoot = new TreeItem<>("Backups");
+        TreeItem<Object> backupsRoot = createHeaderTreeItemStaticText(IdeIcon.FOLDER_SYNC, "Backups", "backup-icon", null, null, null);
 
         for (BackupFile backup : backups) {
-            backupsRoot.getChildren().add(new TreeItem<>(new BackupTreeItem(backup, restoreHandler)));
+            backupsRoot.getChildren().add(new TreeItem<>(new BackupTreeItem(backup, restoreHandler, deleteHandler)));
         }
 
         backups.addListener((ListChangeListener<BackupFile>) change -> {
             while (change.next()) {
                 if (change.wasAdded()) {
                     for (BackupFile added : change.getAddedSubList()) {
-                        backupsRoot.getChildren().add(0, new TreeItem<>(new BackupTreeItem(added, restoreHandler)));
+                        backupsRoot.getChildren().add(0, new TreeItem<>(new BackupTreeItem(added, restoreHandler, deleteHandler)));
                     }
                 }
                 if (change.wasRemoved()) {

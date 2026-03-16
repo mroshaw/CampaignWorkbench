@@ -158,11 +158,11 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 );
 
                 modulesListener = bindListToTree(newWorkspace.getModules(), moduleRoot, module ->
-                                WorkspaceExplorerItem.createModuleTreeItem(module, this::insertIntoCode, this::deleteExistingFile, this::restoreBackupHandler),
+                                WorkspaceExplorerItem.createModuleTreeItem(module, this::insertIntoCode, this::deleteExistingFile, this::restoreBackupHandler, this::deleteBackupFile),
                         Comparator.comparing(EtmModule::getBaseFileName));
 
                 blocksListener = bindListToTree(newWorkspace.getBlocks(), blockRoot, block ->
-                                WorkspaceExplorerItem.createBlockTreeItem(block, this::insertIntoCode, this::deleteExistingFile, this::restoreBackupHandler),
+                                WorkspaceExplorerItem.createBlockTreeItem(block, this::insertIntoCode, this::deleteExistingFile, this::restoreBackupHandler, this::deleteBackupFile),
                         Comparator.comparing(PersoBlock::getBaseFileName));
 
                 contextsListener = bindListToTree(newWorkspace.getContexts(), contextRoot, context ->
@@ -226,6 +226,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 this::getWorkspace,
                 () -> selectedFile,
                 () -> selectedFileType,
+                this::openFile,
                 this::createNewHandler,
                 this::addExistingHandler,
                 this::deleteHandler,
@@ -387,16 +388,29 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
     }
 
-    private void deleteExistingFile(WorkspaceFile workspaceFile) {
-        YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Confirm delete?", "Do you also want to delete the selected file (" + selectedFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
+    private void deleteBackupFile(WorkspaceFile workspaceFile, BackupFile backupFile) {
+        YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Confirm delete?", "Do you also want to delete the selected file (" + workspaceFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
 
         if (result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
             return;
         }
         try {
-            getWorkspace().removeWorkspaceFile(selectedFile, result == YesNoCancelPopupDialog.YesNoCancel.YES);
+            getWorkspace().removeWorkspaceBackupFile(workspaceFile, backupFile, result == YesNoCancelPopupDialog.YesNoCancel.YES);
         } catch (WorkspaceException workspaceException) {
-            errorReporter.reportError("An error occurred deleting " + selectedFile.getBaseFileName(), workspaceException, true);
+            errorReporter.reportError("An error occurred deleting " + backupFile.getBaseFileName(), workspaceException, true);
+        }
+    }
+
+    private void deleteExistingFile(WorkspaceFile workspaceFile) {
+        YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Confirm delete?", "Do you also want to delete the selected file (" + workspaceFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
+
+        if (result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
+            return;
+        }
+        try {
+            getWorkspace().removeWorkspaceFile(workspaceFile, result == YesNoCancelPopupDialog.YesNoCancel.YES);
+        } catch (WorkspaceException workspaceException) {
+            errorReporter.reportError("An error occurred deleting " + workspaceFile.getBaseFileName(), workspaceException, true);
         }
     }
 
@@ -482,6 +496,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
         }
     }
 
+    private void openFile(WorkspaceFile file) {
+        fileOpenHandler.accept(file);
+    }
+
     private void setupDoubleClickHandler() {
         treeView.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, evt -> {
             if (evt.getButton() == MouseButton.PRIMARY && evt.getClickCount() == 2) {
@@ -496,6 +514,13 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 // Folder header item
                 if (selectedObject instanceof WorkspaceExplorerItem.HeaderTreeItem) {
                     // Allow the double click to fold/unfolder
+                    return;
+                }
+
+                // Backup item
+                if(selectedObject instanceof WorkspaceExplorerItem.BackupTreeItem backupTreeItem) {
+                    fileOpenHandler.accept(backupTreeItem.backupFile);
+                    evt.consume();
                     return;
                 }
 

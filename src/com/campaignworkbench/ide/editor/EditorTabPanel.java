@@ -3,6 +3,7 @@ package com.campaignworkbench.ide.editor;
 import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.workspace.WorkspaceFile;
+import com.campaignworkbench.workspace.WorkspaceFileType;
 import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
 import javafx.scene.Node;
@@ -114,13 +115,17 @@ public class EditorTabPanel implements IJavaFxNode {
         EditorTab existingTab = getExistingTab(workspaceFile);
         if(existingTab != null) {
             // Refresh and set focus on the tab
-            // getSelected().refreshText();
+            getSelected().refreshText();
             tabPane.getSelectionModel().select(existingTab);
             return;
         }
 
         EditorTab tab = new EditorTab(workspaceFile, errorReporter);
         tab.setClosable(true);
+        // Backups should be read only
+        if(workspaceFile.getFileType() == WorkspaceFileType.BACKUP) {
+            tab.setEditable(false);
+        }
         tabPane.getTabs().add(tab);
         tabPane.getSelectionModel().select(tab);
     }

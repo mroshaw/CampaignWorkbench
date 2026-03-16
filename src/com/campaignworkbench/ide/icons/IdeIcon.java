@@ -39,7 +39,8 @@ public enum IdeIcon {
     WRAP_TEXT("Text_Wrap"),
     // Find Toolbar
     FIND_START("Search"),
-    FIND_CLEAR("Dismiss_Circle");
+    FIND_CLEAR("Dismiss_Circle"),
+    FOLDER_SYNC("Folder_Sync");
 
     private final String iconName;
 

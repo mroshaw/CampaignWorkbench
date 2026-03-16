@@ -67,7 +67,7 @@ public class GutterFactory implements IntFunction<Node> {
     @Override
     public Node apply(int paragraphIndex) {
 
-        if (foldParser.isParagraphHidden(paragraphIndex)) {
+        if (foldParser == null || foldParser.isParagraphHidden(paragraphIndex)) {
             return null;
         }
 
