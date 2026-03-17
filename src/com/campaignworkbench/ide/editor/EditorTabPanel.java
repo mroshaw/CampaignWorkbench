@@ -4,6 +4,7 @@ import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import com.campaignworkbench.workspace.WorkspaceFileType;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
 import javafx.scene.Node;
@@ -14,6 +15,8 @@ import javafx.stage.Window;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Implements a tabbed panel of Editor tabs
@@ -22,17 +25,32 @@ public class EditorTabPanel implements IJavaFxNode {
 
     private final TabPane tabPane;
     private final ErrorReporter errorReporter;
+    private final SimpleBooleanProperty connectedObservable;
+    private final Supplier<Boolean> connectedStateSupplier;
+
+    Consumer<WorkspaceFile> refreshConsumer;
+    Consumer<WorkspaceFile> pushConsumer;
+
     /**
      * Constructor
      *
      * @param tabChangedListener action to call when the tab is changed
      */
-    public EditorTabPanel(ChangeListener<Tab> tabChangedListener, ErrorReporter errorReporter) {
+    public EditorTabPanel(ChangeListener<Tab> tabChangedListener, ErrorReporter errorReporter, SimpleBooleanProperty connectedObservable, Supplier<Boolean> connectedStateSupplier,
+                          Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer) {
+        this.connectedObservable = connectedObservable;
+        this.connectedStateSupplier = connectedStateSupplier;
         this.errorReporter = errorReporter;
+        this.pushConsumer = pushConsumer;
+        this.refreshConsumer = refreshConsumer;
+
         tabPane = new TabPane();
         tabPane.setMinHeight(0);
 
-        tabPane.getSelectionModel().selectedItemProperty().addListener(tabChangedListener);
+        if (tabChangedListener != null) {
+            tabPane.getSelectionModel().selectedItemProperty().addListener(tabChangedListener);
+        }
+
         tabPane.getSelectionModel().selectedItemProperty().addListener((_, _, newTab) -> refreshTabEditor(newTab));
 
         // Set style class
@@ -120,7 +138,7 @@ public class EditorTabPanel implements IJavaFxNode {
             return;
         }
 
-        EditorTab tab = new EditorTab(workspaceFile, errorReporter);
+        EditorTab tab = new EditorTab(this, workspaceFile, errorReporter, connectedObservable, connectedStateSupplier, refreshConsumer, pushConsumer);
         tab.setClosable(true);
         // Backups should be read only
         if(workspaceFile.getFileType() == WorkspaceFileType.BACKUP) {

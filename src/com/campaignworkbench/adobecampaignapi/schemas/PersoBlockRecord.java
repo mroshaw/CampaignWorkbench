@@ -2,7 +2,7 @@ package com.campaignworkbench.adobecampaignapi.schemas;
 
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public class PersoBlockRecord implements ISchemaKey {
+public class PersoBlockRecord extends CampaignRecord implements ISchemaKey {
     @JacksonXmlProperty(isAttribute = true)
     private long id;
 

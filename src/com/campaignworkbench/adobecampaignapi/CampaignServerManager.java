@@ -1,6 +1,8 @@
 package com.campaignworkbench.adobecampaignapi;
 
 import com.campaignworkbench.adobecampaignapi.schemas.*;
+import javafx.beans.property.SimpleBooleanProperty;
+import org.reactfx.Observable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -24,6 +26,8 @@ public class CampaignServerManager {
     private final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     private final XmlMapper mapper = new XmlMapper();
 
+    private SimpleBooleanProperty connectedObservable =  new SimpleBooleanProperty(false);
+
     // Maintain a single list of static blocks and JavaScript templates
     private PersoBlockSchema allPersonalizationBlocks = new PersoBlockSchema();
     private EtmModuleSchema allJavaScriptTemplates = new EtmModuleSchema();
@@ -31,6 +35,7 @@ public class CampaignServerManager {
     public void setCampaignInstance(CampaignInstance instance) {
         this.campaignInstance = instance;
     }
+    public SimpleBooleanProperty connectedObservableProperty;
 
     public boolean connect() throws ApiException {
         if (campaignInstance == null) {
@@ -53,21 +58,26 @@ public class CampaignServerManager {
             throw new ApiException("Could not authenticate with the provided credentials!", e);
         }
 
-        // Connect to the Campaign SOAP instance
-        soapClient = new SoapClient(endPointUrl.get(), accessToken);
+            // Connect to the Campaign SOAP instance
+            soapClient = new SoapClient(endPointUrl.get(), accessToken);
 
-        // Refresh the object cache
-        refreshAll();
-
-        return true;
+            // Refresh the object cache
+            refreshAll();
+            connectedObservable.set(true);
+            return true;
     }
 
     public void disconnect() throws ApiException {
         try {
             soapClient.client.close();
+            connectedObservable.set(false);
         } catch (Exception exception) {
             throw new ApiException("Could not disconnect from the Campaign SOAP instance!", exception);
         }
+    }
+
+    public SimpleBooleanProperty getConnectedObservable() {
+        return connectedObservable;
     }
 
     public String getEndpointUrl() {

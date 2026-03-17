@@ -9,10 +9,7 @@ import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.util.FileUtil;
 import com.campaignworkbench.workspace.*;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -67,16 +64,15 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
     // Main panel
     private VBox workspaceExplorerPanel;
-
     private WorkspaceFileType selectedFileType;
     private WorkspaceFile selectedFile;
-
     private final AppSettings appSettings;
-
     private final ErrorReporter errorReporter;
+    private final SimpleBooleanProperty workspaceSetObservable =  new SimpleBooleanProperty(false);
+    private SimpleBooleanProperty connectedObservable;
+    Consumer<WorkspaceFileType> createFromServerConsumer;
 
-    private final CampaignOperationsHandler campaignOperationsHandler;
-    Consumer<Workspace> workspaceChangedHandler;
+    private String labelText;
 
     /**
      * @param labelText           Label to use for the control in the UI
@@ -84,39 +80,104 @@ public class WorkspaceExplorer implements IJavaFxNode {
      */
     public WorkspaceExplorer(String labelText,
                              Consumer<WorkspaceFile> fileOpenHandler,
-                             Consumer<Workspace> workspaceChangedHandler,
+                             SimpleBooleanProperty connectedObservable,
                              Consumer<String> insertIntoCodeHandler,
+                             Consumer<WorkspaceFileType> createFromServerConsumer,
                              ErrorReporter errorReporter,
                              AppSettings appSettings) {
 
         this.fileOpenHandler = fileOpenHandler;
-        this.workspaceChangedHandler = workspaceChangedHandler;
         this.insertIntoCodeHandler = insertIntoCodeHandler;
+        this.createFromServerConsumer = createFromServerConsumer;
         this.errorReporter = errorReporter;
         this.appSettings = appSettings;
+        this.labelText = labelText;
 
-        campaignOperationsHandler = new CampaignOperationsHandler(
-                errorReporter,
-                fileOpenHandler,
+        // Create the UI
+        Label explorerLabel = new Label(labelText);
+        explorerLabel.getStyleClass().add("ide-label");
+
+        toolbar = new WorkspaceExplorerToolbar(
                 this::getWorkspace,
                 () -> selectedFile,
                 () -> selectedFileType,
-                this::onCampaignConnectionStateChanged,
-                this::getWindow,
-                appSettings
+                connectedObservable,
+                this::openFile,
+                this::createNewHandler,
+                this::addExistingHandler,
+                this::deleteHandler,
+                this::setDataContextHandler,
+                this::clearDataContextHandler,
+                this::setMessageContextHandler,
+                this::clearMessageContextHandler,
+                this::createFromServerHandler
         );
 
-        createUi(labelText);
+        // TreeView for all items
+        treeView = new TreeView<>();
+        treeView.getStyleClass().add("workspace-explorer-treeview");
+        // Bind the workspace to the TreeView
+        bindWorkspace();
+
+        // Create roots
+        TreeItem<Object> workspaceRoot = WorkspaceExplorerItem.createHeaderTreeItemObservableText(IdeIcon.WORKSPACE, workspaceName,
+                "workspace-icon", null, this::createNewFile, this::addExistingFile);
+
+        templateRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.TEMPLATE, "Templates",
+                "template-icon", WorkspaceFileType.TEMPLATE, this::createNewFile, this::addExistingFile);
+
+        moduleRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.MODULE, "Modules",
+                "module-icon", WorkspaceFileType.MODULE, this::createNewFile, this::addExistingFile);
+
+        blockRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.BLOCK, "Blocks",
+                "block-icon", WorkspaceFileType.BLOCK, this::createNewFile, this::addExistingFile);
+
+        contextRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(
+                IdeIcon.CONTEXT, "Contexts",
+                "context-icon", WorkspaceFileType.CONTEXT, this::createNewFile, this::addExistingFile);
+
+        workspaceRoot.getChildren().setAll(templateRoot, moduleRoot, blockRoot, contextRoot);
+        treeView.setRoot(workspaceRoot);
+        workspaceRoot.setExpanded(true);
+
+        // Apply the custom cell factory to render the tree nodes
+        WorkspaceExplorerItem.applyCellFactory(treeView);
+
+        // Create the main explorer container
+        workspaceExplorerPanel = new VBox(explorerLabel, toolbar.getNode(),treeView);
+        workspaceExplorerPanel.setMinHeight(0);
+        VBox.setVgrow(treeView, Priority.ALWAYS);
+
+        // Listen for selection changes, so we can add context to the toolbar buttons
+        treeView.getSelectionModel().selectedItemProperty().addListener(this::selectionChangedHandler);
+
+        // Listen for double clicks
+        setupDoubleClickHandler();
+
+        // Set style classes
+        workspaceExplorerPanel.getStyleClass().add("workspace-explorer");
+        toolbar.update();
     }
 
+    public SimpleBooleanProperty getWorkspaceIsSetObservable() {
+        return workspaceSetObservable;
+    }
     public Workspace getWorkspace() {
         return workspace.getValue();
     }
 
+    public ObjectProperty<Workspace> getWorkspaceObservable() {
+        return workspace;
+    }
+
     public void setWorkspace(Workspace workspace) {
         this.workspace.setValue(workspace);
-        campaignOperationsHandler.onWorkspaceChanged(workspace);
+        workspaceSetObservable.set(workspace != null);
         toolbar.update();
+    }
+
+    public void setConnectedObservable(SimpleBooleanProperty connectedObservable) {
+        this.connectedObservable = connectedObservable;
     }
 
     public boolean isWorkspaceOpen() {
@@ -217,72 +278,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         return listener;
     }
 
-    private void createUi(String labelText) {
-        // Create the UI
-        Label explorerLabel = new Label(labelText);
-        explorerLabel.getStyleClass().add("ide-label");
-
-        toolbar = new WorkspaceExplorerToolbar(
-                campaignOperationsHandler,
-                this::getWorkspace,
-                () -> selectedFile,
-                () -> selectedFileType,
-                this::openFile,
-                this::createNewHandler,
-                this::addExistingHandler,
-                this::deleteHandler,
-                this::setDataContextHandler,
-                this::clearDataContextHandler,
-                this::setMessageContextHandler,
-                this::clearMessageContextHandler
-        );
-
-        // TreeView for all items
-        treeView = new TreeView<>();
-        treeView.getStyleClass().add("workspace-explorer-treeview");
-        // Bind the workspace to the TreeView
-        bindWorkspace();
-
-        // Create roots
-        TreeItem<Object> workspaceRoot = WorkspaceExplorerItem.createHeaderTreeItemObservableText(IdeIcon.WORKSPACE, workspaceName,
-                "workspace-icon", null, this::createNewFile, this::addExistingFile);
-
-        templateRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.TEMPLATE, "Templates",
-                "template-icon", WorkspaceFileType.TEMPLATE, this::createNewFile, this::addExistingFile);
-
-        moduleRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.MODULE, "Modules",
-                "module-icon", WorkspaceFileType.MODULE, this::createNewFile, this::addExistingFile);
-
-        blockRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.BLOCK, "Blocks",
-                "block-icon", WorkspaceFileType.BLOCK, this::createNewFile, this::addExistingFile);
-
-        contextRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(
-                IdeIcon.CONTEXT, "Contexts",
-                "context-icon", WorkspaceFileType.CONTEXT, this::createNewFile, this::addExistingFile);
-
-        workspaceRoot.getChildren().setAll(templateRoot, moduleRoot, blockRoot, contextRoot);
-        treeView.setRoot(workspaceRoot);
-        workspaceRoot.setExpanded(true);
-
-        // Apply the custom cell factory to render the tree nodes
-        WorkspaceExplorerItem.applyCellFactory(treeView);
-
-        // Create the main explorer container
-        workspaceExplorerPanel = new VBox(explorerLabel, toolbar.getCampaignToolbar(), toolbar.getWorkspaceToolbar(), treeView);
-        workspaceExplorerPanel.setMinHeight(0);
-        VBox.setVgrow(treeView, Priority.ALWAYS);
-
-        // Listen for selection changes, so we can add context to the toolbar buttons
-        treeView.getSelectionModel().selectedItemProperty().addListener(this::selectionChangedHandler);
-
-        // Listen for double clicks
-        setupDoubleClickHandler();
-
-        // Set style classes
-        workspaceExplorerPanel.getStyleClass().add("workspace-explorer");
-        toolbar.update();
-    }
-
     private void selectionChangedHandler(ObservableValue obs, TreeItem oldItem, TreeItem newItem) {
         if (newItem != null) {
 
@@ -314,7 +309,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
             Workspace newWorkspace = new Workspace(r.workspaceName(), r.instance().getId(), true);
             newWorkspace.save();
             setWorkspace(newWorkspace);
-            workspaceChangedHandler.accept(newWorkspace);
         });
     }
 
@@ -338,7 +332,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
             try {
                 Workspace newWorkspace = new Workspace(folderName, null, false);
                 setWorkspace(newWorkspace);
-                workspaceChangedHandler.accept(newWorkspace);
             } catch (WorkspaceException workspaceException) {
                 errorReporter.reportError("Could not load workspace!", workspaceException, true);
             }
@@ -442,7 +435,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     }
 
     private void onCampaignConnectionStateChanged() {
-        toolbar.onCampaignConnectionStateChanged();
+
     }
 
     private void insertIntoCode(String textToInsert) {
@@ -498,6 +491,10 @@ public class WorkspaceExplorer implements IJavaFxNode {
         if (selectedFile instanceof Template workspaceFile) {
             workspaceFile.clearMessageContext();
         }
+    }
+
+    private void createFromServerHandler() {
+        createFromServerConsumer.accept(selectedFileType);
     }
 
     private void openFile(WorkspaceFile file) {

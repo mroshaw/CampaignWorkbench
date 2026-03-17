@@ -54,8 +54,6 @@ public class MainMenuBar implements IJavaFxNode {
 
             EventHandler<ActionEvent> settingsHandler,
 
-            EventHandler<ActionEvent> findHandler,
-
             EventHandler<ActionEvent> applyLightThemeHandler,
             EventHandler<ActionEvent> applyDarkThemeHandler,
 
@@ -131,13 +129,6 @@ public class MainMenuBar implements IJavaFxNode {
 
         // Edit menu
         Menu editMenu = new Menu("Edit");
-        MenuItem findMenu = new MenuItem("Find");
-        findMenu.setAccelerator(
-                new KeyCodeCombination(KeyCode.F, KeyCombination.CONTROL_DOWN)
-        );
-        findMenu.setOnAction(findHandler);
-
-        editMenu.getItems().add(findMenu);
 
         // View menu
         Menu viewMenu = new Menu("View");

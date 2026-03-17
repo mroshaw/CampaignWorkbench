@@ -45,6 +45,14 @@
     -fx-padding: 1px;
 }
 
+.template-dropdown {
+    -fx-pref-width: 220px;
+}
+
+.host-label {
+    -fx-pref-width: 220px;
+}
+
 /* Code Editor */
 
 /* Find input text */

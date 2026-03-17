@@ -3,7 +3,6 @@ package com.campaignworkbench.ide;
 import com.campaignworkbench.campaignrenderer.*;
 import com.campaignworkbench.ide.dialogs.AboutDialog;
 import com.campaignworkbench.ide.dialogs.SettingsDialog;
-import com.campaignworkbench.ide.editor.EditorTab;
 import com.campaignworkbench.ide.editor.EditorTabPanel;
 import com.campaignworkbench.ide.logging.ErrorLogPanel;
 import com.campaignworkbench.ide.logging.LogPanel;
@@ -12,8 +11,11 @@ import com.campaignworkbench.ide.results.OutputTabPanel;
 import com.campaignworkbench.ide.themes.IThemeable;
 import com.campaignworkbench.ide.themes.IdeTheme;
 import com.campaignworkbench.ide.themes.ThemeManager;
+import com.campaignworkbench.ide.toolbars.CampaignConnectionToolBar;
 import com.campaignworkbench.ide.toolbars.MainMenuBar;
-import com.campaignworkbench.ide.toolbars.MainToolBar;
+import com.campaignworkbench.ide.toolbars.RunToolBar;
+import com.campaignworkbench.ide.toolbars.WorkspaceToolBar;
+import com.campaignworkbench.ide.workspaceexplorer.CampaignOperationsHandler;
 import com.campaignworkbench.ide.workspaceexplorer.WorkspaceExplorer;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.Template;
@@ -24,10 +26,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
@@ -43,12 +42,11 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     private static final String ideStyleSheet = "/styles/ide_general_styles.css";
 
     private WorkspaceExplorer workspaceExplorer;
-    private MainToolBar toolBar;
+    private RunToolBar runToolBar;
     private EditorTabPanel editorTabPanel;
     private UiErrorReporter errorReporter;
     private ErrorLogPanel errorLogPanel;
     private OutputTabPanel outputPanel;
-    private EditorTab currentEditorTab;
     private Scene scene;
     private AppSettings appSettings;
 
@@ -102,8 +100,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
                 _ -> showSettings(),
 
-                _ -> toggleFindHandler(),
-
                 _ -> setThemeHandler(IdeTheme.LIGHT),
                 _ -> setThemeHandler(IdeTheme.DARK),
 
@@ -111,20 +107,39 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 _ -> exitApplication()
         );
 
-        toolBar = new MainToolBar(_ -> openWorkspaceHandler(),
+        WorkspaceToolBar workspaceToolBar = new WorkspaceToolBar(_ -> openWorkspaceHandler(),
                 _ -> newWorkspaceHandler(),
                 _ -> closeWorkspaceHandler(),
-                _ -> closeEditorTabsHandler(),
-                _ -> runTemplate());
+                _ -> closeEditorTabsHandler());
+
+        // Create a Campaign Operations Handler
+        CampaignOperationsHandler campaignOperationsHandler = new CampaignOperationsHandler(errorReporter, this::openFileFromWorkspace, appSettings);
 
         // Workspace Explorer
-        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace, this::workspaceChanged,
-                this::insertIntoCodeHandler, errorReporter, appSettings);
+        workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", this::openFileFromWorkspace,
+                campaignOperationsHandler.getConnectedObservable(), this::insertIntoCodeHandler, campaignOperationsHandler::createNewFile, errorReporter, appSettings);
 
-        // Editor tabs
-        editorTabPanel = new EditorTabPanel((_, _, newTab) -> tabPanelChanged(newTab), errorReporter);
+        // Reset the connection if the workspace changes
+        workspaceExplorer.getWorkspaceObservable().addListener((_, _, newW) -> campaignOperationsHandler.setWorkspace(newW));
+        CampaignConnectionToolBar campaignConnectionToolBar = new CampaignConnectionToolBar(campaignOperationsHandler::connectToCampaign,
+                campaignOperationsHandler::disconnectFromCampaign,
+                campaignOperationsHandler.getConnectedObservable(),
+                workspaceExplorer.getWorkspaceIsSetObservable());
 
-        // Output panes
+        runToolBar = new RunToolBar(this::runTemplate);
+
+        // Refresh templates if the workspace changes
+        workspaceExplorer.getWorkspaceObservable().addListener((_, _, newW) -> runToolBar.setTemplateObservableList(newW.getTemplates()));
+
+        // Editor tab panel
+        editorTabPanel = new EditorTabPanel(null, errorReporter, campaignOperationsHandler.getConnectedObservable(),
+                campaignOperationsHandler.getConnectedObservable()::get,
+                campaignOperationsHandler::refresh, campaignOperationsHandler::push);
+
+        // Close all tabs when workspace changes
+        workspaceExplorer.getWorkspaceObservable().addListener((_, _, newW) -> editorTabPanel.closeAllTabs());
+
+                // Output panes
         outputPanel = new OutputTabPanel();
 
         SplitPane logSplitPane = new SplitPane();
@@ -132,7 +147,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         logSplitPane.getItems().addAll(logPanel.getNode(), errorLogPanel.getNode());
         logSplitPane.setDividerPositions(0.5);
 
-        // --- Split: Workspace Explorer | Editor Tabs ---
+        // Workspace Explorer | Editor Tabs
         SplitPane workspaceEditorSplit = new SplitPane();
         workspaceEditorSplit.setOrientation(Orientation.HORIZONTAL);
         workspaceEditorSplit.getItems().addAll(
@@ -142,7 +157,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         workspaceEditorSplit.setDividerPositions(0.30);
         SplitPane.setResizableWithParent(workspaceExplorer.getNode(), false);
 
-        // --- Split: (Workspace+Editor) | Preview ---
+        // Workspace+Editor | Preview
         SplitPane editorPreviewSplit = new SplitPane();
         editorPreviewSplit.setOrientation(Orientation.HORIZONTAL);
         editorPreviewSplit.getItems().addAll(
@@ -150,9 +165,11 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 outputPanel.getNode()
         );
         editorPreviewSplit.setDividerPositions(0.71);
-        // SplitPane.setResizableWithParent(previewSplitPane, false);
 
-        VBox topBar = new VBox(menuBar.getNode(), toolBar.getNode());
+        ToolBar ideToolBar = new ToolBar(workspaceToolBar.getNode(), new Separator(Orientation.VERTICAL), campaignConnectionToolBar.getNode(), new Separator(Orientation.VERTICAL), runToolBar.getNode());
+        ideToolBar.getStyleClass().add("large-toolbar");
+
+        VBox topBar = new VBox(menuBar.getNode(), ideToolBar);
 
         SplitPane rootSplitPane = new SplitPane();
         rootSplitPane.setOrientation(Orientation.VERTICAL);
@@ -169,9 +186,15 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         ThemeManager.register(this);
         Workspace.createWorkspaceRootFolder();
 
+        campaignOperationsHandler.setSceneSupplier(this::getScene);
+
         // Apply styles
         scene.getStylesheets().add(UiUtil.getStylesFromStyleSheet(ideStyleSheet));
         errorReporter.reportError("Welcome to Campaign workbench!", false);
+    }
+
+    private Scene getScene() {
+        return scene;
     }
 
     /**
@@ -214,14 +237,14 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
      * Updates the run button state based on the current tab
      *
      * @param tab the currently selected tab
-     */
-    private void tabPanelChanged(Tab tab) {
-        if (tab instanceof EditorTab editorTab) {
-            toolBar.setRunButtonState(editorTab.isTemplateTab());
-            currentEditorTab = editorTab;
-        }
-    }
 
+    private void tabPanelChanged(Tab tab) {
+    if (tab instanceof EditorTab editorTab) {
+    toolBar.setRunButtonState(editorTab.isTemplateTab());
+    currentEditorTab = editorTab;
+    }
+    }
+     */
     /**
      * Opens a workspace directory
      */
@@ -281,6 +304,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
     private void workspaceChanged(Workspace newWorkspace) {
         editorTabPanel.closeAllTabs();
+        runToolBar.setTemplateObservableList(newWorkspace.getTemplates());
     }
 
     private void insertIntoCodeHandler(String code) {
@@ -334,16 +358,10 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
     }
 
-    private void toggleFindHandler() {
-        if (currentEditorTab != null) {
-            currentEditorTab.toggleFind();
-        }
-    }
-
     /**
      * Runs the template in the currently selected editor tab
      */
-    private void runTemplate() {
+    private void runTemplate(Template selectedTemplate) {
         if (!workspaceExplorer.isWorkspaceOpen()) {
             errorReporter.reportError("No workspace is open. Please open a workspace before running a template.", true);
             return;
@@ -352,23 +370,19 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         errorLogPanel.clearErrors();
         saveWorkspaceHandler();
         try {
-            WorkspaceFile selectedWorkspaceFile = editorTabPanel.getSelectedWorkspaceFile();
+            TemplateRenderResult renderResult = templateRenderer.render(
+                    workspaceExplorer.getWorkspace(),
+                    selectedTemplate
+            );
 
-            if (selectedWorkspaceFile instanceof Template workspaceContextFile) {
+            String resultHtml = renderResult.renderedOutput();
+            String resultJs = renderResult.generatedJavaScript();
 
-                TemplateRenderResult renderResult = templateRenderer.render(
-                        workspaceExplorer.getWorkspace(),
-                        workspaceContextFile
-                );
+            Platform.runLater(() -> {
+                outputPanel.setContent(resultHtml, resultJs);
+                errorReporter.logMessage("Template ran successfully: " + selectedTemplate.getFileName());
+            });
 
-                String resultHtml = renderResult.renderedOutput();
-                String resultJs = renderResult.generatedJavaScript();
-
-                Platform.runLater(() -> {
-                    outputPanel.setContent(resultHtml, resultJs);
-                    errorReporter.logMessage("Template ran successfully: " + editorTabPanel.getSelectedFileName());
-                });
-            }
         } catch (IdeException ideEx) {
             errorReporter.reportError("An IDE error occurred!", ideEx, true);
         } catch (RendererException renderEx) {

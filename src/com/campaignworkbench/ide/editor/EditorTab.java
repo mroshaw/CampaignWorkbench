@@ -4,13 +4,12 @@ import com.campaignworkbench.ide.IdeException;
 import com.campaignworkbench.ide.dialogs.YesNoCancelPopupDialog;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import com.campaignworkbench.ide.logging.ErrorReporter;
-import com.campaignworkbench.ide.icons.IdeIcon;
-import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.ContextXml;
 import com.campaignworkbench.workspace.WorkspaceContextFile;
 import com.campaignworkbench.workspace.WorkspaceFile;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.Event;
+import javafx.geometry.Orientation;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -19,20 +18,20 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.reactfx.Subscription;
 
-import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Implements a Tab containing a code editor
  */
 public final class EditorTab extends Tab {
 
-    private final ToolBar findReplaceToolBar;
+    private EditorTabPanel editorTabPanel;
     private final WorkspaceFile workspaceFile;
     private final ICodeEditor editor;
-    private final TextField findField;
 
     private boolean isTextDirty;
-    private ToggleButton toggleWrapButton;
+
     private ErrorReporter errorReporter;
 
     /**
@@ -40,35 +39,22 @@ public final class EditorTab extends Tab {
      *
      * @param workspaceFile that the editor is editing
      */
-    public EditorTab(WorkspaceFile workspaceFile, ErrorReporter errorReporter) {
+    public EditorTab(EditorTabPanel editorTabPanel, WorkspaceFile workspaceFile, ErrorReporter errorReporter, SimpleBooleanProperty connectedObservable, Supplier<Boolean> connectedStateSupplier,
+                     Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer) {
 
         this.workspaceFile = workspaceFile;
+
+        FormatToolBar formatToolBar = new FormatToolBar(this, editorTabPanel::closeAllTabs);
+        CampaignToolBar campaignToolBar = new CampaignToolBar(this, connectedObservable, connectedStateSupplier, refreshConsumer, pushConsumer);
+        FindReplaceToolBar findReplaceToolBar = new FindReplaceToolBar(this);
 
         // Set the tab title
         updateTabText();
 
-        // Create the toolbar
-        // Format toolbar
-        Button formatButton = UiUtil.createMiniToolbarButton("", "Format code", IdeIcon.FORMAT_CODE, true, "positive-icon", 20, true, _ -> formatHandler());
-        Button foldAllButton = UiUtil.createMiniToolbarButton("", "Fold all", IdeIcon.FOLD_ALL, true, "positive-icon", 20, true, _ -> foldAllHandler());
-        Button unfoldAllButton = UiUtil.createMiniToolbarButton("", "Unfold all", IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, true, _ -> unfoldAllHandler());
-        toggleWrapButton = UiUtil.createMiniToolbarToggleButton("", "Toggle wrap", IdeIcon.WRAP_TEXT, true, "positive-icon", 20, true, null);
-        toggleWrapButton.selectedProperty().addListener(this::toggleWrapHandler);
-        ToolBar formatToolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton, toggleWrapButton);
-        formatToolBar.getStyleClass().add("small-toolbar");
-
-        // Find toolbar
-        Label findLabel = new Label("Find:");
-        findField = new TextField();
-        Button findButton = UiUtil.createMiniToolbarButton("", "Find all", IdeIcon.FIND_START, true, "positive-icon", 20, true, _ -> findHandler());
-        Button clearFindButton = UiUtil.createMiniToolbarButton("", "Clear", IdeIcon.FIND_CLEAR, true, "negative-icon", 20, true, _ -> clearFindHandler());
-        findReplaceToolBar = new ToolBar(findLabel, findField, findButton, clearFindButton);
-        findReplaceToolBar.getStyleClass().add("small-toolbar");
-
         // Combine the toolbars
         HBox toolsContainer = new HBox();
-        toolsContainer.getChildren().addAll(formatToolBar, findReplaceToolBar);
-        HBox.setHgrow(formatToolBar, Priority.ALWAYS);
+        toolsContainer.getChildren().addAll(formatToolBar.getNode(), campaignToolBar.getNode(),findReplaceToolBar.getNode());
+        HBox.setHgrow(campaignToolBar.getNode(), Priority.ALWAYS);
 
         // Create the code editor
         this.editor = new RichTextFXEditor(determineSyntax(workspaceFile));
@@ -168,38 +154,6 @@ public final class EditorTab extends Tab {
         }
     }
 
-    private void formatHandler() {
-        try {
-            editor.formatCode(2);
-        } catch (IdeException ideException) {
-            errorReporter.reportError("An error occurred formatting the editor code", ideException, true);
-        }
-    }
-
-    private void foldAllHandler() {
-        editor.foldAll();
-    }
-
-    private void unfoldAllHandler() {
-        editor.unfoldAll();
-    }
-
-    private void toggleWrapHandler(ObservableValue<? extends Boolean> observable, boolean wasSelected, boolean isSelected) {
-        editor.setWrap(isSelected);
-    }
-
-    private void findHandler() {
-        String textToFind = findField.getText();
-        if (!Objects.equals(textToFind, "")) {
-            editor.find(textToFind);
-        }
-    }
-
-    private void clearFindHandler() {
-        // findField.setText("");
-        editor.find("");
-    }
-
     /**
      * Refresh the context of the tab
      */
@@ -245,10 +199,6 @@ public final class EditorTab extends Tab {
      */
     public boolean isTemplateTab() {
         return workspaceFile.isTemplate();
-    }
-
-    public void toggleFind() {
-        findReplaceToolBar.setVisible(!findReplaceToolBar.isVisible());
     }
 
 }

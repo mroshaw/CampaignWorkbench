@@ -2,7 +2,7 @@ package com.campaignworkbench.adobecampaignapi.schemas;
 
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 
-public class EtmModuleRecord implements ISchemaKey {
+public class EtmModuleRecord extends CampaignRecord implements ISchemaKey {
 
     @JacksonXmlProperty(isAttribute = true)
     private String name;
