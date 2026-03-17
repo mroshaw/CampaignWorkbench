@@ -3,14 +3,14 @@ package com.campaignworkbench.ide.workspaceexplorer;
 import com.campaignworkbench.ide.dialogs.PickerDialog;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import javafx.collections.ObservableList;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 
 import java.util.Optional;
 public class WorkspaceFilePickerDialog<T extends WorkspaceFile> extends PickerDialog<T> {
 
     // new static wrapper
     public static <T extends WorkspaceFile> Optional<T> show(
-            Window owner,
+            Stage owner,
             ObservableList<T> workspaceFiles
     ) {
         WorkspaceFilePickerDialog<T> dialog = new WorkspaceFilePickerDialog<>();
@@ -18,7 +18,7 @@ public class WorkspaceFilePickerDialog<T extends WorkspaceFile> extends PickerDi
     }
 
     public Optional<T> showInternal(
-            Window owner,
+            Stage owner,
             ObservableList<T> files
     ) {
 

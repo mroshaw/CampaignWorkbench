@@ -9,7 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.util.Optional;
 
@@ -22,7 +22,7 @@ public class SettingsDialog {
 
     private static final String TITLE = "Settings";
 
-    public static void show(Stage owner, AppSettings appSettings) {
+    public static void show(Window owner, AppSettings appSettings) {
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle(TITLE);
@@ -87,9 +87,9 @@ public class SettingsDialog {
         removeButton.setOnAction(_ -> {
             CampaignInstance selected = instanceListView.getSelectionModel().getSelectedItem();
             if (selected == null) return;
-            boolean confirmed = YesNoPopupDialog.show(
+            boolean confirmed = YesNoPopupDialog.show(owner,
                     "Remove instance?",
-                    "Remove '" + selected.getName() + "'? Stored credentials will also be deleted.", owner) == YesNoPopupDialog.YesNo.YES;
+                    "Remove '" + selected.getName() + "'? Stored credentials will also be deleted.") == YesNoPopupDialog.YesNo.YES;
             if (confirmed) {
                 selected.getCredentialStore().clear();
                 appSettings.removeInstance(selected);

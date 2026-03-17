@@ -2,7 +2,7 @@ package com.campaignworkbench.ide.dialogs;
 
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert;
-import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.util.Optional;
 
@@ -15,9 +15,10 @@ public final class YesNoPopupDialog extends BasePopupDialog {
     private YesNoPopupDialog() {}
 
     public static YesNo show(
+            Window owner,
             String title,
-            String message,
-            Stage owner
+            String message
+
     ) {
         Alert alert = createAlert(Alert.AlertType.CONFIRMATION, title, message, owner);
 

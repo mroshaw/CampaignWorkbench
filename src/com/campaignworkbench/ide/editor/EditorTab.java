@@ -122,7 +122,7 @@ public final class EditorTab extends Tab {
 
     private void tabClosedHandler(Event event) {
         if (isTextDirty) {
-            YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Save changes?", "The file contents have changed. Do you want to save?", (Stage) getTabPane().getScene().getWindow());
+            YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show(getTabPane().getScene().getWindow(), "Save changes?", "The file contents have changed. Do you want to save?");
             if (result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
                 event.consume();
             }

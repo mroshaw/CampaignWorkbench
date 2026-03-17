@@ -162,7 +162,7 @@ public class CampaignOperationsHandler {
             return;
         }
 
-        if (YesNoPopupDialog.show("Are you sure?", "Are you sure you want to refresh " + fileType + " " + workspaceFile.getFileName() + " from Adobe Campaign?", (Stage) sceneSupplier.get().getWindow()) != YesNoPopupDialog.YesNo.YES) {
+        if (YesNoPopupDialog.show(sceneSupplier.get().getWindow(), "Are you sure?", "Are you sure you want to refresh " + fileType + " " + workspaceFile.getFileName() + " from Adobe Campaign?") != YesNoPopupDialog.YesNo.YES) {
             return;
         }
         errorReporter.logMessage("Refreshing " + workspaceFile.getBaseFileName() + " from Adobe Campaign. Please wait...");
@@ -205,11 +205,11 @@ public class CampaignOperationsHandler {
         String fileTypeLower = fileType.toString().toLowerCase();
         String fileName = workspaceFile.getFileName();
 
-        if (YesNoPopupDialog.show("Are you sure?", "Are you sure you want to push " + fileTypeLower + " " + fileName + " to Adobe Campaign?", (Stage) sceneSupplier.get().getWindow()) == YesNoPopupDialog.YesNo.NO) {
+        if (YesNoPopupDialog.show(sceneSupplier.get().getWindow(), "Are you sure?", "Are you sure you want to push " + fileTypeLower + " " + fileName + " to Adobe Campaign?") == YesNoPopupDialog.YesNo.NO) {
             return;
         }
 
-        boolean doBackup = YesNoPopupDialog.show("Backup existing code?", "Do you want to create a backup of " + fileTypeLower + " " + fileName + " from Adobe Campaign?", (Stage) sceneSupplier.get().getWindow()) == YesNoPopupDialog.YesNo.YES;
+        boolean doBackup = YesNoPopupDialog.show(sceneSupplier.get().getWindow(), "Backup existing code?", "Do you want to create a backup of " + fileTypeLower + " " + fileName + " from Adobe Campaign?") == YesNoPopupDialog.YesNo.YES;
 
         if (workspaceFile instanceof EtmModule etmModule) {
             EtmModuleSchemaKey moduleKey = etmModule.getKey();

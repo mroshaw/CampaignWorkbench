@@ -3,7 +3,7 @@ package com.campaignworkbench.ide.dialogs;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.util.Optional;
 
@@ -16,9 +16,10 @@ public final class YesNoCancelPopupDialog extends BasePopupDialog {
     private YesNoCancelPopupDialog() {}
 
     public static YesNoCancel show(
+            Window owner,
             String title,
-            String message,
-            Stage owner
+            String message
+
     ) {
         Alert alert = createAlert(Alert.AlertType.CONFIRMATION, title, message, owner);
 

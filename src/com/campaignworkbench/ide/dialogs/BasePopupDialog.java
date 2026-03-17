@@ -2,7 +2,7 @@ package com.campaignworkbench.ide.dialogs;
 
 
 import javafx.scene.control.Alert;
-import javafx.stage.Stage;
+import javafx.stage.Window;
 
 abstract class BasePopupDialog {
 
@@ -10,7 +10,7 @@ abstract class BasePopupDialog {
             Alert.AlertType type,
             String title,
             String message,
-            Stage owner
+            Window owner
     ) {
         Alert alert = new Alert(type);
         alert.initOwner(owner);

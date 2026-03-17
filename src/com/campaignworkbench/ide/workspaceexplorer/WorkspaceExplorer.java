@@ -49,30 +49,27 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private ListChangeListener<ContextXml> contextsListener;
 
     // Root structures of the tree view
-    private TreeView<Object> treeView;
-    private TreeItem<Object> templateRoot;
-    private TreeItem<Object> moduleRoot;
-    private TreeItem<Object> blockRoot;
-    private TreeItem<Object> contextRoot;
+    private final TreeView<Object> treeView;
+    private final TreeItem<Object> templateRoot;
+    private final TreeItem<Object> moduleRoot;
+    private final TreeItem<Object> blockRoot;
+    private final TreeItem<Object> contextRoot;
 
     // Event handlers
     private final Consumer<WorkspaceFile> fileOpenHandler;
     private final Consumer<String> insertIntoCodeHandler;
 
     // Toolbar
-    private WorkspaceExplorerToolbar toolbar;
+    private final WorkspaceExplorerToolbar toolbar;
 
     // Main panel
-    private VBox workspaceExplorerPanel;
+    private final VBox workspaceExplorerPanel;
     private WorkspaceFileType selectedFileType;
     private WorkspaceFile selectedFile;
     private final AppSettings appSettings;
     private final ErrorReporter errorReporter;
     private final SimpleBooleanProperty workspaceSetObservable =  new SimpleBooleanProperty(false);
-    private SimpleBooleanProperty connectedObservable;
     Consumer<WorkspaceFileType> createFromServerConsumer;
-
-    private String labelText;
 
     /**
      * @param labelText           Label to use for the control in the UI
@@ -91,7 +88,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         this.createFromServerConsumer = createFromServerConsumer;
         this.errorReporter = errorReporter;
         this.appSettings = appSettings;
-        this.labelText = labelText;
 
         // Create the UI
         Label explorerLabel = new Label(labelText);
@@ -174,10 +170,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         this.workspace.setValue(workspace);
         workspaceSetObservable.set(workspace != null);
         toolbar.update();
-    }
-
-    public void setConnectedObservable(SimpleBooleanProperty connectedObservable) {
-        this.connectedObservable = connectedObservable;
     }
 
     public boolean isWorkspaceOpen() {
@@ -386,7 +378,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     }
 
     private void deleteBackupFile(WorkspaceFile workspaceFile, BackupFile backupFile) {
-        YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Confirm delete?", "Do you also want to delete the selected file (" + workspaceFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
+        YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show(getWindow(), "Confirm delete?", "Do you also want to delete the selected file (" + workspaceFile.getBaseFileName() + ") from the file system?");
 
         if (result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
             return;
@@ -399,7 +391,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     }
 
     private void deleteExistingFile(WorkspaceFile workspaceFile) {
-        YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show("Confirm delete?", "Do you also want to delete the selected file (" + workspaceFile.getBaseFileName() + ") from the file system?", (Stage) getNode().getScene().getWindow());
+        YesNoCancelPopupDialog.YesNoCancel result = YesNoCancelPopupDialog.show(getWindow(), "Confirm delete?", "Do you also want to delete the selected file (" + workspaceFile.getBaseFileName() + ") from the file system?");
 
         if (result == YesNoCancelPopupDialog.YesNoCancel.CANCEL) {
             return;
@@ -420,9 +412,9 @@ public class WorkspaceExplorer implements IJavaFxNode {
             return;
         }
         if (YesNoPopupDialog.show(
+                getWindow(),
                 "Confirm Restore",
-                "Are you sure you want to restore " + targetFile.getFileName() + " from this backup? The current file content will be overwritten.",
-                (Stage) getNode().getScene().getWindow()) == YesNoPopupDialog.YesNo.NO) {
+                "Are you sure you want to restore " + targetFile.getFileName() + " from this backup? The current file content will be overwritten.") == YesNoPopupDialog.YesNo.NO) {
             return;
         }
         try {
@@ -432,10 +424,6 @@ public class WorkspaceExplorer implements IJavaFxNode {
         } catch (WorkspaceException e) {
             errorReporter.reportError("An error occurred restoring the backup for " + targetFile.getBaseFileName(), e, true);
         }
-    }
-
-    private void onCampaignConnectionStateChanged() {
-
     }
 
     private void insertIntoCode(String textToInsert) {
@@ -468,7 +456,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         if (selectedFile instanceof WorkspaceContextFile workspaceContextFile) {
 
-            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show(getWindow(), getWorkspace().getContexts());
+            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show((Stage) getWindow(), getWorkspace().getContexts());
             contextFile.ifPresent(workspaceContextFile::setDataContextFile);
         }
     }
@@ -476,7 +464,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     private void setMessageContextHandler() {
         if (selectedFile instanceof Template template) {
 
-            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show(getWindow(), getWorkspace().getContexts());
+            Optional<ContextXml> contextFile = WorkspaceFilePickerDialog.show((Stage) getWindow(), getWorkspace().getContexts());
             contextFile.ifPresent(template::setMessageContextFile);
         }
     }

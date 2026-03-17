@@ -1,4 +1,5 @@
 package com.campaignworkbench.ide.dialogs;
+
 import javafx.stage.Window;
 
 import java.util.Optional;
@@ -14,10 +15,8 @@ public class TextInputDialog {
         dialog.setContentText(contentText);
 
         // Optional: prevent empty submissions
-        dialog.getEditor().textProperty().addListener((obs, oldVal, newVal) -> {
-            dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK)
-                    .setDisable(newVal == null || newVal.trim().isEmpty());
-        });
+        dialog.getEditor().textProperty().addListener((_, _, newVal) -> dialog.getDialogPane().lookupButton(javafx.scene.control.ButtonType.OK)
+                .setDisable(newVal == null || newVal.trim().isEmpty()));
 
         return dialog.showAndWait()
                 .map(String::trim)
