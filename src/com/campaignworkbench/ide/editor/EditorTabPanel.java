@@ -57,6 +57,11 @@ public class EditorTabPanel implements IJavaFxNode {
         tabPane.getStyleClass().add("editor-tab-panel");
     }
 
+    public void setConsumers(Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer) {
+        this.refreshConsumer = refreshConsumer;
+        this.pushConsumer = pushConsumer;
+    }
+
     private void refreshTabEditor(Tab tab) {
         if (tab instanceof EditorTab editorTab) {
             editorTab.refreshEditor();
@@ -89,21 +94,6 @@ public class EditorTabPanel implements IJavaFxNode {
         targetTab.getEditor().gotoLine(line);
     }
 
-    /**
-     * @param path The path to the file
-     * @return true if the file is already open in a tab
-     */
-    public boolean isOpened(Path path) {
-        for (Tab tab : tabPane.getTabs()) {
-            if (tab instanceof EditorTab editorTab) {
-                if (editorTab.getFile().equals(path)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     private EditorTab getExistingTab(WorkspaceFile workspaceFile) {
         for (Tab tab : tabPane.getTabs()) {
             if (tab instanceof EditorTab editorTab) {
@@ -115,20 +105,13 @@ public class EditorTabPanel implements IJavaFxNode {
         return null;
     }
 
-    /**
-     * Gets the window underlying the tab panel
-     *
-     * @return the underlying tab window
-     */
+     // Gets the window underlying the tab panel
     public Window getWindow() {
         return tabPane.getScene().getWindow();
     }
 
-    /**
-     * Adds a new Editor Tab to the Tab Panel
-     *
-     * @param workspaceFile workspace file to be edited in the tab
-     */
+
+    // Adds a new Editor Tab to the Tab Panel
     public void addEditorTab(WorkspaceFile workspaceFile) {
         EditorTab existingTab = getExistingTab(workspaceFile);
         if(existingTab != null) {
@@ -148,49 +131,16 @@ public class EditorTabPanel implements IJavaFxNode {
         tabPane.getSelectionModel().select(tab);
     }
 
-    public WorkspaceFile getSelectedWorkspaceFile() {
-        return getSelected().getWorkspaceFile();
-    }
-
-    /**
-     * @return the file from the currently selected tab
-     */
-    public WorkspaceFile getSelectedFile() {
-        return getSelected().getFile();
-    }
-
-    /**
-     * @return the code as text from the currently selected tab
-     */
-    public String getSelectedText() {
-        return getSelected().getEditorText();
-    }
-
-    /**
-     * @return the code in the currently selected tab
-     */
-    public String getSelectedFileName() {
-        return getSelectedFile().getFileName().toString();
-    }
-
-    public boolean isSelectedTemplateAndReady() {
-        EditorTab selectedTab = getSelected();
-        return selectedTab.isTemplateTab() && selectedTab.isContextSet();
-    }
-
     private EditorTab getSelected() {
         return (EditorTab) tabPane.getSelectionModel().getSelectedItem();
     }
 
-    /**
-     * @return true if this tab is the currently selected tab
-     */
-    public boolean isSelected() {
-        return getSelected() != null;
-    }
-
     public void saveSelectedTab() {
         getSelected().saveFile();
+    }
+
+    public void saveSelectedTabAs() {
+
     }
 
     public void insertTextIntoSelected(String text) {

@@ -5,9 +5,7 @@ import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.util.UiUtil;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToolBar;
@@ -34,11 +32,9 @@ public class CampaignConnectionToolBar implements IJavaFxNode {
         connectedHostLabel.getStyleClass().add("host-label");
         toolBar.getItems().addAll(connectToCampaignButton, disconnectFromCampaignButton, connectedHostLabel);
 
-        workspaceSetObservable.addListener((observable, oldValue, newValue) -> {
-            connectToCampaignButton.setDisable(!newValue);
-        });
+        workspaceSetObservable.addListener((_, _, newValue) -> connectToCampaignButton.setDisable(!newValue));
 
-        connectedObservable.addListener((observable, _, newValue) -> {
+        connectedObservable.addListener((_, _, newValue) -> {
             connectToCampaignButton.setDisable(newValue);
             disconnectFromCampaignButton.setDisable(!newValue);
             if(!newValue) {

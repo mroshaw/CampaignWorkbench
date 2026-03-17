@@ -25,7 +25,7 @@ public class CampaignOperationsHandler {
 
     private final CampaignServerManager campaignServerManager;
     private final ErrorReporter errorReporter;
-    private final Consumer<WorkspaceFile> fileOpenHandler;
+    private Consumer<WorkspaceFile> fileOpenHandler;
     private Supplier<Scene> sceneSupplier;
 
     private final AppSettings appSettings;
@@ -34,13 +34,15 @@ public class CampaignOperationsHandler {
 
     public CampaignOperationsHandler(
             ErrorReporter errorReporter,
-            Consumer<WorkspaceFile> fileOpenHandler,
             AppSettings appSettings) {
 
         this.errorReporter = errorReporter;
-        this.fileOpenHandler = fileOpenHandler;
         this.appSettings = appSettings;
         this.campaignServerManager = new CampaignServerManager();
+    }
+
+    public void setFileOpenHandler(Consumer<WorkspaceFile> fileOpenHandler) {
+        this.fileOpenHandler = fileOpenHandler;
     }
 
     public void setSceneSupplier(Supplier<Scene> sceneSupplier) {

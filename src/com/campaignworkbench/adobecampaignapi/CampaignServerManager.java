@@ -2,7 +2,6 @@ package com.campaignworkbench.adobecampaignapi;
 
 import com.campaignworkbench.adobecampaignapi.schemas.*;
 import javafx.beans.property.SimpleBooleanProperty;
-import org.reactfx.Observable;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -26,7 +25,7 @@ public class CampaignServerManager {
     private final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     private final XmlMapper mapper = new XmlMapper();
 
-    private SimpleBooleanProperty connectedObservable =  new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty connectedObservable =  new SimpleBooleanProperty(false);
 
     // Maintain a single list of static blocks and JavaScript templates
     private PersoBlockSchema allPersonalizationBlocks = new PersoBlockSchema();
@@ -35,9 +34,8 @@ public class CampaignServerManager {
     public void setCampaignInstance(CampaignInstance instance) {
         this.campaignInstance = instance;
     }
-    public SimpleBooleanProperty connectedObservableProperty;
 
-    public boolean connect() throws ApiException {
+        public boolean connect() throws ApiException {
         if (campaignInstance == null) {
             throw new ApiException("No Campaign instance is configured for this workspace.", null);
         }
@@ -68,6 +66,9 @@ public class CampaignServerManager {
     }
 
     public void disconnect() throws ApiException {
+        if(soapClient == null) {
+            return;
+        }
         try {
             soapClient.client.close();
             connectedObservable.set(false);

@@ -18,7 +18,7 @@ public class CampaignToolBar implements IJavaFxNode {
     private final Button refreshFromCampaignButton;
     private final Button pushToCampaignButton;
 
-    private Boolean isCampaignConnected = false;
+    private Boolean isCampaignConnected;
 
     Consumer<WorkspaceFile> refreshConsumer;
     Consumer<WorkspaceFile> pushConsumer;
@@ -32,9 +32,9 @@ public class CampaignToolBar implements IJavaFxNode {
 
         toolBar = new ToolBar();
         toolBar.getStyleClass().add("small-toolbar");
-        refreshFromCampaignButton = UiUtil.createMiniToolbarButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, false, _ -> refreshHandler());
-        pushToCampaignButton = UiUtil.createMiniToolbarButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, false, _ -> pushHandler());
-        connectedObservable.addListener((obs, oldVal, newVal) -> connectedChangedHandler(newVal));
+        refreshFromCampaignButton = UiUtil.createMiniToolbarButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, false, _ -> refreshConsumer.accept(editorTab.getWorkspaceFile()));
+        pushToCampaignButton = UiUtil.createMiniToolbarButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, false, _ -> pushConsumer.accept(editorTab.getWorkspaceFile()));
+        connectedObservable.addListener((_, _, newVal) -> connectedChangedHandler(newVal));
         toolBar.getItems().addAll(refreshFromCampaignButton, pushToCampaignButton);
         isCampaignConnected = connectedStateSupplier.get();
         setButtonState();
@@ -50,13 +50,7 @@ public class CampaignToolBar implements IJavaFxNode {
         setButtonState();
     }
 
-    private void refreshHandler() {
-        refreshConsumer.accept(editorTab.getWorkspaceFile());
-    }
 
-    private void pushHandler() {
-        pushConsumer.accept(editorTab.getWorkspaceFile());
-    }
 
     @Override
     public Node getNode() {
