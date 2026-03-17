@@ -1,83 +1,82 @@
-package com.campaignworkbench.ide.workspaceexplorer;
+package com.campaignworkbench.ide.dialogs;
 
 import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
-import com.campaignworkbench.adobecampaignapi.schemas.EtmModuleRecord;
-import com.campaignworkbench.ide.dialogs.PickerDialog;
+import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockRecord;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.util.Optional;
 
-public class CampaignModulePickerDialog extends PickerDialog<EtmModuleRecord> {
+public class CampaignBlockPickerDialog extends PickerDialog<PersoBlockRecord> {
 
-    public static Optional<EtmModuleRecord> show(Window owner, CampaignServerManager campaignServerManager) {
-        return new CampaignModulePickerDialog().showInternal(owner, campaignServerManager);
+    public static Optional<PersoBlockRecord> show(Window owner, CampaignServerManager campaignServerManager) {
+        return new CampaignBlockPickerDialog().showInternal(owner, campaignServerManager);
     }
 
-    public Optional<EtmModuleRecord> showInternal(Window owner, CampaignServerManager campaignServerManager) {
+    public Optional<PersoBlockRecord> showInternal(Window owner, CampaignServerManager campaignServerManager) {
 
-        ObservableList<EtmModuleRecord> modules = FXCollections.observableArrayList(
-                campaignServerManager.getAllJavaScriptTemplates(true).getJavaScriptTemplates()
+        ObservableList<PersoBlockRecord> blocks = FXCollections.observableArrayList(
+                campaignServerManager.getAllPersoBlocks(true).getPersonalisationBlocks()
         );
 
         // Filter
-        FilteredList<EtmModuleRecord> filteredModules = new FilteredList<>(modules, _ -> true);
+        FilteredList<PersoBlockRecord> filteredBlocks = new FilteredList<>(blocks, _ -> true);
 
         // Sort
-        SortedList<EtmModuleRecord> sortedModules = new SortedList<>(filteredModules);
+        SortedList<PersoBlockRecord> sortedBlocks = new SortedList<>(filteredBlocks);
 
         // Table
-        TableView<EtmModuleRecord> tableView = new TableView<>(sortedModules);
+        TableView<PersoBlockRecord> tableView = new TableView<>(sortedBlocks);
         tableView.getStyleClass().add("picker-tableview");
-        sortedModules.comparatorProperty().bind(tableView.comparatorProperty());
+        sortedBlocks.comparatorProperty().bind(tableView.comparatorProperty());
 
-        TableColumn<EtmModuleRecord, String> namespaceColumn = new TableColumn<>("Namespace");
-        namespaceColumn.setCellValueFactory(cell ->
-                new javafx.beans.property.SimpleStringProperty(cell.getValue().getNamespace())
-        );
-        namespaceColumn.setPrefWidth(300);
+        TableColumn<PersoBlockRecord, String> folderColumn = new TableColumn<>("Folder");
+        folderColumn.setCellValueFactory(cell -> {
+            PersoBlockRecord record = cell.getValue();
+            String folder = record.getFolder() != null ? record.getFolder().getFullName() : "";
+            return new javafx.beans.property.SimpleStringProperty(folder);
+        });
+        folderColumn.setPrefWidth(600);
 
-        TableColumn<EtmModuleRecord, String> nameColumn = new TableColumn<>("Name");
+        TableColumn<PersoBlockRecord, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellValueFactory(cell ->
-                new javafx.beans.property.SimpleStringProperty(cell.getValue().getName())
+                new javafx.beans.property.SimpleStringProperty(cell.getValue().getLabel())
         );
-        nameColumn.setPrefWidth(500);
+        nameColumn.setPrefWidth(400);
 
-        tableView.getColumns().addAll(namespaceColumn, nameColumn);
+        tableView.getColumns().addAll(folderColumn, nameColumn);
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
         // Filter bar
         TextField filterField = new TextField();
         filterField.setPromptText("Filter...");
-        HBox.setHgrow(filterField, Priority.ALWAYS);
+        HBox.setHgrow(filterField, javafx.scene.layout.Priority.ALWAYS);
 
         Button clearButton = new Button("Clear");
         clearButton.setOnAction(_ -> filterField.clear());
 
         filterField.textProperty().addListener((_, _, newValue) -> {
             String lower = newValue == null ? "" : newValue.toLowerCase();
-            filteredModules.setPredicate(record -> {
+            filteredBlocks.setPredicate(record -> {
                 if (lower.isEmpty()) return true;
-                String namespace = record.getNamespace() != null ? record.getNamespace().toLowerCase() : "";
-                String name = record.getName() != null ? record.getName().toLowerCase() : "";
-                return namespace.contains(lower) || name.contains(lower);
+                String folder = record.getFolder() != null ? record.getFolder().getFullName().toLowerCase() : "";
+                String label = record.getLabel() != null ? record.getLabel().toLowerCase() : "";
+                return folder.contains(lower) || label.contains(lower);
             });
         });
 
         HBox filterBar = new HBox(8, new Label("Filter:"), filterField, clearButton);
         filterBar.setPadding(new Insets(0, 0, 8, 0));
-        filterBar.setAlignment(Pos.CENTER_LEFT);
+        filterBar.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
         // Layout
         BorderPane content = new BorderPane();
@@ -85,14 +84,14 @@ public class CampaignModulePickerDialog extends PickerDialog<EtmModuleRecord> {
         content.setCenter(tableView);
 
         // Dialog
-        Dialog<EtmModuleRecord> dialog = new Dialog<>();
+        Dialog<PersoBlockRecord> dialog = new Dialog<>();
         dialog.initOwner(owner);
-        dialog.setTitle("Pick JavaScript Module");
-        dialog.setHeaderText("Select a module");
+        dialog.setTitle("Pick Personalization Block");
+        dialog.setHeaderText("Select a block");
 
         dialog.setOnShown(_ -> {
             Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
-            stage.setWidth(1000);
+            stage.setWidth(1200);
             stage.setHeight(700);
             if (owner != null) {
                 stage.setX(owner.getX() + (owner.getWidth() - stage.getWidth()) / 2);

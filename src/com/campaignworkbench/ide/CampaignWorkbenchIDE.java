@@ -18,7 +18,7 @@ import com.campaignworkbench.ide.toolbars.CampaignConnectionToolBar;
 import com.campaignworkbench.ide.toolbars.MainMenuBar;
 import com.campaignworkbench.ide.toolbars.RunToolBar;
 import com.campaignworkbench.ide.toolbars.WorkspaceToolBar;
-import com.campaignworkbench.ide.workspaceexplorer.CampaignOperationsHandler;
+import com.campaignworkbench.adobecampaignapi.CampaignOperationsHandler;
 import com.campaignworkbench.ide.workspaceexplorer.WorkspaceExplorer;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.Template;

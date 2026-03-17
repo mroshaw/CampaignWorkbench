@@ -136,7 +136,9 @@ public class EditorTabPanel implements IJavaFxNode {
     }
 
     public void saveSelectedTab() {
-        getSelected().saveFile();
+        if(getSelected() != null) {
+            getSelected().saveFile();
+        }
     }
 
     public void saveSelectedTabAs() {

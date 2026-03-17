@@ -4,6 +4,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.util.Optional;
@@ -26,11 +27,13 @@ public abstract class PickerDialog<T> {
         dialog.setHeaderText(headerText);
 
         dialog.setOnShown(event -> {
-            owner.setWidth(width);
-            owner.setHeight(height);
 
-            owner.setX(owner.getX() + (owner.getWidth() - owner.getWidth()) / 2);
-            owner.setY(owner.getY() + (owner.getHeight() - owner.getHeight()) / 2);
+            Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+            stage.setWidth(width);
+            stage.setHeight(height);
+
+            stage.setX(owner.getX() + (owner.getWidth() - stage.getWidth()) / 2);
+            stage.setY(owner.getY() + (owner.getHeight() - stage.getHeight()) / 2);
         });
 
         ButtonType pickButtonType =

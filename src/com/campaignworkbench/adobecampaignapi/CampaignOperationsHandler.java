@@ -1,10 +1,9 @@
-package com.campaignworkbench.ide.workspaceexplorer;
+package com.campaignworkbench.adobecampaignapi;
 
-import com.campaignworkbench.adobecampaignapi.ApiException;
-import com.campaignworkbench.adobecampaignapi.CampaignInstance;
-import com.campaignworkbench.adobecampaignapi.CampaignServerManager;
 import com.campaignworkbench.adobecampaignapi.schemas.*;
 import com.campaignworkbench.ide.AppSettings;
+import com.campaignworkbench.ide.dialogs.CampaignBlockPickerDialog;
+import com.campaignworkbench.ide.dialogs.CampaignModulePickerDialog;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
 
@@ -13,8 +12,6 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
-import javafx.stage.Window;
 
 import java.net.URI;
 import java.util.Optional;
