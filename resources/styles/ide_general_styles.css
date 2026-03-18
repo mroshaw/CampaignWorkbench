@@ -125,3 +125,11 @@
 .picker-tableview .table-cell {
     -fx-padding: 2px 4px;
 }
+
+.folder-dropdown {
+    -fx-pref-width: 400px;
+}
+
+.schema-dropdown {
+    -fx-pref-width: 280px;
+}

@@ -84,7 +84,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
         // Editor tab panel
         editorTabPanel = new EditorTabPanel(null, errorReporter, campaignOperationsHandler.getConnectedObservable(),
-                campaignOperationsHandler::refresh, campaignOperationsHandler::push);
+                campaignOperationsHandler::refresh, campaignOperationsHandler::push, campaignOperationsHandler::createOnServer);
 
         // Workspace Explorer
         workspaceExplorer = new WorkspaceExplorer("Workspace Explorer", editorTabPanel::addEditorTab,

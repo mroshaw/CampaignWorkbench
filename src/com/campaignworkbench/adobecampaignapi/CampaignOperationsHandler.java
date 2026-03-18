@@ -6,7 +6,9 @@ import com.campaignworkbench.ide.dialogs.CampaignBlockPickerDialog;
 import com.campaignworkbench.ide.dialogs.CampaignModulePickerDialog;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
-
+import com.campaignworkbench.ide.dialogs.CreateBlockOnServerDialog;
+import com.campaignworkbench.ide.dialogs.CreateModuleOnServerDialog;
+import javafx.stage.Window;
 import com.campaignworkbench.workspace.*;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -248,6 +250,117 @@ public class CampaignOperationsHandler {
             }
         } else {
             errorReporter.reportError("File " + fileTypeLower + " " + fileName + " is not supported for syncing with Campaign server!", true);
+        }
+    }
+
+    /**
+     * Creates a new file on the Campaign server from a locally-created workspace file.
+     * Shows a dialog to collect server details, checks for duplicates, creates the record,
+     * renames the local file to match the server-canonical name, and sets the key.
+     *
+     * Only supported for BLOCK and MODULE file types.
+     */
+    public void createOnServer(WorkspaceFile workspaceFile) {
+        WorkspaceFileType fileType = workspaceFile.getFileType();
+        Window owner = sceneSupplier.get().getWindow();
+        String fileTypeLower = fileType.toString().toLowerCase();
+
+        if (fileType == WorkspaceFileType.BLOCK) {
+            createBlockOnServer((PersoBlock) workspaceFile, owner, fileTypeLower);
+        } else if (fileType == WorkspaceFileType.MODULE) {
+            createModuleOnServer((EtmModule) workspaceFile, owner, fileTypeLower);
+        }
+    }
+
+    private void createBlockOnServer(PersoBlock block, Window owner, String fileTypeLower) {
+        // Loop to allow the user to correct details if a duplicate is found
+        while (true) {
+            Optional<CreateBlockOnServerDialog.Result> result = CreateBlockOnServerDialog.show(owner, block.getBaseFileName(), campaignServerManager);
+            if (result.isEmpty()) {
+                return;
+            }
+
+            CreateBlockOnServerDialog.Result details = result.get();
+
+            // Check for duplicate before hitting the server
+            if (campaignServerManager.personalizationBlockExists(details.name())) {
+                errorReporter.reportError(
+                        "A personalization block with name '" + details.name() + "' already exists on the server. Please choose a different name.",
+                        true);
+                continue;
+            }
+
+            String canonicalFileName = details.name() + WorkspaceFileType.BLOCK.getFileExtension();
+
+            withBusyCursor(() -> {
+                try {
+                    PersoBlockRecord created = campaignServerManager.createPersonalizationBlock(
+                            details.name(), details.label(),
+                            details.folderId(), block.getWorkspaceFileContent());
+
+                    PersoBlockSchemaKey key = (PersoBlockSchemaKey) created.getKey();
+                    block.setKey(key);
+
+                    if (!block.getFileName().equals(canonicalFileName)) {
+                        workspace.renameWorkspaceFile(block, canonicalFileName);
+                    } else {
+                        workspace.save();
+                    }
+
+                    errorReporter.logMessage("Successfully created " + fileTypeLower + " '" + details.name() + "' on Campaign server!");
+                    Platform.runLater(() -> fileOpenHandler.accept(block));
+
+                } catch (ApiException apiException) {
+                    errorReporter.reportError("An error occurred creating " + fileTypeLower + " '" + details.name() + "' on the Campaign server", apiException, true);
+                }
+            });
+            return;
+        }
+    }
+
+    private void createModuleOnServer(EtmModule module, Window owner, String fileTypeLower) {
+        // Loop to allow the user to correct details if a duplicate is found
+        while (true) {
+            Optional<CreateModuleOnServerDialog.Result> result = CreateModuleOnServerDialog.show(owner, module.getBaseFileName(), campaignServerManager);
+            if (result.isEmpty()) {
+                return;
+            }
+
+            CreateModuleOnServerDialog.Result details = result.get();
+
+            // Check for duplicate before hitting the server
+            if (campaignServerManager.javaScriptTemplateExists(details.namespace(), details.name())) {
+                errorReporter.reportError(
+                        "A JavaScript template '" + details.namespace() + ":" + details.name() + "' already exists on the server. Please choose a different name.",
+                        true);
+                continue;
+            }
+
+            String canonicalFileName = details.name() + WorkspaceFileType.MODULE.getFileExtension();
+
+            withBusyCursor(() -> {
+                try {
+                    EtmModuleRecord created = campaignServerManager.createJavaScriptTemplate(
+                            details.namespace(), details.name(), details.label(), details.schemaKey(),
+                            module.getWorkspaceFileContent());
+
+                    EtmModuleSchemaKey key = new EtmModuleSchemaKey(details.name(), details.namespace());
+                    module.setKey(key);
+
+                    if (!module.getFileName().equals(canonicalFileName)) {
+                        workspace.renameWorkspaceFile(module, canonicalFileName);
+                    } else {
+                        workspace.save();
+                    }
+
+                    errorReporter.logMessage("Successfully created " + fileTypeLower + " '" + details.namespace() + ":" + details.name() + "' on Campaign server!");
+                    Platform.runLater(() -> fileOpenHandler.accept(module));
+
+                } catch (ApiException apiException) {
+                    errorReporter.reportError("An error occurred creating " + fileTypeLower + " '" + details.name() + "' on the Campaign server", apiException, true);
+                }
+            });
+            return;
         }
     }
 

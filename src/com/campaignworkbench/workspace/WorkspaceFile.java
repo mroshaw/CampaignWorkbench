@@ -49,6 +49,10 @@ public abstract class WorkspaceFile {
         return fileName;
     }
 
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     /**
      * @return file name without the extension
      */

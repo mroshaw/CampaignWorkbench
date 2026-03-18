@@ -18,12 +18,15 @@ public enum IdeIcon {
     BLOCK("Document_Javascript"),
     CONTEXT("Document_Database"),
 
-    // Workspace Explorer Toolbar icons
+    // Campaign icons
     CONNECT("Plug_Connected"),
     DISCONNECT("Plug_Disconnected"),
     NEW_FROM_CAMPAIGN("Document_Arrow_Down"),
     REFRESH_FROM_CAMPAIGN("Document_Arrow_Left"),
     UPDATE_TO_CAMPAIGN("Document_Arrow_Right"),
+    CREATE_ON_CAMPAIGN("Document_Key"),
+
+    // Workspace Explorer Toolbar icons
     NEW_FILE("Document_Add"),
     ADD_FILE("Document_Link"),
     DELETE_FILE("Document_Dismiss"),

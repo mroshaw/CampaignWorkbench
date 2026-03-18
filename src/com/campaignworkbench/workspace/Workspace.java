@@ -395,6 +395,21 @@ public class Workspace {
         }
     }
 
+     /* Renames a workspace file on disk and updates its fileName field.
+        * The new name should include the file extension.   */
+    public void renameWorkspaceFile(WorkspaceFile workspaceFile, String newFileName) {
+        Path oldPath = workspaceFile.getAbsoluteFilePath();
+        Path newPath = oldPath.resolveSibling(newFileName);
+        try {
+            Files.move(oldPath, newPath);
+        } catch (IOException ioe) {
+            throw new WorkspaceException("An error occurred renaming '" + workspaceFile.getFileName() + "' to '" + newFileName + "'", ioe);
+        }
+        workspaceFile.setFileName(newFileName);
+        save();
+        refreshWorkspaceFile(workspaceFile);
+    }
+
     private String getExtension(String fileName) {
         int dot = fileName.lastIndexOf('.');
         return dot >= 0 ? fileName.substring(dot) : "";
@@ -426,6 +441,19 @@ public class Workspace {
 
     private Path getFilePath(String fileName, WorkspaceFileType fileType) {
         return getRootFolderPath().resolve(fileType.getFolderName()).resolve(fileName);
+    }
+
+    public void refreshWorkspaceFile(WorkspaceFile workspaceFile) {
+        ObservableList<? extends WorkspaceFile> list = switch (workspaceFile.getFileType()) {
+            case MODULE -> modules;
+            case BLOCK -> blocks;
+            default -> null;
+        };
+        if (list == null) return;
+        int index = list.indexOf(workspaceFile);
+        if (index >= 0) {
+            ((ObservableList<WorkspaceFile>) list).set(index, workspaceFile);
+        }
     }
 
     // JSON methods for load and save

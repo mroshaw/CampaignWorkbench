@@ -46,6 +46,14 @@ public class EtmModuleSchema extends CampaignSchema {
                 """.formatted(key.getName(), key.getNamespace(), code);
     }
 
+    public static String getCreateXml(String label, String name, String nameSpace, String schema, String code) {
+        return """
+                <jst xtkschema="xtk:jst" label="%s" name="%s" namespace="%s" schema="%s" _key="@name,@namespace" >
+                <code><![CDATA[%s]]></code>
+                </jst>
+                """.formatted(label, name, nameSpace, schema, code);
+    }
+
     @Override
     public boolean isInitialized() {
         return javaScriptTemplates != null;

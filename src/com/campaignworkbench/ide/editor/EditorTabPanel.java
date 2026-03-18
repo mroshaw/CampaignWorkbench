@@ -28,6 +28,7 @@ public class EditorTabPanel implements IJavaFxNode {
 
     Consumer<WorkspaceFile> refreshConsumer;
     Consumer<WorkspaceFile> pushConsumer;
+    Consumer<WorkspaceFile> createOnServerConsumer;
 
     /**
      * Constructor
@@ -36,11 +37,13 @@ public class EditorTabPanel implements IJavaFxNode {
      */
     public EditorTabPanel(ChangeListener<Tab> tabChangedListener, ErrorReporter errorReporter,
                           SimpleBooleanProperty connectedObservable,
-                          Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer) {
+                          Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer,
+                          Consumer<WorkspaceFile> createOnServerConsumer) {
         this.connectedObservable = connectedObservable;
         this.errorReporter = errorReporter;
         this.pushConsumer = pushConsumer;
         this.refreshConsumer = refreshConsumer;
+        this.createOnServerConsumer = createOnServerConsumer;
 
         tabPane = new TabPane();
         tabPane.setMinHeight(0);
@@ -120,7 +123,7 @@ public class EditorTabPanel implements IJavaFxNode {
         }
 
         EditorTab tab = new EditorTab(workspaceFile, errorReporter, connectedObservable,
-                refreshConsumer, pushConsumer, this::closeAllTabs);
+                refreshConsumer, pushConsumer, createOnServerConsumer, this::closeAllTabs);
         tab.setClosable(true);
         // Backups should be read only
         if(workspaceFile.getFileType() == WorkspaceFileType.BACKUP) {
@@ -157,6 +160,13 @@ public class EditorTabPanel implements IJavaFxNode {
                 editorTab.saveFile();
             }
         }
+    }
+
+    public void closeTab(WorkspaceFile workspaceFile) {
+        EditorTab existingTab = getExistingTab(workspaceFile);
+        if (existingTab == null) return;
+        tabPane.getTabs().remove(existingTab);
+        Event.fireEvent(existingTab, new Event(Tab.CLOSED_EVENT));
     }
 
     public void closeAllTabs() {

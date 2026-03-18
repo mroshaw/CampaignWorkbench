@@ -50,4 +50,12 @@ public class PersoBlockSchema extends CampaignSchema {
                 </includeView>
                 """.formatted(key.getId(),code);
     }
+
+    public static String getCreateXml(String internalName, String label, long folderId, String code) {
+        return """
+                <includeView xtkschema="nms:includeView" name="%s"  label="%s" folderId="%d" _key="@name" >
+                <source><text><![CDATA[%s]]></text></source>
+                </includeView>
+                """.formatted(internalName ,label, folderId, code);
+    }
 }

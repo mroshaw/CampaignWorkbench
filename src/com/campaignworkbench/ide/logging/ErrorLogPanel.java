@@ -111,6 +111,11 @@ public class ErrorLogPanel implements IJavaFxNode {
             errorNode.getChildren().add(solutionNode);
 
             errorTreeView.getRoot().getChildren().add(errorNode);
+        } else {
+            TreeItem<String> errorNode = new TreeItem<>(exception.getMessage());
+            TreeItem<String> rootCauseNode = new TreeItem<>("Root Cause: " + exception.getCause());
+            errorNode.getChildren().add(rootCauseNode);
+            errorTreeView.getRoot().getChildren().add(errorNode);
         }
     }
 

@@ -38,6 +38,7 @@ public final class EditorTab extends Tab {
     public EditorTab(WorkspaceFile workspaceFile, ErrorReporter errorReporter,
                      SimpleBooleanProperty connectedObservable,
                      Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer,
+                     Consumer<WorkspaceFile> createOnServerConsumer,
                      Runnable closeAllTabs) {
         this.workspaceFile = workspaceFile;
         this.errorReporter = errorReporter;
@@ -57,7 +58,8 @@ public final class EditorTab extends Tab {
                 () -> workspaceFile,
                 connectedObservable,
                 refreshConsumer,
-                pushConsumer
+                pushConsumer,
+                createOnServerConsumer
         );
 
         FindReplaceToolBar findReplaceToolBar = new FindReplaceToolBar(
