@@ -24,7 +24,7 @@ public enum IdeIcon {
     NEW_FROM_CAMPAIGN("Document_Arrow_Down"),
     REFRESH_FROM_CAMPAIGN("Document_Arrow_Left"),
     UPDATE_TO_CAMPAIGN("Document_Arrow_Right"),
-    CREATE_ON_CAMPAIGN("Document_Key"),
+    CREATE_ON_CAMPAIGN("Document_Arrow_Up"),
 
     // Workspace Explorer Toolbar icons
     NEW_FILE("Document_Add"),
