@@ -1,0 +1,18 @@
+<component name="libraryTable">
+  <library name="mozilla.rhino.all" type="repository">
+    <properties maven-id="org.mozilla:rhino-all:1.9.1" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino-all/1.9.1/rhino-all-1.9.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino/1.9.1/rhino-1.9.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino-tools/1.9.1/rhino-tools-1.9.1.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino-xml/1.9.1/rhino-xml-1.9.1.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino-all/1.9.1/rhino-all-1.9.1-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino/1.9.1/rhino-1.9.1-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino-tools/1.9.1/rhino-tools-1.9.1-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/mozilla/rhino-xml/1.9.1/rhino-xml-1.9.1-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES />
+  </library>
+</component>

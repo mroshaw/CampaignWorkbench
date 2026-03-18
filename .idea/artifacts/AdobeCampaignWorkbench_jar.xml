@@ -6,14 +6,11 @@
         <element id="module-output" name="AdobeCampaignWorkbench" />
       </element>
       <element id="library" level="project" name="fxmisc.richtext.richtextfx" />
-      <element id="library" level="project" name="fifesoft.autocomplete" />
-      <element id="library" level="project" name="fifesoft.rstaui" />
       <element id="library" level="project" name="io.github.mkpaz.atlantafx.base" />
-      <element id="library" level="project" name="fifesoft.rsyntaxtextarea" />
-      <element id="library" level="project" name="fifesoft.languagesupport" />
       <element id="library" level="project" name="github.javakeyring.java.keyring" />
       <element id="library" level="project" name="tools.jackson.dataformat.xml" />
       <element id="library" level="project" name="tools.jackson.jaxrs.json.provider" />
+      <element id="library" level="project" name="mozilla.rhino.all" />
     </root>
   </artifact>
 </component>
