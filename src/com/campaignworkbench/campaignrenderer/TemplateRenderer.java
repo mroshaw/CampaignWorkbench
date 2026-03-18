@@ -58,7 +58,7 @@ public final class TemplateRenderer extends AbstractRenderer {
 
             cx = Context.enter();
             cx.setOptimizationLevel(-1);
-            cx.setLanguageVersion(Context.VERSION_1_7);
+            cx.setLanguageVersion(Context.VERSION_ES6);
             scope = cx.initStandardObjects();
 
             // Add the Data Context
