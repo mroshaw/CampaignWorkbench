@@ -257,6 +257,8 @@ public class CampaignOperationsHandler {
         Thread.ofVirtual().start(() -> {
             try {
                 operation.run();
+            } catch (Exception ex) {
+                errorReporter.reportError("An error occurred during a Campaign operation: " + operation.toString(),  ex, true);
             } finally {
                 Platform.runLater(() -> scene.setCursor(Cursor.DEFAULT));
             }

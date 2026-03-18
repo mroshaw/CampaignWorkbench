@@ -2,6 +2,7 @@ package com.campaignworkbench.ide.workspaceexplorer;
 
 import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.icons.IdeIcon;
+import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.Workspace;
 import com.campaignworkbench.workspace.WorkspaceFile;
@@ -48,6 +49,8 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
     private final Supplier<WorkspaceFileType> selectedFileTypeSupplier;
     private final SimpleBooleanProperty connectedObservable;
 
+    private ErrorReporter errorReporter;
+
     public WorkspaceExplorerToolbar(
             Supplier<Workspace> workspaceSupplier,
             Supplier<WorkspaceFile> selectedFileSupplier,
@@ -61,7 +64,8 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
             Runnable clearDataContext,
             Runnable setMessageContext,
             Runnable clearMessageContext,
-            Runnable createFromServer
+            Runnable createFromServer,
+            ErrorReporter errorReporter
     ) {
 
         this.workspaceSupplier = workspaceSupplier;
@@ -69,6 +73,7 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
         this.selectedFileTypeSupplier = selectedFileTypeSupplier;
         this.connectedObservable = connectedObservable;
         this.openFileConsumer = openFileConsumer;
+        this.errorReporter = errorReporter;
 
         createNewButton = UiUtil.createMiniToolbarButton("", "Create new", IdeIcon.NEW_FILE, true, "neutral-icon", 20, true, _ -> createNew.run());
         addExistingButton = UiUtil.createMiniToolbarButton("", "Add existing", IdeIcon.ADD_FILE, true, "positive-icon", 20, true, _ -> addExisting.run());
@@ -117,18 +122,6 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
             addExistingButton.setTooltip(new Tooltip(addExistingButtonText + " " + selectedFileType.toString().toLowerCase()));
             removeButton.setTooltip(new Tooltip(removeButtonText + " " + selectedFileType.toString().toLowerCase()));
         }
-    }
-
-    private void withBusyCursor(Runnable operation) {
-        Scene scene = getNode().getScene();
-        scene.setCursor(Cursor.WAIT);
-        Thread.ofVirtual().start(() -> {
-            try {
-                operation.run();
-            } finally {
-                Platform.runLater(() -> scene.setCursor(Cursor.DEFAULT));
-            }
-        });
     }
 
     @Override

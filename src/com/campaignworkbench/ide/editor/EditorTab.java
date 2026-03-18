@@ -72,11 +72,15 @@ public final class EditorTab extends Tab {
         this.setOnCloseRequest(this::tabClosedHandler);
     }
 
-    public void saveFile() throws IdeException {
-        String content = editor.getText();
-        workspaceFile.saveWorkspaceFileContent(content);
-        isTextDirty = false;
-        updateTabText();
+    public void saveFile()  {
+        try {
+            String content = editor.getText();
+            workspaceFile.saveWorkspaceFileContent(content);
+            isTextDirty = false;
+            updateTabText();
+        } catch (IdeException ex) {
+            errorReporter.reportError("An error occurred while saving the file: " + workspaceFile.getFileName(), ex, true);
+        }
     }
 
     public void setEditable(boolean isEditable) {

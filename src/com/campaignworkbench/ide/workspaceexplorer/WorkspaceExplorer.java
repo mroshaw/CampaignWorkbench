@@ -106,7 +106,8 @@ public class WorkspaceExplorer implements IJavaFxNode {
                 this::clearDataContextHandler,
                 this::setMessageContextHandler,
                 this::clearMessageContextHandler,
-                this::createFromServerHandler
+                this::createFromServerHandler,
+                errorReporter
         );
 
         // TreeView for all items
