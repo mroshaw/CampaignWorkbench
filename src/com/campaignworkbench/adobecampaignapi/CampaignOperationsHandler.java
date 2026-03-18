@@ -283,6 +283,7 @@ public class CampaignOperationsHandler {
             CreateBlockOnServerDialog.Result details = result.get();
 
             // Check for duplicate before hitting the server
+            campaignServerManager.refreshBlocks();
             if (campaignServerManager.personalizationBlockExists(details.name())) {
                 errorReporter.reportError(
                         "A personalization block with name '" + details.name() + "' already exists on the server. Please choose a different name.",
@@ -307,7 +308,7 @@ public class CampaignOperationsHandler {
                         workspace.save();
                     }
 
-                    errorReporter.logMessage("Successfully created " + fileTypeLower + " '" + details.name() + "' on Campaign server!");
+                    errorReporter.logMessage("Successfully created " + fileTypeLower + " '" + details.name() + "' on Campaign server! (name=" + details.name() + ", folderId=" +  details.folderId() + ")");
                     Platform.runLater(() -> fileOpenHandler.accept(block));
 
                 } catch (ApiException apiException) {
@@ -327,7 +328,7 @@ public class CampaignOperationsHandler {
             }
 
             CreateModuleOnServerDialog.Result details = result.get();
-
+            campaignServerManager.refreshJavaScriptTemplates();
             // Check for duplicate before hitting the server
             if (campaignServerManager.javaScriptTemplateExists(details.namespace(), details.name())) {
                 errorReporter.reportError(
