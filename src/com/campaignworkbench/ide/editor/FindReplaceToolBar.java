@@ -9,39 +9,41 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToolBar;
 
+import java.util.function.Consumer;
+
 public class FindReplaceToolBar implements IJavaFxNode {
     private ToolBar toolBar;
-    private final EditorTab editorTab;
+    private final Consumer<String> findHandler;
+    private final Runnable clearHandler;
     private final TextField findField;
 
-    public FindReplaceToolBar(EditorTab editorTab) {
-        this.editorTab = editorTab;
+    public FindReplaceToolBar(Consumer<String> findHandler, Runnable clearHandler) {
+        this.findHandler = findHandler;
+        this.clearHandler = clearHandler;
         toolBar = new ToolBar();
 
-        // Find toolbar
         Label findLabel = new Label("Find:");
         findField = new TextField();
-        Button findButton = UiUtil.createMiniToolbarButton("", "Find all", IdeIcon.FIND_START, true, "positive-icon", 20, true, _ -> findHandler());
-        Button clearFindButton = UiUtil.createMiniToolbarButton("", "Clear", IdeIcon.FIND_CLEAR, true, "negative-icon", 20, true, _ -> clearFindHandler());
+        Button findButton = UiUtil.createMiniToolbarButton("", "Find all", IdeIcon.FIND_START, true, "positive-icon", 20, true, _ -> handleFind());
+        Button clearFindButton = UiUtil.createMiniToolbarButton("", "Clear", IdeIcon.FIND_CLEAR, true, "negative-icon", 20, true, _ -> handleClear());
         toolBar = new ToolBar(findLabel, findField, findButton, clearFindButton);
         toolBar.getStyleClass().add("small-toolbar");
     }
 
-    private void findHandler() {
+    private void handleFind() {
         String findText = findField.getText();
         if (!findText.isEmpty()) {
-            editorTab.getEditor().find(findText);
+            findHandler.accept(findText);
         }
     }
 
-    private void clearFindHandler() {
+    private void handleClear() {
         findField.setText("");
-        editorTab.getEditor().find(null);
+        clearHandler.run();
     }
 
     @Override
     public Node getNode() {
         return toolBar;
     }
-
 }

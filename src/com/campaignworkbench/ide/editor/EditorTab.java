@@ -35,14 +35,36 @@ public final class EditorTab extends Tab {
      *
      * @param workspaceFile that the editor is editing
      */
-    public EditorTab(EditorTabPanel editorTabPanel, WorkspaceFile workspaceFile, ErrorReporter errorReporter, SimpleBooleanProperty connectedObservable, Supplier<Boolean> connectedStateSupplier,
-                     Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer) {
+    public EditorTab(WorkspaceFile workspaceFile, ErrorReporter errorReporter,
+                     SimpleBooleanProperty connectedObservable,
+                     Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer,
+                     Runnable closeAllTabs) {
         this.workspaceFile = workspaceFile;
         this.errorReporter = errorReporter;
 
-        FormatToolBar formatToolBar = new FormatToolBar(this, editorTabPanel::closeAllTabs);
-        CampaignToolBar campaignToolBar = new CampaignToolBar(this, connectedObservable, connectedStateSupplier, refreshConsumer, pushConsumer);
-        FindReplaceToolBar findReplaceToolBar = new FindReplaceToolBar(this);
+        // Create the code editor
+        this.editor = new RichTextFXEditor(determineSyntax(workspaceFile));
+
+        FormatToolBar formatToolBar = new FormatToolBar(
+                () -> editor.formatCode(2),
+                editor::foldAll,
+                editor::unfoldAll,
+                editor::setWrap,
+                closeAllTabs
+        );
+
+        CampaignToolBar campaignToolBar = new CampaignToolBar(
+                () -> workspaceFile,
+                connectedObservable,
+                refreshConsumer,
+                pushConsumer
+        );
+
+        FindReplaceToolBar findReplaceToolBar = new FindReplaceToolBar(
+                editor::find,
+                () -> editor.find(null)
+        );
+
 
         // Set the tab title
         updateTabText();
@@ -52,8 +74,7 @@ public final class EditorTab extends Tab {
         toolsContainer.getChildren().addAll(formatToolBar.getNode(), campaignToolBar.getNode(),findReplaceToolBar.getNode());
         HBox.setHgrow(campaignToolBar.getNode(), Priority.ALWAYS);
 
-        // Create the code editor
-        this.editor = new RichTextFXEditor(determineSyntax(workspaceFile));
+        // Arrange layout
         BorderPane root = new BorderPane();
         root.setCenter(editor.getNode());
         editor.setText(workspaceFile.getWorkspaceFileContent());

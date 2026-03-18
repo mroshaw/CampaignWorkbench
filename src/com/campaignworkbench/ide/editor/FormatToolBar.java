@@ -10,27 +10,22 @@ import javafx.scene.control.Separator;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 
+import java.util.function.Consumer;
+
 public class FormatToolBar implements IJavaFxNode {
 
     private final ToolBar toolBar;
-    private final ToggleButton toggleWrapButton;
-    private final EditorTab editorTab;
 
-    public FormatToolBar(EditorTab editorTab, Runnable closeAllTabsHandler) {
-        this.editorTab = editorTab;
+    public FormatToolBar(Runnable formatCode, Runnable foldAll, Runnable unfoldAll,
+                         Consumer<Boolean> toggleWrap, Runnable closeAllTabs) {
 
-        // Format toolbar
-        Button formatButton = UiUtil.createMiniToolbarButton("", "Format code", IdeIcon.FORMAT_CODE, true, "positive-icon", 20, true, _ -> editorTab.getEditor().formatCode(2));
-        Button foldAllButton = UiUtil.createMiniToolbarButton("", "Fold all", IdeIcon.FOLD_ALL, true, "positive-icon", 20, true, _ ->  editorTab.getEditor().foldAll());
-        Button unfoldAllButton = UiUtil.createMiniToolbarButton("", "Unfold all", IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, true, _ -> editorTab.getEditor().unfoldAll());
-        toggleWrapButton = UiUtil.createMiniToolbarToggleButton("", "Toggle wrap", IdeIcon.WRAP_TEXT, true, "positive-icon", 20, true, _ -> toggleWrapHandler());
-        Button closeEditorTabsButton = UiUtil.createMiniToolbarButton("", "Close all editor tabs", IdeIcon.CLOSE_ALL_TABS, true, "negative-icon", 20, true, _-> closeAllTabsHandler.run());
-        toolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton, toggleWrapButton, new Separator(Orientation.VERTICAL), closeEditorTabsButton, new Separator(Orientation.VERTICAL));
+        Button formatButton = UiUtil.createMiniToolbarButton("", "Format code", IdeIcon.FORMAT_CODE, true, "positive-icon", 20, true, _ -> formatCode.run());
+        Button foldAllButton = UiUtil.createMiniToolbarButton("", "Fold all", IdeIcon.FOLD_ALL, true, "positive-icon", 20, true, _ -> foldAll.run());
+        Button unfoldAllButton = UiUtil.createMiniToolbarButton("", "Unfold all", IdeIcon.UNFOLD_ALL, true, "positive-icon", 20, true, _ -> unfoldAll.run());
+        ToggleButton wrapButton = UiUtil.createMiniToolbarToggleButton("", "Toggle wrap", IdeIcon.WRAP_TEXT, true, "positive-icon", 20, true, toggleWrap);
+        Button closeEditorTabsButton = UiUtil.createMiniToolbarButton("", "Close all editor tabs", IdeIcon.CLOSE_ALL_TABS, true, "negative-icon", 20, true, _ -> closeAllTabs.run());
+        toolBar = new ToolBar(formatButton, foldAllButton, unfoldAllButton, wrapButton, new Separator(Orientation.VERTICAL), closeEditorTabsButton, new Separator(Orientation.VERTICAL));
         toolBar.getStyleClass().add("small-toolbar");
-    }
-
-    private void toggleWrapHandler() {
-        editorTab.getEditor().setWrap(toggleWrapButton.isSelected());
     }
 
     @Override

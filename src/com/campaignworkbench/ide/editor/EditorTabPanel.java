@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Implements a tabbed panel of Editor tabs
@@ -26,7 +25,6 @@ public class EditorTabPanel implements IJavaFxNode {
     private final TabPane tabPane;
     private final ErrorReporter errorReporter;
     private final SimpleBooleanProperty connectedObservable;
-    private final Supplier<Boolean> connectedStateSupplier;
 
     Consumer<WorkspaceFile> refreshConsumer;
     Consumer<WorkspaceFile> pushConsumer;
@@ -36,10 +34,10 @@ public class EditorTabPanel implements IJavaFxNode {
      *
      * @param tabChangedListener action to call when the tab is changed
      */
-    public EditorTabPanel(ChangeListener<Tab> tabChangedListener, ErrorReporter errorReporter, SimpleBooleanProperty connectedObservable, Supplier<Boolean> connectedStateSupplier,
+    public EditorTabPanel(ChangeListener<Tab> tabChangedListener, ErrorReporter errorReporter,
+                          SimpleBooleanProperty connectedObservable,
                           Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer) {
         this.connectedObservable = connectedObservable;
-        this.connectedStateSupplier = connectedStateSupplier;
         this.errorReporter = errorReporter;
         this.pushConsumer = pushConsumer;
         this.refreshConsumer = refreshConsumer;
@@ -121,7 +119,8 @@ public class EditorTabPanel implements IJavaFxNode {
             return;
         }
 
-        EditorTab tab = new EditorTab(this, workspaceFile, errorReporter, connectedObservable, connectedStateSupplier, refreshConsumer, pushConsumer);
+        EditorTab tab = new EditorTab(workspaceFile, errorReporter, connectedObservable,
+                refreshConsumer, pushConsumer, this::closeAllTabs);
         tab.setClosable(true);
         // Backups should be read only
         if(workspaceFile.getFileType() == WorkspaceFileType.BACKUP) {
