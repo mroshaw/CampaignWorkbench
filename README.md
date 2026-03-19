@@ -4,7 +4,7 @@
 
 Campaign Workbench is a Java FX based desktop application for developing, managing and testing email template code for use in Adobe Campaign Classic v8.
 
-![](.\images\CampaignWorkbenchMainUi.png)
+![](https://github.com/mroshaw/CampaignWorkbench/blob/698a2d7fd92352139407f78f169731d368ff1f88/images/CampaignWorkbenchMainUi.png?raw=true)
 
 ## Core functions
 
