@@ -57,12 +57,7 @@ public abstract class WorkspaceFile {
      * @return file name without the extension
      */
     public String getBaseFileName() {
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex > 0) {
-            return fileName.substring(0, dotIndex);
-        } else {
-            return fileName; // no extension found
-        }
+        return fileName.contains(".") ? fileName.substring(0, fileName.indexOf('.')) : fileName;
     }
 
     public Path getRelativeFilePath() {

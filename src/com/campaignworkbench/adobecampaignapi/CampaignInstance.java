@@ -2,8 +2,11 @@ package com.campaignworkbench.adobecampaignapi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 /**
@@ -15,6 +18,9 @@ public class CampaignInstance {
 
     private final String id;
     private String name;
+    private final String endpointUrl;
+    private static final String userHomeFolderName = "Campaign Workbench";
+    public static final Path userHome =  Paths.get(System.getProperty("user.home")).resolve(userHomeFolderName);
 
     @JsonIgnore
     private final CredentialStore credentialStore;
@@ -22,10 +28,11 @@ public class CampaignInstance {
     /**
      * Creates a new CampaignInstance with a generated UUID.
      */
-    public CampaignInstance(String name) {
+    public CampaignInstance(String name, String endpointUrl) {
         this.id = UUID.randomUUID().toString();
         this.name = name;
-        this.credentialStore = new CredentialStore(this.id);
+        this.endpointUrl = endpointUrl;
+        credentialStore = new CredentialStore(id);
     }
 
     /**
@@ -33,10 +40,12 @@ public class CampaignInstance {
      */
     @JsonCreator
     public CampaignInstance(@JsonProperty("id") String id,
-                            @JsonProperty("name") String name) {
+                            @JsonProperty("name") String name,
+                            @JsonProperty("url") String endpointUrl) {
         this.id = id;
         this.name = name;
-        this.credentialStore = new CredentialStore(this.id);
+        this.endpointUrl = endpointUrl;
+        credentialStore = new CredentialStore(id);
     }
 
     @JsonProperty("id")
@@ -47,6 +56,11 @@ public class CampaignInstance {
     @JsonProperty("name")
     public String getName() {
         return name;
+    }
+
+    @JsonProperty("url")
+    public String getEndpointUrl() {
+        return endpointUrl;
     }
 
     public void setName(String name) {
@@ -62,4 +76,4 @@ public class CampaignInstance {
     public String toString() {
         return name;
     }
-}
+    }

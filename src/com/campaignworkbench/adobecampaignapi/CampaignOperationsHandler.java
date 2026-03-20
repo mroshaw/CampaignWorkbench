@@ -1,21 +1,23 @@
 package com.campaignworkbench.adobecampaignapi;
 
-import com.campaignworkbench.adobecampaignapi.schemas.*;
+import com.campaignworkbench.adobecampaignapi.schemas.EtmModuleRecord;
+import com.campaignworkbench.adobecampaignapi.schemas.EtmModuleSchemaKey;
+import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockRecord;
+import com.campaignworkbench.adobecampaignapi.schemas.PersoBlockSchemaKey;
 import com.campaignworkbench.ide.AppSettings;
-import com.campaignworkbench.ide.dialogs.CampaignBlockPickerDialog;
-import com.campaignworkbench.ide.dialogs.CampaignModulePickerDialog;
+import com.campaignworkbench.ide.dialogs.*;
 import com.campaignworkbench.ide.logging.ErrorReporter;
-import com.campaignworkbench.ide.dialogs.YesNoPopupDialog;
-import com.campaignworkbench.ide.dialogs.CreateBlockOnServerDialog;
-import com.campaignworkbench.ide.dialogs.CreateModuleOnServerDialog;
-import javafx.stage.Window;
 import com.campaignworkbench.workspace.*;
 import javafx.application.Platform;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.stage.Window;
 
-import java.net.URI;
+import java.io.IOException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -53,7 +55,7 @@ public class CampaignOperationsHandler {
      * for the workspace and wires it into the CampaignServerManager.
      */
     public void setWorkspace(Workspace workspace) {
-        if(campaignServerManager.getConnectedObservable().get()) {
+        if (campaignServerManager.getConnectedStatusObservable().get().getIsConnected()) {
             disconnectFromCampaign();
         }
 
@@ -69,50 +71,58 @@ public class CampaignOperationsHandler {
         } else {
             campaignServerManager.setCampaignInstance(null);
             errorReporter.reportError(
-                    "The Campaign instance configured for this workspace could not be found. " +
-                            "Please check File > Settings and reassign an instance.", true);
+                    "The Campaign instance configured for this workspace could not be found. ", true);
         }
     }
 
-    public SimpleBooleanProperty getConnectedObservable() {
-        return campaignServerManager.getConnectedObservable();
+    public ObjectProperty<ConnectedStatus> getConnectedObservable() {
+        return campaignServerManager.getConnectedStatusObservable();
     }
 
-    public String connectToCampaign() {
-        try {
-            withBusyCursor(() -> {
-                campaignServerManager.connect();
-            });
-
-        } catch (ApiException apiException) {
-            errorReporter.reportError("An error occurred connecting to Adobe Campaign. Please check File > Settings!", apiException, true);
-            return "";
-        }
-        errorReporter.logMessage("Connected to Campaign server at: " + campaignServerManager.getEndpointUrl());
-        String endPointUrl = campaignServerManager.getEndpointUrl();
-        String host = URI.create(endPointUrl).getHost();
-        String hostname = host.split("\\.")[0];
-        return hostname;
+    public void connectToCampaign() {
+        withBusyCursor(() -> {
+            try {
+                campaignServerManager.connect(KeystorePasswordProvider.getPassword());
+            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | ApiException e) {
+                // First attempt failed — ask the user for a password and try again
+                Platform.runLater(() -> {
+                    Optional<char[]> passwordOptional = PasswordInputDialog.show(
+                            sceneSupplier.get().getWindow(),
+                            "Credentials Password",
+                            "Enter credentials password",
+                            "Please enter the password used to protect the instance credentials");
+                    if (passwordOptional.isEmpty()) {
+                        errorReporter.reportError("Cannot connect to campaign instance without a credential store password!", true);
+                        return;
+                    }
+                    withBusyCursor(() -> {
+                        try {
+                            campaignServerManager.connect(passwordOptional.get());
+                        } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException | ApiException ex) {
+                            errorReporter.reportError("An error occurred while trying to connect to the campaign instance.", ex, true);
+                        }
+                    });
+                });
+            }
+        });
     }
 
-    public Boolean disconnectFromCampaign() {
-        try {
-            withBusyCursor(() -> {
+    public void disconnectFromCampaign() {
+
+        withBusyCursor(() -> {
+            try {
                 campaignServerManager.disconnect();
-            });
-            errorReporter.logMessage("Disconnected from Campaign at: " + campaignServerManager.getEndpointUrl());
-        } catch (ApiException apiException) {
-            errorReporter.reportError("An error occurred disconnecting from Adobe Campaign", apiException, true);
-        }
-        return true;
+            } catch (ApiException ex) {
+                errorReporter.reportError("An error occurred while trying to connect to the campaign instance.", ex, true);
+            }
+        });
     }
 
     public void createNewFile(WorkspaceFileType workspaceFileType) {
-        if(workspaceFileType == WorkspaceFileType.BLOCK) {
+        if (workspaceFileType == WorkspaceFileType.BLOCK) {
             createNewBlock();
         }
-        if(workspaceFileType == WorkspaceFileType.MODULE)
-        {
+        if (workspaceFileType == WorkspaceFileType.MODULE) {
             createNewModule();
         }
     }
@@ -257,7 +267,7 @@ public class CampaignOperationsHandler {
      * Creates a new file on the Campaign server from a locally-created workspace file.
      * Shows a dialog to collect server details, checks for duplicates, creates the record,
      * renames the local file to match the server-canonical name, and sets the key.
-     *
+     * <p>
      * Only supported for BLOCK and MODULE file types.
      */
     public void createOnServer(WorkspaceFile workspaceFile) {
@@ -308,7 +318,7 @@ public class CampaignOperationsHandler {
                         workspace.save();
                     }
 
-                    errorReporter.logMessage("Successfully created " + fileTypeLower + " '" + details.name() + "' on Campaign server! (name=" + details.name() + ", folderId=" +  details.folderId() + ")");
+                    errorReporter.logMessage("Successfully created " + fileTypeLower + " '" + details.name() + "' on Campaign server! (name=" + details.name() + ", folderId=" + details.folderId() + ")");
                     Platform.runLater(() -> fileOpenHandler.accept(block));
 
                 } catch (ApiException apiException) {
@@ -372,7 +382,7 @@ public class CampaignOperationsHandler {
             try {
                 operation.run();
             } catch (Exception ex) {
-                errorReporter.reportError("An error occurred during a Campaign operation: " + operation.toString(),  ex, true);
+                errorReporter.reportError(ex.getMessage() != null ? ex.getMessage() : "An error occurred during a Campaign operation", ex, true);
             } finally {
                 Platform.runLater(() -> scene.setCursor(Cursor.DEFAULT));
             }

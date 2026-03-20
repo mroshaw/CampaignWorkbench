@@ -1,6 +1,7 @@
 package com.campaignworkbench.workspace;
 
 import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
+import com.campaignworkbench.ide.CampaignWorkbenchIDE;
 import com.campaignworkbench.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -14,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -30,8 +30,8 @@ import java.util.List;
 )
 public class Workspace {
 
-    private static final String workspacesRootName = "Campaign Workbench Workspaces";
-    private static final Path workspacesRootPath = Paths.get(System.getProperty("user.home")).resolve(workspacesRootName);
+    private static final String workspacesRootName = "Workspaces";
+    public static final Path workspacesRootPath = CampaignWorkbenchIDE.userHome.resolve(workspacesRootName);
 
     // Observable lists to allow WorkspaceExplorer to auto update
     @JsonIgnore
@@ -142,8 +142,7 @@ public class Workspace {
         return workspacesRootPath.resolve(nameProperty.getValue());
     }
 
-    public static void createWorkspaceRootFolder() {
-        Path workspacesRootPath = getWorkspacesRootPath();
+    public static void checkWorkspaceRoot() {
         // Create a 'Workspaces' root, if not already present
         if (!Files.exists(workspacesRootPath)) {
             try {
@@ -154,11 +153,6 @@ public class Workspace {
                 throw new WorkspaceException("An error occurred creating Workspaces root: " + workspacesRootPath, ioe.getCause());
             }
         }
-    }
-
-    public static Path getWorkspacesRootPath() {
-        File userDir = new File(System.getProperty("user.home"));
-        return userDir.toPath().resolve(workspacesRootName);
     }
 
     @JsonProperty("campaignInstanceId")

@@ -1,0 +1,16 @@
+<component name="ArtifactManager">
+  <artifact type="jlink" name="RunTimeImage">
+    <output-path>$PROJECT_DIR$/out/artifacts/RunTimeImage</output-path>
+    <properties id="jlink-properties">
+      <options>
+        <option name="compressionLevel" value="2" />
+        <option name="verbose" value="true" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="module-output" name="AdobeCampaignWorkbench" />
+      <element id="library" level="project" name="fxmisc.richtext.richtextfx" />
+      <element id="library" level="project" name="tools.jackson.dataformat.xml" />
+    </root>
+  </artifact>
+</component>

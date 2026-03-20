@@ -1,10 +1,12 @@
 package com.campaignworkbench.ide.editor;
 
+import com.campaignworkbench.adobecampaignapi.ConnectedStatus;
 import com.campaignworkbench.ide.IdeException;
 import com.campaignworkbench.ide.dialogs.YesNoCancelPopupDialog;
 import com.campaignworkbench.ide.editor.richtextfx.RichTextFXEditor;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.workspace.WorkspaceFile;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.Event;
 import javafx.scene.control.Tab;
@@ -36,7 +38,7 @@ public final class EditorTab extends Tab {
      * @param workspaceFile that the editor is editing
      */
     public EditorTab(WorkspaceFile workspaceFile, ErrorReporter errorReporter,
-                     SimpleBooleanProperty connectedObservable,
+                     ObjectProperty<ConnectedStatus> connectedObservable,
                      Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer,
                      Consumer<WorkspaceFile> createOnServerConsumer,
                      Runnable closeAllTabs) {

@@ -1,7 +1,9 @@
 package com.campaignworkbench.adobecampaignapi;
 
 import com.campaignworkbench.adobecampaignapi.schemas.*;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -16,6 +18,10 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URI;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.Optional;
 
 public class CampaignServerManager {
@@ -25,25 +31,30 @@ public class CampaignServerManager {
     private final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     private final XmlMapper mapper = new XmlMapper();
 
-    private final SimpleBooleanProperty connectedObservable = new SimpleBooleanProperty(false);
-
     // Maintain a single list of static blocks and JavaScript templates
     private PersoBlockSchema allPersonalizationBlocks = new PersoBlockSchema();
     private EtmModuleSchema allJavaScriptTemplates = new EtmModuleSchema();
     private FolderSchema allBlockFolders = new FolderSchema();
     private EntitySchemasSchema allSchemas = new EntitySchemasSchema();
 
+    private final ObjectProperty<ConnectedStatus> connectedStatusProperty =
+            new SimpleObjectProperty<>(new ConnectedStatus(false, null));
+
     public void setCampaignInstance(CampaignInstance instance) {
         this.campaignInstance = instance;
     }
 
-    public boolean connect() throws ApiException {
+    public ObjectProperty<ConnectedStatus> getConnectedStatusObservable() {
+        return connectedStatusProperty;
+    }
+
+    public boolean connect(char[] credentialsPassword) throws ApiException, KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         if (campaignInstance == null) {
             throw new ApiException("No Campaign instance is configured for this workspace.", null);
         }
-
+        campaignInstance.getCredentialStore().unlock(credentialsPassword);
         CredentialStore credentials = campaignInstance.getCredentialStore();
-        Optional<String> endPointUrl = credentials.getEndpointUrl();
+        String endPointUrl = campaignInstance.getEndpointUrl();
         Optional<String> clientId = credentials.getClientId();
         Optional<String> clientSecret = credentials.getClientSecret();
 
@@ -58,11 +69,11 @@ public class CampaignServerManager {
             throw new ApiException("Could not authenticate with the provided credentials!", e);
         }
         // Connect to the Campaign SOAP instance
-        soapClient = new SoapClient(endPointUrl.get(), accessToken);
+        soapClient = new SoapClient(endPointUrl, accessToken);
 
         // Refresh the object cache
         refreshAll();
-        connectedObservable.set(true);
+        Platform.runLater(() -> connectedStatusProperty.set(new ConnectedStatus(true, campaignInstance)));
         return true;
     }
 
@@ -72,22 +83,15 @@ public class CampaignServerManager {
         }
         try {
             soapClient.client.close();
-            connectedObservable.set(false);
+            Platform.runLater(() -> connectedStatusProperty.set(new ConnectedStatus(false, campaignInstance)));
+
         } catch (Exception exception) {
             throw new ApiException("Could not disconnect from the Campaign SOAP instance!", exception);
         }
     }
 
-    public SimpleBooleanProperty getConnectedObservable() {
-        return connectedObservable;
-    }
-
-    public String getEndpointUrl() {
-        if (campaignInstance == null) {
-            return "";
-        }
-        Optional<String> endPointUrl = campaignInstance.getCredentialStore().getEndpointUrl();
-        return endPointUrl.orElse("");
+    public static String getHostName(String endPointUrl) {
+        return URI.create(endPointUrl).getHost().split("\\.")[0];
     }
 
     public PersoBlockSchema getAllPersoBlocks(boolean refresh) throws ApiException {

@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
+import com.campaignworkbench.adobecampaignapi.ConnectedStatus;
 import com.campaignworkbench.ide.AppSettings;
 import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.dialogs.NewWorkspaceDialog;
@@ -77,7 +78,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
      */
     public WorkspaceExplorer(String labelText,
                              Consumer<WorkspaceFile> fileOpenHandler,
-                             SimpleBooleanProperty connectedObservable,
+                             ObjectProperty<ConnectedStatus> connectedObservable,
                              Consumer<String> insertIntoCodeHandler,
                              Consumer<WorkspaceFileType> createFromServerConsumer,
                              ErrorReporter errorReporter,
@@ -309,7 +310,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("Open Workspace Folder");
         directoryChooser.setInitialDirectory(
-                Workspace.getWorkspacesRootPath().toFile()
+                Workspace.workspacesRootPath.toFile()
         );
 
         File folder = directoryChooser.showDialog(getWindow());
@@ -347,7 +348,7 @@ public class WorkspaceExplorer implements IJavaFxNode {
     }
 
     public void closeWorkspace() {
-
+        setWorkspace(null);
     }
 
     public void createNewFile(WorkspaceFileType workspaceFileType) {

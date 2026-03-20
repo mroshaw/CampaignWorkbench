@@ -3,6 +3,7 @@ package com.campaignworkbench.ide.dialogs;
 import com.campaignworkbench.adobecampaignapi.CampaignInstance;
 import com.campaignworkbench.ide.AppSettings;
 import com.campaignworkbench.ide.AppSettingsManager;
+import com.campaignworkbench.ide.logging.ErrorReporter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -22,7 +23,7 @@ public class SettingsDialog {
 
     private static final String TITLE = "Settings";
 
-    public static void show(Window owner, AppSettings appSettings) {
+    public static void show(Window owner, AppSettings appSettings, ErrorReporter errorReporter) {
 
         Dialog<Void> dialog = new Dialog<>();
         dialog.setTitle(TITLE);
@@ -67,7 +68,7 @@ public class SettingsDialog {
         });
 
         addButton.setOnAction(_ -> {
-            Optional<CampaignInstance> result = InstanceEditDialog.showForNew(owner);
+            Optional<CampaignInstance> result = InstanceEditDialog.showForNew(owner, errorReporter);
             result.ifPresent(newInstance -> {
                 appSettings.addInstance(newInstance);
                 AppSettingsManager.save(appSettings);
@@ -78,7 +79,7 @@ public class SettingsDialog {
         editButton.setOnAction(_ -> {
             CampaignInstance selected = instanceListView.getSelectionModel().getSelectedItem();
             if (selected == null) return;
-            InstanceEditDialog.showForEdit(owner, selected);
+            InstanceEditDialog.showForEdit(owner, selected, errorReporter);
             // Credentials saved within the dialog; name change reflected via observable list refresh
             AppSettingsManager.save(appSettings);
             instanceItems.setAll(appSettings.getInstances());
@@ -91,10 +92,21 @@ public class SettingsDialog {
                     "Remove instance?",
                     "Remove '" + selected.getName() + "'? Stored credentials will also be deleted.") == YesNoPopupDialog.YesNo.YES;
             if (confirmed) {
-                selected.getCredentialStore().clear();
-                appSettings.removeInstance(selected);
-                AppSettingsManager.save(appSettings);
-                instanceItems.setAll(appSettings.getInstances());
+
+                Optional<char[]> credentialPassword = PasswordInputDialog.show(owner, "Credentials Password", "Enter credentials password", "Please enter the password used to protect the instance credentials");
+
+                if(credentialPassword.isPresent()) {
+                    try {
+                        selected.getCredentialStore().unlock(credentialPassword.get());
+                    } catch (Exception ex) {
+                        errorReporter.reportError("An error occurred while retrieving credentials!", ex, true);
+                    }
+                    selected.getCredentialStore().clear();
+                    appSettings.removeInstance(selected);
+                    AppSettingsManager.save(appSettings);
+                    instanceItems.setAll(appSettings.getInstances());
+                }
+
             }
         });
 

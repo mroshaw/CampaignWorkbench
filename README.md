@@ -10,7 +10,7 @@ Campaign Workbench is a Java FX based desktop application for developing, managi
 
 The application provides a modern Integrated Development Environment for the development and management of core Adobe Campaign code objects:
 
-- Manage email templates, JST code modules, personalization blocks, context XML in a central "Workspace".
+- Manage email templates, JST code modules, personalization blocks, and context XML in a central "Workspace".
 - Manage and apply different data/payload, message and module contexts for scenario/segmentation testing
 - Custom code editor with syntax highlighting, code folding and code formatting.
 - Simulate Adobe Campaign rendering of email templates using ES6 compliant JavaScript interpreter (Apache Rhino).
@@ -20,9 +20,20 @@ The application provides a modern Integrated Development Environment for the dev
 - Create and synchronise objects with a Campaign server instance.
 - Backup/version control changes with an ability to review and restore from previous versions.
 
+The application provides a slick, developer focussed workflow for development and testing, in stark contrast to the complex, clunky tools and workflow built into the Campaign Console front end.
+
 ## How to build
 
 Build using IntelliJ IDEA 2025.3 and above.
+
+There are build artefacts for:
+
+- Application JAR
+- jlink runtime
+
+And configurations and build scripts for:
+
+- Windows MSI installer
 
 ## Dependencies
 

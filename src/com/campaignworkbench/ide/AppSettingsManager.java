@@ -15,37 +15,33 @@ import java.nio.file.Path;
 public class AppSettingsManager {
 
     private static ErrorReporter errorReporter;
-    private static final String SETTINGS_FILE_NAME = "app-settings.json";
+    private static final String settingsFileName = "app-settings.json";
+    private static final Path settingsFilePath = AppSettings.appSettingsPath.resolve(settingsFileName);
 
     public AppSettingsManager(ErrorReporter errorReporter) {
         AppSettingsManager.errorReporter = errorReporter;
     }
 
-    private static Path getSettingsFilePath() {
-        return Workspace.getWorkspacesRootPath().resolve(SETTINGS_FILE_NAME);
-    }
-
     public static AppSettings load() {
-        Path path = getSettingsFilePath();
-        if (!Files.exists(path)) {
+        if (!Files.exists(settingsFilePath)) {
             return new AppSettings();
         }
         try {
-            return JsonUtil.readFromJson(path, AppSettings.class);
+            return JsonUtil.readFromJson(settingsFilePath, AppSettings.class);
         } catch (IOException ioe) {
-            errorReporter.reportError("An error occurred loading app settings from path: " + path, ioe, true);
+            errorReporter.reportError("An error occurred loading app settings from path: " + settingsFilePath, ioe, true);
             return new AppSettings();
         }
     }
 
     public static void save(AppSettings settings) {
-        Path path = getSettingsFilePath();
+
         try {
             // Ensure the parent directory exists (it should, since workspaces root is created at startup)
-            Files.createDirectories(path.getParent());
-            JsonUtil.writeToJson(path, settings);
+            Files.createDirectories(settingsFilePath.getParent());
+            JsonUtil.writeToJson(settingsFilePath, settings);
         } catch (IOException ioe) {
-            errorReporter.reportError("An error occurred saving app settings to path: " + path, ioe, true);
+            errorReporter.reportError("An error occurred saving app settings to path: " + settingsFilePath, ioe, true);
         }
     }
 }

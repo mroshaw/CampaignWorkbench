@@ -1,9 +1,11 @@
 package com.campaignworkbench.ide.editor;
 
+import com.campaignworkbench.adobecampaignapi.ConnectedStatus;
 import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.logging.ErrorReporter;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import com.campaignworkbench.workspace.WorkspaceFileType;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
@@ -24,7 +26,7 @@ public class EditorTabPanel implements IJavaFxNode {
 
     private final TabPane tabPane;
     private final ErrorReporter errorReporter;
-    private final SimpleBooleanProperty connectedObservable;
+    private final ObjectProperty<ConnectedStatus> connectedObservable;
 
     Consumer<WorkspaceFile> refreshConsumer;
     Consumer<WorkspaceFile> pushConsumer;
@@ -36,7 +38,7 @@ public class EditorTabPanel implements IJavaFxNode {
      * @param tabChangedListener action to call when the tab is changed
      */
     public EditorTabPanel(ChangeListener<Tab> tabChangedListener, ErrorReporter errorReporter,
-                          SimpleBooleanProperty connectedObservable,
+                          ObjectProperty<ConnectedStatus> connectedObservable,
                           Consumer<WorkspaceFile> refreshConsumer, Consumer<WorkspaceFile> pushConsumer,
                           Consumer<WorkspaceFile> createOnServerConsumer) {
         this.connectedObservable = connectedObservable;

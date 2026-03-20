@@ -1,6 +1,7 @@
 package com.campaignworkbench.ide;
 
 import com.campaignworkbench.adobecampaignapi.CampaignConnectionManager;
+import com.campaignworkbench.adobecampaignapi.ConnectedStatus;
 import com.campaignworkbench.campaignrenderer.RendererException;
 import com.campaignworkbench.campaignrenderer.TemplateRenderResult;
 import com.campaignworkbench.campaignrenderer.TemplateRenderer;
@@ -14,7 +15,7 @@ import com.campaignworkbench.ide.results.OutputTabPanel;
 import com.campaignworkbench.ide.themes.IThemeable;
 import com.campaignworkbench.ide.themes.IdeTheme;
 import com.campaignworkbench.ide.themes.ThemeManager;
-import com.campaignworkbench.ide.toolbars.CampaignConnectionToolBar;
+import com.campaignworkbench.ide.toolbars.ConnectionToolBar;
 import com.campaignworkbench.ide.toolbars.MainMenuBar;
 import com.campaignworkbench.ide.toolbars.RunToolBar;
 import com.campaignworkbench.ide.toolbars.WorkspaceToolBar;
@@ -34,13 +35,18 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
  * Builds a User Interface for the Campaign Workbench IDE
  */
 public class CampaignWorkbenchIDE extends Application implements IThemeable {
-
+    private static final String userHomeFolderName = "Campaign Workbench";
+    public static final Path userHome =  Paths.get(System.getProperty("user.home")).resolve(userHomeFolderName);
     private static final String ideStyleSheet = "/styles/ide_general_styles.css";
 
     private WorkspaceExplorer workspaceExplorer;
@@ -68,19 +74,37 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
                 Objects.requireNonNull(getClass().getResourceAsStream("/app.png")));
         primaryStage.getIcons().add(iconImage);
 
-        // Connection status manager, which is shared across mulitple components
 
         // Log panel and Error Reporter
         LogPanel logPanel = new LogPanel("Logs");
         errorLogPanel = new ErrorLogPanel("Errors");
-        errorLogPanel.setOnErrorDoubleClicked((workspaceFile, line) -> outputPanel.highlightJsLine(line));
-
+        errorLogPanel.setOnErrorDoubleClicked((_, line) -> outputPanel.highlightJsLine(line));
         errorReporter = new UiErrorReporter(logPanel, errorLogPanel);
+
+        // Create the user home, if not already created
+        try {
+            checkUserHome();
+        } catch (IdeException e) {
+            errorReporter.reportError("A FATAL error occurred creating the user home folder! Cannot proceed!", true);
+        }
+
+        try {
+            AppSettings.checkAppSettings();
+        }  catch (IdeException e) {
+            errorReporter.reportError("A FATAL error occurred creating the app settings folder! Cannot proceed!", true);
+        }
+
+        try {
+            Workspace.checkWorkspaceRoot();
+        } catch (IdeException e) {
+            errorReporter.reportError("A FATAL error occurred creating the workspace folder! Cannot proceed!", true);
+        }
 
         appSettings = AppSettingsManager.load();
 
         // Create a Campaign Operations Handler
         campaignOperationsHandler = new CampaignOperationsHandler(errorReporter, appSettings);
+        campaignOperationsHandler.getConnectedObservable().addListener((_, _, newValue) -> connectedStatusChangedHandler(newValue));
 
         // Editor tab panel
         editorTabPanel = new EditorTabPanel(null, errorReporter, campaignOperationsHandler.getConnectedObservable(),
@@ -94,7 +118,7 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
         // Reset the connection if the workspace changes
         workspaceExplorer.getWorkspaceObservable().addListener((_, _, newW) -> campaignOperationsHandler.setWorkspace(newW));
-        CampaignConnectionToolBar campaignConnectionToolBar = new CampaignConnectionToolBar(campaignOperationsHandler::connectToCampaign,
+        ConnectionToolBar campaignConnectionToolBar = new ConnectionToolBar(campaignOperationsHandler::connectToCampaign,
                 campaignOperationsHandler::disconnectFromCampaign,
                 campaignOperationsHandler.getConnectedObservable(),
                 workspaceExplorer.getWorkspaceIsSetObservable());
@@ -132,7 +156,11 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
 
         // Refresh templates if the workspace changes
-        workspaceExplorer.getWorkspaceObservable().addListener((_, _, newW) -> runToolBar.setTemplateObservableList(newW.getTemplates()));
+        workspaceExplorer.getWorkspaceObservable().addListener((_, _, newW) -> {
+            if(newW != null) {
+                runToolBar.setTemplateObservableList(newW.getTemplates());
+            }
+        });
 
         // Create the workspace toolbar
         WorkspaceToolBar workspaceToolBar = new WorkspaceToolBar(workspaceExplorer::openWorkspace, workspaceExplorer::createNewWorkspace, workspaceExplorer::closeWorkspace);
@@ -185,7 +213,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
         primaryStage.setScene(scene);
         primaryStage.show();
         ThemeManager.register(this);
-        Workspace.createWorkspaceRootFolder();
 
         campaignOperationsHandler.setSceneSupplier(this::getScene);
 
@@ -196,6 +223,26 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
 
     private Scene getScene() {
         return scene;
+    }
+
+    private void connectedStatusChangedHandler(ConnectedStatus connectedStatus) {
+        if(connectedStatus.getIsConnected()) {
+            errorReporter.logMessage("Connected to: " + connectedStatus.getConnectionName());
+        } else {
+            errorReporter.logMessage("Disconnected from campaign.");
+        }
+    }
+
+    private void checkUserHome() {
+        if (!Files.exists(userHome)) {
+            try {
+                System.out.println("Creating user home: " + userHome);
+                Files.createDirectory(userHome);
+                System.out.println("Created user home: " + userHome);
+            } catch (IOException ioe) {
+                errorReporter.reportError("An error occurred creating user home: " + userHome, ioe, true);
+            }
+        }
     }
 
     // Stop the application
@@ -267,6 +314,6 @@ public class CampaignWorkbenchIDE extends Application implements IThemeable {
     }
 
     private void showSettings() {
-        SettingsDialog.show((Stage) scene.getWindow(), appSettings);
+        SettingsDialog.show(scene.getWindow(), appSettings, errorReporter);
     }
 }

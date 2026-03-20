@@ -12,7 +12,8 @@ public class CampaignQueryTest {
         try {
 
             CampaignServerManager campaignServerManager = new CampaignServerManager();
-            boolean connected =  campaignServerManager.connect();
+            String testPassword = "Specsavers";
+            boolean connected =  campaignServerManager.connect(testPassword.toCharArray());
 
             if(connected) {
                 System.out.println("Connected!");

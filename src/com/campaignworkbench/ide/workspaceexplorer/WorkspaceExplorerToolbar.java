@@ -1,5 +1,6 @@
 package com.campaignworkbench.ide.workspaceexplorer;
 
+import com.campaignworkbench.adobecampaignapi.ConnectedStatus;
 import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.ide.logging.ErrorReporter;
@@ -8,6 +9,7 @@ import com.campaignworkbench.workspace.Workspace;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import com.campaignworkbench.workspace.WorkspaceFileType;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -47,7 +49,7 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
     private final Supplier<Workspace> workspaceSupplier;
     private final Supplier<WorkspaceFile> selectedFileSupplier;
     private final Supplier<WorkspaceFileType> selectedFileTypeSupplier;
-    private final SimpleBooleanProperty connectedObservable;
+    private final ObjectProperty<ConnectedStatus> connectedObservable;
 
     private ErrorReporter errorReporter;
 
@@ -55,7 +57,7 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
             Supplier<Workspace> workspaceSupplier,
             Supplier<WorkspaceFile> selectedFileSupplier,
             Supplier<WorkspaceFileType> selectedFileTypeSupplier,
-            SimpleBooleanProperty connectedObservable,
+            ObjectProperty<ConnectedStatus> connectedObservable,
             Consumer<WorkspaceFile> openFileConsumer,
             Runnable createNew,
             Runnable addExisting,
@@ -88,6 +90,10 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
 
         toolBar = new ToolBar(createNewButton, addExistingButton, createNewFromCampaignButton, removeButton, setDataContextButton, clearDataContextButton, setMessageContextButton, clearMessageContextButton);
         toolBar.getStyleClass().add("small-toolbar");
+
+        connectedObservable.addListener((observable, oldValue, newValue) -> {
+            update();
+        });
     }
 
     public ToolBar getToolBar() {
@@ -95,7 +101,7 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
     }
 
     public void update() {
-        Boolean isConnected =  connectedObservable.getValue();
+        boolean isConnected =  connectedObservable.getValue().getIsConnected();
         WorkspaceFile selectedFile = selectedFileSupplier.get();
         WorkspaceFileType selectedFileType = selectedFileTypeSupplier.get();
         boolean hasWorkspace = workspaceSupplier.get() != null;

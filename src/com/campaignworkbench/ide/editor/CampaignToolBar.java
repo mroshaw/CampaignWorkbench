@@ -1,11 +1,12 @@
 package com.campaignworkbench.ide.editor;
 
+import com.campaignworkbench.adobecampaignapi.ConnectedStatus;
 import com.campaignworkbench.ide.IJavaFxNode;
 import com.campaignworkbench.ide.icons.IdeIcon;
 import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import com.campaignworkbench.workspace.WorkspaceFileType;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
@@ -23,7 +24,7 @@ public class CampaignToolBar implements IJavaFxNode {
     private final Supplier<WorkspaceFile> workspaceFileSupplier;
 
     public CampaignToolBar(Supplier<WorkspaceFile> workspaceFileSupplier,
-                           SimpleBooleanProperty connectedObservable,
+                           ObjectProperty<ConnectedStatus> connectedObservable,
                            Consumer<WorkspaceFile> refreshConsumer,
                            Consumer<WorkspaceFile> pushConsumer,
                            Consumer<WorkspaceFile> createOnServerConsumer) {
@@ -34,11 +35,11 @@ public class CampaignToolBar implements IJavaFxNode {
         refreshFromCampaignButton = UiUtil.createMiniToolbarButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, false, _ -> refreshConsumer.accept(workspaceFileSupplier.get()));
         pushToCampaignButton = UiUtil.createMiniToolbarButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, false, _ -> pushConsumer.accept(workspaceFileSupplier.get()));
         createOnCampaignButton = UiUtil.createMiniToolbarButton("", "Create on Campaign", IdeIcon.CREATE_ON_CAMPAIGN, true, "neutral-icon", 20, false, _ -> createOnServerConsumer.accept(workspaceFileSupplier.get()));
-        connectedObservable.addListener((_, _, newVal) -> updateButtonState(newVal));
+        connectedObservable.addListener((_, _, newVal) -> updateButtonState(newVal.getIsConnected()));
         toolBar.getItems().addAll(refreshFromCampaignButton, pushToCampaignButton, createOnCampaignButton);
 
         // Set initial state directly from the property
-        updateButtonState(connectedObservable.get());
+        updateButtonState(connectedObservable.get().getIsConnected());
     }
 
     private void updateButtonState(boolean connected) {

@@ -1,23 +1,80 @@
 package com.campaignworkbench.adobecampaignapi;
 
-import com.github.javakeyring.BackendNotSupportedException;
-import com.github.javakeyring.Keyring;
-import com.github.javakeyring.PasswordAccessException;
+import com.campaignworkbench.ide.AppSettings;
+import com.campaignworkbench.ide.CampaignWorkbenchIDE;
+import com.campaignworkbench.workspace.Workspace;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
+import java.security.KeyStore;
+import java.security.KeyStore.PasswordProtection;
+import java.security.KeyStore.SecretKeyEntry;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableEntryException;
+import java.security.cert.CertificateException;
+import java.util.Arrays;
 import java.util.Optional;
 
 public class CredentialStore {
-    private static final String SERVICE = "campaign.workbench.oauth";
 
-    private final Keyring keyring;
+    private static final String KEYSTORE_TYPE = "PKCS12";
+    private static final String KEYSTORE_FILE = ".campaign-workbench-%s.p12";
+
     private final String instanceId;
+    private final Path keystorePath;
+    private final KeyStore keyStore;
+
+    private char[] credentialPassword;
 
     public CredentialStore(String instanceId) {
         this.instanceId = instanceId;
+        this.keystorePath = AppSettings.appSettingsPath.resolve(KEYSTORE_FILE.formatted(instanceId));
         try {
-            this.keyring = Keyring.create();
-        } catch (BackendNotSupportedException backEndException) {
-            throw new RuntimeException("Failed to create keyring", backEndException);
+            keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialise keystore", e);
+        }
+    }
+
+    public void unlock(char[] credentialPassword) throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        this.credentialPassword = credentialPassword;
+        loadOrCreate();
+    }
+
+    public void lock() {
+        if (credentialPassword != null) {
+            Arrays.fill(credentialPassword, '\0');
+            credentialPassword = null;
+        }
+    }
+
+    private void checkUnlocked() {
+        if (credentialPassword == null) {
+            throw new ApiException("CredentialStore is locked", null);
+        }
+    }
+
+    private void loadOrCreate() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException  {
+
+        if (Files.exists(keystorePath)) {
+            try (InputStream is = Files.newInputStream(keystorePath)) {
+                keyStore.load(is, credentialPassword);
+            }
+        } else {
+            keyStore.load(null, credentialPassword);
+            persist();
+        }
+    }
+
+    private void persist() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException  {
+        try (OutputStream os = Files.newOutputStream(keystorePath,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.TRUNCATE_EXISTING)) {
+            keyStore.store(os, credentialPassword);
         }
     }
 
@@ -25,47 +82,75 @@ public class CredentialStore {
         return instanceId + "_" + field;
     }
 
-    public void save(String clientId, String clientSecret, String endpointUrl) {
-        try {
-            keyring.setPassword(SERVICE, key("client_id"), clientId);
-            keyring.setPassword(SERVICE, key("client_secret"), clientSecret);
-            keyring.setPassword(SERVICE, key("endpoint_url"), endpointUrl);
-        } catch (PasswordAccessException passwordAccessException) {
-            throw new RuntimeException("Failed to save credentials", passwordAccessException);
+    private SecretKey toSecretKey(String value) {
+        return new SecretKeySpec(value.getBytes(StandardCharsets.UTF_8), "AES");
+    }
+
+    private String fromSecretKey(SecretKey key) {
+        return new String(key.getEncoded(), StandardCharsets.UTF_8);
+    }
+
+    private void set(String alias, String value) throws Exception {
+        SecretKeyEntry entry = new SecretKeyEntry(toSecretKey(value));
+        keyStore.setEntry(alias, entry, new PasswordProtection(credentialPassword));
+        persist();
+    }
+
+    private Optional<String> get(String alias) throws KeyStoreException, UnrecoverableEntryException, NoSuchAlgorithmException {
+        if (!keyStore.containsAlias(alias)) {
+            return Optional.empty();
+        }
+        SecretKeyEntry entry = (SecretKeyEntry)
+                keyStore.getEntry(alias, new PasswordProtection(credentialPassword));
+
+        return Optional.ofNullable(entry)
+                .map(SecretKeyEntry::getSecretKey)
+                .map(this::fromSecretKey);
+    }
+
+    private void delete(String alias) throws IOException, KeyStoreException,  CertificateException, NoSuchAlgorithmException {
+        if (keyStore.containsAlias(alias)) {
+            keyStore.deleteEntry(alias);
+            persist();
         }
     }
 
-    public Optional<String> getClientId() {
+    // === Public API (unchanged) ===
+
+    public void save(String clientId, String clientSecret) throws ApiException {
+        checkUnlocked();
         try {
-            return Optional.ofNullable(keyring.getPassword(SERVICE, key("client_id")));
-        } catch (PasswordAccessException passwordAccessException) {
-            throw new RuntimeException("Failed to get credentials", passwordAccessException);
+            set(key("client_id"), clientId);
+            set(key("client_secret"), clientSecret);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save credentials", e);
         }
     }
 
-    public Optional<String> getClientSecret() {
+    public Optional<String> getClientId() throws ApiException {
+        checkUnlocked();
         try {
-            return Optional.ofNullable(keyring.getPassword(SERVICE, key("client_secret")));
-        } catch (PasswordAccessException passwordAccessException) {
-            throw new RuntimeException("Failed to get credentials", passwordAccessException);
+            return get(key("client_id"));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get clientId", e);
         }
     }
 
-    public Optional<String> getEndpointUrl() {
+    public Optional<String> getClientSecret() throws ApiException {
+        checkUnlocked();
         try {
-            return Optional.ofNullable(keyring.getPassword(SERVICE, key("endpoint_url")));
-        } catch (PasswordAccessException passwordAccessException) {
-            throw new RuntimeException("Failed to get credentials", passwordAccessException);
+            return get(key("client_secret"));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to get clientSecret", e);
         }
     }
 
-    public void clear() {
+    public void clear() throws ApiException{
         try {
-            keyring.deletePassword(SERVICE, key("client_id"));
-            keyring.deletePassword(SERVICE, key("client_secret"));
-            keyring.deletePassword(SERVICE, key("endpoint_url"));
-        } catch (PasswordAccessException passwordAccessException) {
-            throw new RuntimeException("Failed to clear credentials", passwordAccessException);
+            delete(key("client_id"));
+            delete(key("client_secret"));
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to clear credentials", e);
         }
     }
 }
