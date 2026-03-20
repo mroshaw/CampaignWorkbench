@@ -223,6 +223,7 @@ public class CampaignOperationsHandler {
         if (workspaceFile instanceof EtmModule etmModule) {
             EtmModuleSchemaKey moduleKey = etmModule.getKey();
             if (doBackup) {
+                campaignServerManager.refreshJavaScriptTemplates();
                 Optional<EtmModuleRecord> backupModule = campaignServerManager.getJavaScriptTemplate(moduleKey);
                 if (backupModule.isPresent()) {
                     try {
@@ -242,6 +243,7 @@ public class CampaignOperationsHandler {
         } else if (workspaceFile instanceof PersoBlock persoBlock) {
             PersoBlockSchemaKey blockKey = persoBlock.getKey();
             if (doBackup) {
+                campaignServerManager.refreshBlocks();
                 Optional<PersoBlockRecord> backupBlock = campaignServerManager.getPersonalizationBlock(blockKey);
                 if (backupBlock.isPresent()) {
                     try {
