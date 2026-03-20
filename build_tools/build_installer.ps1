@@ -9,47 +9,27 @@ Get-Content $versionFile | ForEach-Object {
 $version = "$($props.major).$($props.minor).$($props.build)"
 
 # JPackage using full JDK runtime
-# jpackage    --name "Campaign Workbench" `
-#            --app-version $version `
-#            --vendor "Specsavers" `
-#            --description "Develop, execute, and test Adobe Campaign email templates, ETM modules, and personalisation blocks" `
-#            --input "$PSScriptRoot\..\out\artifacts\AdobeCampaignWorkbench_jar" `
-#            --main-jar AdobeCampaignWorkbench.jar `
-#            --main-class com.campaignworkbench.ide.CampaignWorkbenchIDE `
-#            --icon "$PSScriptRoot\..\resources\app.ico" `
-#            --type msi `
-#            --java-options  `
-#            "--module-path E:\Dev\Java\javafx-sdk-25.0.2\lib `
-#            --add-modules javafx.controls,javafx.fxml,javafx.graphics `
-#            --enable-native-access=ALL-UNNAMED `
-#            --enable-native-access=javafx.graphics `
-#            --enable-native-access=javafx.web `
-#            --enable-native-access=javafx.media `
-#            --dest "$PSScriptRoot\..\installer" `
-#            --win-dir-chooser `
-#            --win-menu `
-#            --win-shortcut `
-#            --win-shortcut-prompt `
-#            --win-console `
-#            --win-per-user-install `
-#            --win-upgrade-uuid "dfb8d89d-c5ac-4cd3-810e-e73b857e1a51"
-
-# JPackage using custom JDK jlink runtime
-jpackage    --name "Campaign Workbench" `
-            --app-version $version `
-            --vendor "Specsavers"   `
-            --description "Develop, execute, and test Adobe Campaign email templates, ETM modules, and personalisation blocks" `
-            --input "$PSScriptRoot\..\out\artifacts\AdobeCampaignWorkbench_jar" `
-            --main-jar AdobeCampaignWorkbench.jar `
-            --main-class com.campaignworkbench.ide.CampaignWorkbenchIDE `
-            --icon "$PSScriptRoot\..\resources\app.ico" `
-            --type msi `
-            --runtime-image "$PSScriptRoot\..\out\artifacts\RunTimeImage" `
-            --dest "$PSScriptRoot\..\installer" `
-            --win-dir-chooser `
-            --win-menu `
-            --win-shortcut `
-            --win-shortcut-prompt `
-            --win-console `
-            --win-per-user-install `
-            --win-upgrade-uuid "dfb8d89d-c5ac-4cd3-810e-e73b857e1a51"
+jpackage `
+    --name "Campaign Workbench" `
+    --app-version $version `
+    --vendor "Specsavers" `
+    --description "Develop, execute, and test Adobe Campaign email templates, ETM modules, and personalisation blocks" `
+    --input "$PSScriptRoot\..\out\artifacts\AdobeCampaignWorkbench_jar" `
+    --main-jar AdobeCampaignWorkbench.jar `
+    --main-class com.campaignworkbench.ide.CampaignWorkbenchIDE `
+    --icon "$PSScriptRoot\..\resources\app.ico" `
+    --type msi `
+    --java-options "--module-path E:\Dev\Java\javafx-sdk-25.0.2\lib" `
+    --java-options "--add-modules javafx.controls,javafx.fxml,javafx.graphics" `
+    --java-options "--enable-native-access=ALL-UNNAMED" `
+    --java-options "--enable-native-access=javafx.graphics" `
+    --java-options "--enable-native-access=javafx.web" `
+    --java-options "--enable-native-access=javafx.media" `
+    --dest "$PSScriptRoot\..\installer" `
+    --win-dir-chooser `
+    --win-menu `
+    --win-shortcut `
+    --win-shortcut-prompt `
+    --win-console `
+    --win-per-user-install `
+    --win-upgrade-uuid "dfb8d89d-c5ac-4cd3-810e-e73b857e1a51"
