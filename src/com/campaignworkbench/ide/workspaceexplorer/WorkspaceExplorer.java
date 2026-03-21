@@ -119,20 +119,20 @@ public class WorkspaceExplorer implements IJavaFxNode {
 
         // Create roots
         TreeItem<Object> workspaceRoot = WorkspaceExplorerItem.createHeaderTreeItemObservableText(IdeIcon.WORKSPACE, workspaceName,
-                "workspace-icon", null, this::createNewFile, this::addExistingFile);
+                "plain-icon", null, this::createNewFile, this::addExistingFile);
 
         templateRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.TEMPLATE, "Templates",
-                "template-icon", WorkspaceFileType.TEMPLATE, this::createNewFile, this::addExistingFile);
+                "plain-icon", WorkspaceFileType.TEMPLATE, this::createNewFile, this::addExistingFile);
 
         moduleRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.MODULE, "Modules",
-                "module-icon", WorkspaceFileType.MODULE, this::createNewFile, this::addExistingFile);
+                "plain-icon", WorkspaceFileType.MODULE, this::createNewFile, this::addExistingFile);
 
         blockRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(IdeIcon.BLOCK, "Blocks",
-                "block-icon", WorkspaceFileType.BLOCK, this::createNewFile, this::addExistingFile);
+                "plain-icon", WorkspaceFileType.BLOCK, this::createNewFile, this::addExistingFile);
 
         contextRoot = WorkspaceExplorerItem.createHeaderTreeItemStaticText(
                 IdeIcon.CONTEXT, "Contexts",
-                "context-icon", WorkspaceFileType.CONTEXT, this::createNewFile, this::addExistingFile);
+                "plain-icon", WorkspaceFileType.CONTEXT, this::createNewFile, this::addExistingFile);
 
         workspaceRoot.getChildren().setAll(templateRoot, moduleRoot, blockRoot, contextRoot);
         treeView.setRoot(workspaceRoot);

@@ -3,6 +3,7 @@ import com.campaignworkbench.adobecampaignapi.schemas.SchemaKey;
 import com.campaignworkbench.util.FileUtil;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import javafx.beans.property.SimpleBooleanProperty;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,6 +28,9 @@ public abstract class WorkspaceFile {
     @JsonIgnore
     private Workspace workspace;
 
+    @JsonIgnore
+    private final SimpleBooleanProperty hasCampaignKeyProperty = new SimpleBooleanProperty(false);
+
     public WorkspaceFile() {
     }
 
@@ -34,6 +38,14 @@ public abstract class WorkspaceFile {
         this.fileName = fileName;
         this.fileType = fileType;
         this.workspace = workspace;
+    }
+
+    public SimpleBooleanProperty hasCampaignKeyProperty() {
+        return hasCampaignKeyProperty;
+    }
+
+    protected void notifyCampaignKeySet(SchemaKey key) {
+        hasCampaignKeyProperty.set(key != null);
     }
 
     public void setWorkspace(Workspace workspace) {

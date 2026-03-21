@@ -12,6 +12,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -109,13 +110,32 @@ public class ErrorLogPanel implements IJavaFxNode {
 
             TreeItem<String> solutionNode = new TreeItem<>("Recommended Solution: " + templateException.getSolution());
             errorNode.getChildren().add(solutionNode);
+            if(exception.getStackTrace() != null) {
+                addExceptionStackTrace(exception, errorNode);
+            }
 
             errorTreeView.getRoot().getChildren().add(errorNode);
         } else {
             TreeItem<String> errorNode = new TreeItem<>(exception.getMessage());
-            TreeItem<String> rootCauseNode = new TreeItem<>("Root Cause: " + exception.getCause());
-            errorNode.getChildren().add(rootCauseNode);
+            if(exception.getCause() != null) {
+                TreeItem<String> rootCauseNode = new TreeItem<>("Root Cause: " + exception.getCause());
+                errorNode.getChildren().add(rootCauseNode);
+            }
+            if(exception.getStackTrace() != null) {
+                addExceptionStackTrace(exception, errorNode);
+            }
             errorTreeView.getRoot().getChildren().add(errorNode);
+        }
+    }
+
+    private void addExceptionStackTrace(Exception exception, TreeItem<String> parentNode) {
+        if(exception.getStackTrace() != null) {
+            TreeItem<String> stackTraceNode = new TreeItem<>("Stack Trace" );
+            for(StackTraceElement stackTraceElement : exception.getStackTrace()) {
+                TreeItem<String> stackTraceItemNode = new TreeItem<String>(stackTraceElement.toString());
+                stackTraceNode.getChildren().add(stackTraceItemNode);
+            }
+            parentNode.getChildren().add(stackTraceNode);
         }
     }
 

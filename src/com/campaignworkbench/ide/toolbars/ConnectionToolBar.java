@@ -25,8 +25,10 @@ public class ConnectionToolBar implements IJavaFxNode {
 
         this.workspaceSetObservable = workspaceSetObservable;
         toolBar = new ToolBar();
-        connectToCampaignButton = UiUtil.createToolbarButton("", "Connect to Campaign", IdeIcon.CONNECT, true, "positive-icon", 20, false, _ -> connectHandler.run());
-        disconnectFromCampaignButton = UiUtil.createToolbarButton("", "Disconnect from Campaign", IdeIcon.DISCONNECT, true, "negative-icon", 20, false, _ -> disconnectHandler.run());
+        toolBar.getStyleClass().add("small-toolbar");
+
+        connectToCampaignButton = UiUtil.createMiniToolbarButton("", "Connect to Campaign", IdeIcon.CONNECT, true, "positive-icon", 20, false, _ -> connectHandler.run());
+        disconnectFromCampaignButton = UiUtil.createMiniToolbarButton("", "Disconnect from Campaign", IdeIcon.DISCONNECT, true, "negative-icon", 20, false, _ -> disconnectHandler.run());
         connectedHostLabel = new Label(connectedObservable.getValue().getConnectionName());
         connectedHostLabel.getStyleClass().add("host-label");
         toolBar.getItems().addAll(connectToCampaignButton, disconnectFromCampaignButton, connectedHostLabel);

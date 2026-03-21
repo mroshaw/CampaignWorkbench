@@ -48,7 +48,7 @@
 .module-icon            { -fx-fill: #C586FF; }
 .context-icon           { -fx-fill: #4EC9B0; }
 .backup-icon            { -fx-fill: #B9BCC1; }
-.plain-icon             { -fx-fill: #B9BCC1; }
+.plain-icon             { -fx-fill: #F0F0F0; }
 
 /* Code Editor */
 .code-editor .code-area .find-text {
@@ -74,7 +74,13 @@
 
 /* Workspace Explorer */
 .workspace-explorer .workspace-file-linked {
-    -fx-font-weight: bold;
+    /* fx-font-weight: bold; */
+    -fx-text-fill: #F2C14E;
+}
+
+.workspace-explorer .backup-file {
+    -fx-text-fill: #4E8F00;;
+    -fx-font-style: italic;
 }
 
 /* Log area */

@@ -19,7 +19,7 @@ public class RunToolBar implements IJavaFxNode {
     public RunToolBar(Consumer<Template> runConsumer) {
 
         this.runConsumer = runConsumer;
-        runButton = UiUtil.createToolbarButton("", "Run template", IdeIcon.RUN_TEMPLATE, true, "positive-icon", 20, false, _ -> runButtonHandler());
+        runButton = UiUtil.createMiniToolbarButton("", "Run template", IdeIcon.RUN_TEMPLATE, true, "positive-icon", 20, false, _ -> runButtonHandler());
 
         Label templateLabel = new Label("Template: ");
         templateDropDown = new ComboBox<>();
@@ -48,7 +48,7 @@ public class RunToolBar implements IJavaFxNode {
 
 
         toolBar = new ToolBar(templateLabel, templateDropDown, runButton);
-        toolBar.getStyleClass().add("large-toolbar");
+        toolBar.getStyleClass().add("small-toolbar");
     }
 
     public void setTemplateObservableList(ObservableList<Template> templateObservableList) {

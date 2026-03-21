@@ -1,4 +1,5 @@
 package com.campaignworkbench.adobecampaignapi;
+import com.campaignworkbench.ide.IdeException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class AuthClient {
         this.objectMapper = new ObjectMapper();
     }
 
-    public String getAccessToken(String clientId, String clientSecret) throws IOException, InterruptedException, RuntimeException {
+    public String getAccessToken(String clientId, String clientSecret) throws IOException, InterruptedException, IdeException {
         // Build form parameters
         String form = "grant_type=client_credentials" +
                 "&client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8) +
@@ -40,7 +41,7 @@ public class AuthClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
-            throw new RuntimeException("Token request failed: HTTP " + response.statusCode() + ", body=" + response.body());
+            throw new IdeException("Token request failed: HTTP " + response.statusCode() + ", body=" + response.body(), null);
         }
 
         AuthResponse authResponse = objectMapper.readValue(response.body(), AuthResponse.class);

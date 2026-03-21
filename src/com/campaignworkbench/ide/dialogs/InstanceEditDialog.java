@@ -76,7 +76,7 @@ public class InstanceEditDialog {
         PasswordField credentialPasswordField = new PasswordField();
         credentialPasswordField.setPromptText(isNew ? "Credentials Password" : "Re-enter password to save changes");
 
-        CheckBox requireCredentialsPassword =  new CheckBox("Require Password");
+        CheckBox requireCredentialsPassword =  new CheckBox("Secure credentials with a password (recommended)");
         requireCredentialsPassword.setSelected(true);
         requireCredentialsPassword.selectedProperty().addListener(new ChangeListener<Boolean>() {
             @Override

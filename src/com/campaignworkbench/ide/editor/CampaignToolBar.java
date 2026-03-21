@@ -7,6 +7,7 @@ import com.campaignworkbench.util.UiUtil;
 import com.campaignworkbench.workspace.WorkspaceFile;
 import com.campaignworkbench.workspace.WorkspaceFileType;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
@@ -32,17 +33,26 @@ public class CampaignToolBar implements IJavaFxNode {
 
         toolBar = new ToolBar();
         toolBar.getStyleClass().add("small-toolbar");
-        refreshFromCampaignButton = UiUtil.createMiniToolbarButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "neutral-icon", 20, false, _ -> refreshConsumer.accept(workspaceFileSupplier.get()));
-        pushToCampaignButton = UiUtil.createMiniToolbarButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "neutral-icon", 20, false, _ -> pushConsumer.accept(workspaceFileSupplier.get()));
-        createOnCampaignButton = UiUtil.createMiniToolbarButton("", "Create on Campaign", IdeIcon.CREATE_ON_CAMPAIGN, true, "neutral-icon", 20, false, _ -> createOnServerConsumer.accept(workspaceFileSupplier.get()));
+        refreshFromCampaignButton = UiUtil.createMiniToolbarButton("", "Refresh from Campaign", IdeIcon.REFRESH_FROM_CAMPAIGN, true, "plain-icon", 20, false, _ -> refreshConsumer.accept(workspaceFileSupplier.get()));
+        pushToCampaignButton = UiUtil.createMiniToolbarButton("", "Push to Campaign", IdeIcon.UPDATE_TO_CAMPAIGN, true, "plain-icon", 20, false, _ -> pushConsumer.accept(workspaceFileSupplier.get()));
+        createOnCampaignButton = UiUtil.createMiniToolbarButton("", "Create on Campaign", IdeIcon.CREATE_ON_CAMPAIGN, true, "plain-icon", 20, false, _ -> createOnServerConsumer.accept(workspaceFileSupplier.get()));
         connectedObservable.addListener((_, _, newVal) -> updateButtonState(newVal.getIsConnected()));
+        WorkspaceFile file = workspaceFileSupplier.get();
+        if (file != null) {
+            file.hasCampaignKeyProperty().addListener((_, _, _) ->
+                    updateButtonState(connectedObservable.get().getIsConnected()));
+        }
+
+        // Set initial state directly from the property
+        updateButtonState(connectedObservable.get().getIsConnected());
+
         toolBar.getItems().addAll(refreshFromCampaignButton, pushToCampaignButton, createOnCampaignButton);
 
         // Set initial state directly from the property
         updateButtonState(connectedObservable.get().getIsConnected());
     }
 
-    private void updateButtonState(boolean connected) {
+     private void updateButtonState(boolean connected) {
         WorkspaceFile workspaceFile = workspaceFileSupplier.get();
         boolean hasCampaignKey = workspaceFile != null && workspaceFile.hasCampaignKey();
         boolean isServerSyncable = workspaceFile != null &&

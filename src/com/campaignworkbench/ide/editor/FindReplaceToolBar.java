@@ -24,7 +24,7 @@ public class FindReplaceToolBar implements IJavaFxNode {
 
         Label findLabel = new Label("Find:");
         findField = new TextField();
-        Button findButton = UiUtil.createMiniToolbarButton("", "Find all", IdeIcon.FIND_START, true, "positive-icon", 20, true, _ -> handleFind());
+        Button findButton = UiUtil.createMiniToolbarButton("", "Find all", IdeIcon.FIND_START, true, "plain-icon", 20, true, _ -> handleFind());
         Button clearFindButton = UiUtil.createMiniToolbarButton("", "Clear", IdeIcon.FIND_CLEAR, true, "negative-icon", 20, true, _ -> handleClear());
         toolBar = new ToolBar(findLabel, findField, findButton, clearFindButton);
         toolBar.getStyleClass().add("small-toolbar");

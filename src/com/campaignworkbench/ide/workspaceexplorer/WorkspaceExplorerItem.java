@@ -265,7 +265,7 @@ public class WorkspaceExplorerItem {
                 }
 
                 // Reset class
-                getStyleClass().removeAll("workspace-file", "workspace-file-linked");
+                getStyleClass().removeAll("workspace-file", "workspace-file-linked", "backup-file");
 
                 switch (item) {
                     // Item header has an icon graphic and a context menu
@@ -353,7 +353,7 @@ public class WorkspaceExplorerItem {
             BiConsumer<WorkspaceFile, BackupFile> deleteHandler) {
 
         // TreeItem<Object> backupsRoot = new TreeItem<>("Backups");
-        TreeItem<Object> backupsRoot = createHeaderTreeItemStaticText(IdeIcon.FOLDER_SYNC, "Backups", "backup-icon", null, null, null);
+        TreeItem<Object> backupsRoot = createHeaderTreeItemStaticText(IdeIcon.FOLDER_SYNC, "Backups", "plain-icon", null, null, null);
 
         backups.stream()
                 .sorted(Comparator.comparing(BackupFile::getBackupDate,

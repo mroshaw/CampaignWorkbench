@@ -1,6 +1,7 @@
 package com.campaignworkbench.adobecampaignapi;
 
 import com.campaignworkbench.adobecampaignapi.schemas.*;
+import com.campaignworkbench.ide.IdeException;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -65,7 +66,7 @@ public class CampaignServerManager {
                 throw new ApiException("Could not authenticate with the provided credentials! Endpoint URL, client_id or client_secret are empty!", null);
             }
             accessToken = authClient.getAccessToken(clientId.get(), clientSecret.get());
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | IdeException e) {
             throw new ApiException("Could not authenticate with the provided credentials!", e);
         }
         // Connect to the Campaign SOAP instance

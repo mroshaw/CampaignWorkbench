@@ -17,9 +17,9 @@ public class WorkspaceToolBar implements IJavaFxNode {
                             Runnable newWorkspaceHandler,
                             Runnable closeWorkspaceHandler) {
 
-        Button openWorkspaceButton = UiUtil.createToolbarButton("", "Open Workspace", IdeIcon.OPEN_WORKSPACE, true, "workspace-icon", 20, true,_ -> openWorkspaceHandler.run());
-        Button newWorkspaceButton = UiUtil.createToolbarButton("", "New Workspace", IdeIcon.NEW_WORKSPACE, true, "positive-icon", 20, true, _ -> newWorkspaceHandler.run());
-        Button closeWorkspaceButton = UiUtil.createToolbarButton("", "Close Workspace", IdeIcon.CLOSE_WORKSPACE, true, "negative-icon", 20, true,_ -> closeWorkspaceHandler.run());
+        Button openWorkspaceButton = UiUtil.createMiniToolbarButton("", "Open Workspace", IdeIcon.OPEN_WORKSPACE, true, "plain-icon", 20, true,_ -> openWorkspaceHandler.run());
+        Button newWorkspaceButton = UiUtil.createMiniToolbarButton("", "New Workspace", IdeIcon.NEW_WORKSPACE, true, "plain-icon", 20, true, _ -> newWorkspaceHandler.run());
+        Button closeWorkspaceButton = UiUtil.createMiniToolbarButton("", "Close Workspace", IdeIcon.CLOSE_WORKSPACE, true, "plain-icon", 20, true,_ -> closeWorkspaceHandler.run());
 
         toolBar = new ToolBar(
                 openWorkspaceButton,
@@ -27,7 +27,7 @@ public class WorkspaceToolBar implements IJavaFxNode {
                 closeWorkspaceButton,
                 new Separator(Orientation.VERTICAL));
 
-        toolBar.getStyleClass().add("large-toolbar");
+        toolBar.getStyleClass().add("small-toolbar");
     }
 
     @Override

@@ -77,14 +77,14 @@ public class WorkspaceExplorerToolbar implements IJavaFxNode {
         this.openFileConsumer = openFileConsumer;
         this.errorReporter = errorReporter;
 
-        createNewButton = UiUtil.createMiniToolbarButton("", "Create new", IdeIcon.NEW_FILE, true, "neutral-icon", 20, true, _ -> createNew.run());
-        addExistingButton = UiUtil.createMiniToolbarButton("", "Add existing", IdeIcon.ADD_FILE, true, "positive-icon", 20, true, _ -> addExisting.run());
-        removeButton = UiUtil.createMiniToolbarButton("", "Remove", IdeIcon.DELETE_FILE, true, "negative-icon", 20, true, _ -> remove.run());
-        setDataContextButton = UiUtil.createMiniToolbarButton("", "Set Data Context", IdeIcon.SET_DATA_CONTEXT, true, "positive-icon", 20, true, _ -> setDataContext.run());
-        clearDataContextButton = UiUtil.createMiniToolbarButton("", "Clear Data Context", IdeIcon.CLEAR_DATA_CONTEXT, true, "negative-icon", 20, true, _ -> clearDataContext.run());
-        setMessageContextButton = UiUtil.createMiniToolbarButton("", "Set Message Context", IdeIcon.SET_MESSAGE_CONTEXT, true, "positive-icon", 20, true, _ -> setMessageContext.run());
-        clearMessageContextButton = UiUtil.createMiniToolbarButton("", "Clear Message Context", IdeIcon.CLEAR_MESSAGE_CONTEXT, true, "negative-icon", 20, true, _ -> clearMessageContext.run());
-        createNewFromCampaignButton = UiUtil.createMiniToolbarButton("", "Create new from Campaign", IdeIcon.NEW_FROM_CAMPAIGN, true, "positive-icon", 20, false, _ -> createFromServer.run());
+        createNewButton = UiUtil.createMiniToolbarButton("", "Create new", IdeIcon.NEW_FILE, true, "plain-icon", 20, true, _ -> createNew.run());
+        addExistingButton = UiUtil.createMiniToolbarButton("", "Add existing", IdeIcon.ADD_FILE, true, "plain-icon", 20, true, _ -> addExisting.run());
+        removeButton = UiUtil.createMiniToolbarButton("", "Remove", IdeIcon.DELETE_FILE, true, "plain-icon", 20, true, _ -> remove.run());
+        setDataContextButton = UiUtil.createMiniToolbarButton("", "Set Data Context", IdeIcon.SET_DATA_CONTEXT, true, "plain-icon", 20, true, _ -> setDataContext.run());
+        clearDataContextButton = UiUtil.createMiniToolbarButton("", "Clear Data Context", IdeIcon.CLEAR_DATA_CONTEXT, true, "plain-icon", 20, true, _ -> clearDataContext.run());
+        setMessageContextButton = UiUtil.createMiniToolbarButton("", "Set Message Context", IdeIcon.SET_MESSAGE_CONTEXT, true, "plain-icon", 20, true, _ -> setMessageContext.run());
+        clearMessageContextButton = UiUtil.createMiniToolbarButton("", "Clear Message Context", IdeIcon.CLEAR_MESSAGE_CONTEXT, true, "plain-icon", 20, true, _ -> clearMessageContext.run());
+        createNewFromCampaignButton = UiUtil.createMiniToolbarButton("", "Create new from Campaign", IdeIcon.NEW_FROM_CAMPAIGN, true, "plain-icon", 20, false, _ -> createFromServer.run());
 
         urlHostLabel = new Label();
 

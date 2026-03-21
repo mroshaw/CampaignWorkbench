@@ -54,6 +54,7 @@ public class PersoBlock extends WorkspaceFile {
     @Override
     public void setKey(SchemaKey schemaKey) {
         this.schemaKey = (PersoBlockSchemaKey) schemaKey;
+        notifyCampaignKeySet(schemaKey);
     }
 
     @Override

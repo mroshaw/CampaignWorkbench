@@ -49,6 +49,7 @@ public class EtmModule extends WorkspaceContextFile {
     @Override
     public void setKey(SchemaKey schemaKey) {
         this.schemaKey = (EtmModuleSchemaKey) schemaKey;
+        notifyCampaignKeySet(schemaKey);
     }
 
     @Override
